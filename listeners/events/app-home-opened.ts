@@ -1,25 +1,25 @@
-import type {AllMiddlewareArgs, SlackEventMiddlewareArgs} from '@slack/bolt';
-import {AnyBlock} from '@slack/types';
-import {ActionId} from "../../constants";
+import type { AllMiddlewareArgs, SlackEventMiddlewareArgs } from '@slack/bolt';
+import type { AnyBlock } from '@slack/types';
+import { ActionId } from '../../config/constants';
 
-const appHomeOpenedCallback = async (
-  {
-    client,
-    event,
-    logger,
-  }: AllMiddlewareArgs & SlackEventMiddlewareArgs<'app_home_opened'>) => {
+const appHomeOpenedCallback = async ({
+  client,
+  event,
+  logger,
+}: AllMiddlewareArgs & SlackEventMiddlewareArgs<'app_home_opened'>) => {
   // Ignore the `app_home_opened` event for anything but the Home tab
   if (event.tab !== 'home') return;
 
-  const message = "To enable this app in this Slack workspace, you need to save your OpenAI API key. " +
-    "Visit <https://platform.openai.com/account/api-keys|your developer page> to grap your key!"
+  const message =
+    'To enable this app in this Slack workspace, you need to save your OpenAI API key. ' +
+    'Visit <https://platform.openai.com/account/api-keys|your developer page> to grap your key!';
 
   const blocks: AnyBlock[] = [
     {
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: `*Configuration* `,
+        text: '*Configuration* ',
       },
     },
     {
@@ -65,6 +65,3 @@ const appHomeOpenedCallback = async (
 };
 
 export default appHomeOpenedCallback;
-
-
-

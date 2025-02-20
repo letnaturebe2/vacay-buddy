@@ -1,34 +1,29 @@
-import {OpenAI} from 'openai';
-import {GptContext} from "./app";
-
+import { OpenAI } from 'openai';
+import type { GptContext } from './app';
 
 const _translation_result_cache: { [key: string]: string } = {};
 
 const fromLocaleToLang = (locale: string): string | null => {
   const locale_to_lang: Record<string, string> = {
-    "en-US": "English",
-    "en-GB": "English",
-    "de-DE": "German",
-    "es-ES": "Spanish",
-    "es-LA": "Spanish",
-    "fr-FR": "French",
-    "it-IT": "Italian",
-    "pt-BR": "Portuguese",
-    "ru-RU": "Russian",
-    "ja-JP": "Japanese",
-    "zh-CN": "Chinese",
-    "zh-TW": "Chinese",
-    "ko-KR": "Korean",
-  }
+    'en-US': 'English',
+    'en-GB': 'English',
+    'de-DE': 'German',
+    'es-ES': 'Spanish',
+    'es-LA': 'Spanish',
+    'fr-FR': 'French',
+    'it-IT': 'Italian',
+    'pt-BR': 'Portuguese',
+    'ru-RU': 'Russian',
+    'ja-JP': 'Japanese',
+    'zh-CN': 'Chinese',
+    'zh-TW': 'Chinese',
+    'ko-KR': 'Korean',
+  };
 
   return locale_to_lang[locale] || null;
 };
 
-const translate = async (
-  openaiApiKey: string,
-  context: GptContext,
-  text: string
-): Promise<string> => {
+const translate = async (openaiApiKey: string, context: GptContext, text: string): Promise<string> => {
   if (!openaiApiKey.trim()) {
     return text;
   }
@@ -53,16 +48,16 @@ const translate = async (
       messages: [
         {
           role: 'system',
-          content: "You're an AI that specializes in high-quality language translation. " +
+          content:
+            "You're an AI that specializes in high-quality language translation. " +
             "Always return only the translated text, keeping Slack's emoji (e.g., :hourglass_flowing_sand:) " +
-            "and mention formats unchanged. " +
-            "Maintain markdown formatting as much as possible.",
+            'and mention formats unchanged. ' +
+            'Maintain markdown formatting as much as possible.',
         },
         {
           role: 'user',
-          content: `Translate the following text into ${lang} professionally. ` +
-            "Do not include English explanations or pronunciation guides. " +
-            `Original text:\n${text}`,
+          content: `Translate the following text into ${lang}professionally.
+           Do not include English explanations or pronunciation guides. Original text:\n${text}`,
         },
       ],
       top_p: 1,
