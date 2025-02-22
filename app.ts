@@ -3,9 +3,9 @@ import * as dotenv from 'dotenv';
 
 dotenv.config();
 
-import {type AllMiddlewareArgs, App, type Context, LogLevel} from '@slack/bolt';
-import {PROJECT_CONFIG} from './config/constants';
-import {dataSource} from './config/db';
+import { type AllMiddlewareArgs, App, type Context, LogLevel } from '@slack/bolt';
+import { PROJECT_CONFIG } from './config/constants';
+import { dataSource } from './config/db';
 import registerListeners from './listeners';
 
 export interface GptContext extends Context {
@@ -19,7 +19,7 @@ export interface GptContext extends Context {
 }
 
 // middlewares
-const setLocale = async ({context, client, next}: AllMiddlewareArgs<GptContext>) => {
+const setLocale = async ({ context, client, next }: AllMiddlewareArgs<GptContext>) => {
   try {
     const userId = context.userId;
     if (userId) {
@@ -36,7 +36,7 @@ const setLocale = async ({context, client, next}: AllMiddlewareArgs<GptContext>)
   }
 };
 
-const setOpenAIConfig = async ({context, next}: AllMiddlewareArgs<GptContext>) => {
+const setOpenAIConfig = async ({ context, next }: AllMiddlewareArgs<GptContext>) => {
   try {
     context.OPENAI_API_KEY = PROJECT_CONFIG.OPENAI_API_KEY;
     context.OPENAI_MODEL = PROJECT_CONFIG.OPENAI_MODEL;

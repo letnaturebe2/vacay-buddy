@@ -1,7 +1,6 @@
 import type { AllMiddlewareArgs, SlackViewMiddlewareArgs, ViewSubmitAction } from '@slack/bolt';
 import type { GptContext } from '../../app';
-import { ActionId } from '../../config/constants';
-import {teamService} from "../../service/team.service";
+import { teamService } from '../../service/team.service';
 
 const handleConfigureSubmit = async ({
   ack,
@@ -10,20 +9,21 @@ const handleConfigureSubmit = async ({
   context,
   logger,
 }: AllMiddlewareArgs<GptContext> & SlackViewMiddlewareArgs<ViewSubmitAction>) => {
-  try {
-    await ack();
+  await ack();
 
-    const values = view.state.values;
-    const apiKey = values.api_key?.input?.value;
-    const selectedModel = values.model?.input?.selected_option?.value;
-    const team = await teamService.upsertTeam(context.teamId!, apiKey!);
-    logger.info(`Saved API Key: ${apiKey}!!!`);
-    logger.info(`Selected Model: ${selectedModel}`);
+  const values = view.state.values;
+  const apiKey = values.api_key?.input?.value;
+  const selectedModel = values.model?.input?.selected_option?.value;
 
-    // context.OPENAI_API_KEY = apiKey;
-  } catch (error) {
-    logger.error(error);
+  if (!context.teamId || !apiKey) {
+    throw new Error('teamId or apiKey is missing');
   }
+
+  const team = await teamService.upsertTeam(context.teamId, apiKey);
+  logger.info(`Saved API Key: ${apiKey}!!!`);
+  logger.info(`Selected Model: ${selectedModel}`);
+
+  // context.OPENAI_API_KEY = apiKey;
 };
 
 export default handleConfigureSubmit;
