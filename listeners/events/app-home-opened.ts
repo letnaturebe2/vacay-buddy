@@ -1,18 +1,27 @@
-import type { AllMiddlewareArgs, SlackEventMiddlewareArgs } from '@slack/bolt';
-import type { AnyBlock } from '@slack/types';
-import { ActionId } from '../../config/constants';
+import type {AllMiddlewareArgs, SlackEventMiddlewareArgs} from '@slack/bolt';
+import type {AnyBlock} from '@slack/types';
+import {ActionId} from '../../config/constants';
+import {HomeView} from "@slack/types/dist/views";
+import {GptContext} from "../../app";
 
-const appHomeOpenedCallback = async ({
-  client,
-  event,
-  logger,
-}: AllMiddlewareArgs & SlackEventMiddlewareArgs<'app_home_opened'>) => {
-  // Ignore the `app_home_opened` event for anything but the Home tab
-  if (event.tab !== 'home') return;
+const appHomeOpenedCallback = async (
+  {
+    client,
+    event,
+    logger,
+    context,
+  }: AllMiddlewareArgs<GptContext> & SlackEventMiddlewareArgs<'app_home_opened'>) => {
+  if (event.tab !== 'home') {
+    throw new Error('This event is not for the Home tab');
+  }
 
-  const message =
+  let message =
     'To enable this app in this Slack workspace, you need to save your OpenAI API key. ' +
     'Visit <https://platform.openai.com/account/api-keys|your developer page> to grap your key!';
+
+  if (context.team !== null) {
+    message = 'Your OpenAI API key is already configured.';
+  }
 
   const blocks: AnyBlock[] = [
     {
@@ -29,7 +38,7 @@ const appHomeOpenedCallback = async ({
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: message || ' ',
+        text: message,
       },
       accessory: {
         action_id: ActionId.CONFIGURE,
@@ -42,26 +51,17 @@ const appHomeOpenedCallback = async ({
         value: 'api_key',
       },
     },
-    // {
-    //     type: 'section',
-    //     text: {
-    //         type: 'mrkdwn',
-    //         text: `*Welcome home, <@${event.user}> :house:*`,
-    //     },
-    // },
   ];
 
-  try {
-    await client.views.publish({
-      user_id: event.user,
-      view: {
-        type: 'home',
-        blocks: blocks,
-      },
-    });
-  } catch (error) {
-    logger.error(error);
+  const view: HomeView = {
+    type: 'home',
+    blocks: blocks,
   }
+
+  await client.views.publish({
+    user_id: event.user,
+    view,
+  });
 };
 
 export default appHomeOpenedCallback;

@@ -1,5 +1,5 @@
-import { OpenAI } from 'openai';
-import type { GptContext } from './app';
+import {OpenAI} from 'openai';
+import type {GptContext} from './app';
 
 const _translation_result_cache: { [key: string]: string } = {};
 
@@ -42,40 +42,35 @@ const translate = async (openaiApiKey: string, context: GptContext, text: string
     apiKey: openaiApiKey,
   });
 
-  try {
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'system',
-          content:
-            "You're an AI that specializes in high-quality language translation. " +
-            "Always return only the translated text, keeping Slack's emoji (e.g., :hourglass_flowing_sand:) " +
-            'and mention formats unchanged. ' +
-            'Maintain markdown formatting as much as possible.',
-        },
-        {
-          role: 'user',
-          content: `Translate the following text into ${lang}professionally.
+  const response = await openai.chat.completions.create({
+    model: 'gpt-4o-mini',
+    messages: [
+      {
+        role: 'system',
+        content:
+          "You're an AI that specializes in high-quality language translation. " +
+          "Always return only the translated text, keeping Slack's emoji (e.g., :hourglass_flowing_sand:) " +
+          'and mention formats unchanged. ' +
+          'Maintain markdown formatting as much as possible.',
+      },
+      {
+        role: 'user',
+        content: `Translate the following text into ${lang}professionally.
            Do not include English explanations or pronunciation guides. Original text:\n${text}`,
-        },
-      ],
-      top_p: 1,
-      n: 1,
-      max_tokens: 1024,
-      temperature: 1,
-      presence_penalty: 0,
-      frequency_penalty: 0,
-    });
+      },
+    ],
+    top_p: 1,
+    n: 1,
+    max_tokens: 1024,
+    temperature: 1,
+    presence_penalty: 0,
+    frequency_penalty: 0,
+  });
 
-    const translatedText = response.choices[0]?.message?.content?.trim() || text;
-    _translation_result_cache[cacheKey] = translatedText;
+  const translatedText = response.choices[0]?.message?.content?.trim() || text;
+  _translation_result_cache[cacheKey] = translatedText;
 
-    return translatedText;
-  } catch (error) {
-    console.error('Translation error:', error);
-    return text;
-  }
+  return translatedText;
 };
 
 export default translate;

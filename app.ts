@@ -1,12 +1,13 @@
 import 'reflect-metadata';
-import * as dotenv from 'dotenv';
+import {config} from "dotenv";
 
-dotenv.config();
+config();
 
-import { type AllMiddlewareArgs, App, type Context, LogLevel } from '@slack/bolt';
-import { PROJECT_CONFIG } from './config/constants';
-import { dataSource } from './config/db';
+import {type AllMiddlewareArgs, App, type Context, LogLevel} from '@slack/bolt';
+import {dataSource} from './config/db';
 import registerListeners from './listeners';
+import {teamService} from "./service/team.service";
+import {Team} from "./entity/team";
 
 export interface GptContext extends Context {
   locale: string;
@@ -16,39 +17,37 @@ export interface GptContext extends Context {
   OPENAI_TEMPERATURE: number;
   OPENAI_ORG_ID: string | null;
   OPENAI_FUNCTION_CALL_MODULE_NAME?: string | null;
+  team: Team | null;
 }
 
 // middlewares
-const setLocale = async ({ context, client, next }: AllMiddlewareArgs<GptContext>) => {
-  try {
-    const userId = context.userId;
-    if (userId) {
-      const result = await client.users.info({
-        user: userId,
-        include_locale: true,
-      });
-      context.locale = result.user?.locale ?? 'en-US';
-    }
-    await next();
-  } catch (error) {
-    console.error('Error setting locale:', error);
-    await next();
+const setLocale = async ({context, client, next}: AllMiddlewareArgs<GptContext>) => {
+  const userId = context.userId;
+  if (userId) {
+    const result = await client.users.info({
+      user: userId,
+      include_locale: true,
+    });
+    context.locale = result.user?.locale ?? 'en-US';
   }
+  await next();
 };
 
-const setOpenAIConfig = async ({ context, next }: AllMiddlewareArgs<GptContext>) => {
-  try {
-    context.OPENAI_API_KEY = PROJECT_CONFIG.OPENAI_API_KEY;
-    context.OPENAI_MODEL = PROJECT_CONFIG.OPENAI_MODEL;
-    context.OPENAI_IMAGE_GENERATION_MODEL = PROJECT_CONFIG.OPENAI_IMAGE_GENERATION_MODEL;
-    context.OPENAI_TEMPERATURE = Number(PROJECT_CONFIG.OPENAI_TEMPERATURE);
-    context.OPENAI_ORG_ID = PROJECT_CONFIG.OPENAI_ORG_ID;
-    context.OPENAI_FUNCTION_CALL_MODULE_NAME = PROJECT_CONFIG.OPENAI_FUNCTION_CALL_MODULE_NAME;
-    await next();
-  } catch (error) {
-    console.error('Error setting OpenAI config:', error);
-    await next();
+const setOpenAIConfig = async ({context, next}: AllMiddlewareArgs<GptContext>) => {
+  const teamOrNull = await teamService.getTeam(context.teamId || '');
+  context.team = teamOrNull;
+
+  if (teamOrNull) {
+    context.OPENAI_API_KEY = teamOrNull.api_key;
+    context.OPENAI_MODEL = teamOrNull.model;
+  } else {
+    context.OPENAI_API_KEY = process.env.OPENAI_API_KEY || '';
+    context.OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-3.5-turbo';
   }
+
+  context.OPENAI_IMAGE_GENERATION_MODEL = process.env.OPENAI_IMAGE_GENERATION_MODEL || 'dall-e-3';
+  await next();
+
 };
 
 const app = new App({
@@ -59,7 +58,7 @@ const app = new App({
 });
 
 // Register middlewares
-if (PROJECT_CONFIG.USE_SLACK_LANGUAGE) {
+if (process.env.USE_SLACK_LANGUAGE !== 'false') {
   app.use(setLocale);
 }
 app.use(setOpenAIConfig);
