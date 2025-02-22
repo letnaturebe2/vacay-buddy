@@ -1,13 +1,13 @@
 import 'reflect-metadata';
-import {config} from "dotenv";
+import { config } from 'dotenv';
 
 config();
 
-import {type AllMiddlewareArgs, App, type Context, LogLevel} from '@slack/bolt';
-import {dataSource} from './config/db';
+import { type AllMiddlewareArgs, App, type Context, LogLevel } from '@slack/bolt';
+import { dataSource } from './config/db';
+import type { Team } from './entity/team';
 import registerListeners from './listeners';
-import {teamService} from "./service/team.service";
-import {Team} from "./entity/team";
+import { teamService } from './service/team.service';
 
 export interface GptContext extends Context {
   locale: string;
@@ -21,7 +21,7 @@ export interface GptContext extends Context {
 }
 
 // middlewares
-const setLocale = async ({context, client, next}: AllMiddlewareArgs<GptContext>) => {
+const setLocale = async ({ context, client, next }: AllMiddlewareArgs<GptContext>) => {
   const userId = context.userId;
   if (userId) {
     const result = await client.users.info({
@@ -33,7 +33,7 @@ const setLocale = async ({context, client, next}: AllMiddlewareArgs<GptContext>)
   await next();
 };
 
-const setOpenAIConfig = async ({context, next}: AllMiddlewareArgs<GptContext>) => {
+const setOpenAIConfig = async ({ context, next }: AllMiddlewareArgs<GptContext>) => {
   const teamOrNull = await teamService.getTeam(context.teamId || '');
   context.team = teamOrNull;
 
@@ -47,7 +47,6 @@ const setOpenAIConfig = async ({context, next}: AllMiddlewareArgs<GptContext>) =
 
   context.OPENAI_IMAGE_GENERATION_MODEL = process.env.OPENAI_IMAGE_GENERATION_MODEL || 'dall-e-3';
   await next();
-
 };
 
 const app = new App({

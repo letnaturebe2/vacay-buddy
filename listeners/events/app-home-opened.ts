@@ -1,16 +1,15 @@
-import type {AllMiddlewareArgs, SlackEventMiddlewareArgs} from '@slack/bolt';
-import type {AnyBlock} from '@slack/types';
-import {ActionId} from '../../config/constants';
-import {HomeView} from "@slack/types/dist/views";
-import {GptContext} from "../../app";
+import type { AllMiddlewareArgs, SlackEventMiddlewareArgs } from '@slack/bolt';
+import type { AnyBlock } from '@slack/types';
+import type { HomeView } from '@slack/types/dist/views';
+import type { GptContext } from '../../app';
+import { ActionId } from '../../config/constants';
 
-const appHomeOpenedCallback = async (
-  {
-    client,
-    event,
-    logger,
-    context,
-  }: AllMiddlewareArgs<GptContext> & SlackEventMiddlewareArgs<'app_home_opened'>) => {
+const appHomeOpenedCallback = async ({
+  client,
+  event,
+  logger,
+  context,
+}: AllMiddlewareArgs<GptContext> & SlackEventMiddlewareArgs<'app_home_opened'>) => {
   if (event.tab !== 'home') {
     throw new Error('This event is not for the Home tab');
   }
@@ -56,7 +55,7 @@ const appHomeOpenedCallback = async (
   const view: HomeView = {
     type: 'home',
     blocks: blocks,
-  }
+  };
 
   await client.views.publish({
     user_id: event.user,
