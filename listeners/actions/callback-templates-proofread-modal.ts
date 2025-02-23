@@ -2,12 +2,10 @@ import type { AllMiddlewareArgs, BlockAction, SlackActionMiddlewareArgs } from '
 import type { ButtonAction } from '@slack/bolt/dist/types/actions/block-action';
 import type { ModalView } from '@slack/types';
 import type { GptContext } from '../../app';
+import { ActionId } from '../../config/constants';
 
-const buildTemplateProofreadModal = async (context: GptContext, payload: ButtonAction): Promise<ModalView> => {
-  const button = payload as ButtonAction;
-  const prompt = button.value;
-
-  if (prompt === undefined) {
+const buildTemplateProofreadModal = async (context: GptContext, buttonAction: ButtonAction): Promise<ModalView> => {
+  if (buttonAction.value === undefined) {
     throw new Error('Prompt is undefined');
   }
 
@@ -61,17 +59,18 @@ const buildTemplateProofreadModal = async (context: GptContext, payload: ButtonA
       value: 'Speechwriter crafting a persuasive speech',
     },
   ];
+
   return {
     type: 'modal',
-    callback_id: 'proofread',
+    callback_id: ActionId.PROOFREAD,
     title: { type: 'plain_text', text: 'Proofreading' },
     submit: { type: 'plain_text', text: 'Submit' },
     close: { type: 'plain_text', text: 'Close' },
-    private_metadata: JSON.stringify({ prompt: prompt }),
+    private_metadata: JSON.stringify({ prompt: buttonAction.value }),
     blocks: [
       {
         type: 'section',
-        text: { type: 'mrkdwn', text: prompt || ' ' },
+        text: { type: 'mrkdwn', text: buttonAction.value },
       },
       {
         type: 'input',
@@ -92,7 +91,7 @@ const buildTemplateProofreadModal = async (context: GptContext, payload: ButtonA
           action_id: 'input',
           options: tone_and_voice_options,
         },
-        optional: true,
+        optional: false,
       },
     ],
   };
@@ -106,15 +105,16 @@ const callbackTemplateProofreadModal = async ({
   context,
   payload,
 }: AllMiddlewareArgs<GptContext> & SlackActionMiddlewareArgs<BlockAction>) => {
-  try {
-    await ack();
-    await client.views.open({
-      trigger_id: body.trigger_id,
-      view: await buildTemplateProofreadModal(context, payload as ButtonAction),
-    });
-  } catch (error) {
-    logger.error(error);
+  await ack();
+
+  if (payload.type !== 'button') {
+    throw new Error('Invalid action type');
   }
+
+  await client.views.open({
+    trigger_id: body.trigger_id,
+    view: await buildTemplateProofreadModal(context, payload),
+  });
 };
 
 export default callbackTemplateProofreadModal;

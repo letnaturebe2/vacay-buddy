@@ -21,7 +21,6 @@ const handleConfigureSubmit = async ({
   try {
     const openai = new OpenAI({ apiKey });
     await openai.models.list();
-    logger.info('API Key is valid.');
   } catch (error) {
     await ack({
       response_action: 'errors',

@@ -1,6 +1,7 @@
 export enum ActionId {
   CONFIGURE = 'configure',
   TEMPLATES_PROOFREAD = 'templates-proofread',
+  PROOFREAD = 'proofread',
   TEMPLATES_IMAGE_GENERATION = 'templates-image-generation',
   TEMPLATES_IMAGE_VARIATIONS = 'templates-image-variations',
   TEMPLATES_FROM_SCRATCH = 'templates-from-scratch',
