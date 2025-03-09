@@ -13,32 +13,28 @@ export class TeamService {
     return await this.teamRepository.findOne({where: {team_id: teamId}});
   }
 
-  private async createTeam(teamId: string, apiKey: string, model: string): Promise<Team> {
+  private async createTeam(teamId: string): Promise<Team> {
     const team = new Team();
     team.team_id = teamId;
-    team.api_key = apiKey;
-    team.model = model;
     return await this.teamRepository.save(team);
   }
 
-  private async updateTeam(teamId: string, apiKey: string, model: string): Promise<Team> {
+  private async updateTeam(teamId: string): Promise<Team> {
     const team = await this.getTeam(teamId);
 
     if (!team) {
-      return await this.createTeam(teamId, apiKey, model);
+      return await this.createTeam(teamId);
     }
 
-    team.api_key = apiKey;
-    team.model = model;
     return await this.teamRepository.save(team);
   }
 
-  public async upsertTeam(teamId: string, apiKey: string, model: string): Promise<Team> {
+  public async upsertTeam(teamId: string): Promise<Team> {
     const team = await this.getTeam(teamId);
     if (!team) {
-      return await this.createTeam(teamId, apiKey, model);
+      return await this.createTeam(teamId);
     }
-    return await this.updateTeam(teamId, apiKey, model);
+    return await this.updateTeam(teamId);
   }
 }
 

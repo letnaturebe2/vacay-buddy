@@ -1,4 +1,5 @@
-import {Entity, PrimaryGeneratedColumn, Column, Index} from "typeorm";
+import {Entity, PrimaryGeneratedColumn, Column, Index, OneToMany} from "typeorm";
+import {User} from "./user";
 
 @Entity()
 export class Team {
@@ -6,12 +7,9 @@ export class Team {
   id: number;
 
   @Index()
-  @Column({ type: "varchar" })
+  @Column({type: "varchar"})
   team_id: string;
 
-  @Column({ type: "varchar" })
-  api_key: string;
-
-  @Column({ type: "varchar" })
-  model: string;
+  @OneToMany(() => User, (user) => user.team)
+  users: User[];
 }

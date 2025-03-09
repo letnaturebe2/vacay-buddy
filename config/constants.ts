@@ -1,16 +1,26 @@
 export enum ActionId {
   CONFIGURE = 'configure',
-  TEMPLATES_PROOFREAD = 'templates-proofread',
+  UPDATE_BACK_TO_HOME = 'back-to-home',
+  UPDATE_ADMIN_PAGE = 'admin-page',
+  OPEN_ADMIN_MANAGE = 'open-admin-manage',
+  SUBMIT_ADMIN_MANAGE = 'submit-admin-manage',
   PROOFREAD = 'proofread',
-  TEMPLATES_IMAGE_GENERATION = 'templates-image-generation',
-  TEMPLATES_IMAGE_VARIATIONS = 'templates-image-variations',
-  TEMPLATES_FROM_SCRATCH = 'templates-from-scratch',
 }
 
-export const DEFAULT_SYSTEM_TEXT = `
-    You are a bot in a slack chat room. You might receive messages from multiple people.
-    Format bold text *like this*, italic text _like this_ and strikethrough text ~like this~.
-    Slack user IDs match the regex \`<@U.*?>\`.
-    Your Slack user ID is <@{bot_user_id}>.
-    Each message has the author's Slack user ID prepended, like the regex \`^<@U.*?>: \` followed by the message text.
-  `;
+
+// noinspection JSUnusedGlobalSymbols
+export const LOCALE_TO_LANG: Record<string, string> = {
+  'en-US': 'English',
+  'en-GB': 'English',
+  'de-DE': 'German',
+  'es-ES': 'Spanish',
+  'es-LA': 'Spanish',
+  'fr-FR': 'French',
+  'it-IT': 'Italian',
+  'pt-BR': 'Portuguese',
+  'ru-RU': 'Russian',
+  'ja-JP': 'Japanese',
+  'zh-CN': 'Chinese',
+  'zh-TW': 'Chinese',
+  'ko-KR': 'Korean',
+};
