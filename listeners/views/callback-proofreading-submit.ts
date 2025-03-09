@@ -1,19 +1,18 @@
-import type {AllMiddlewareArgs, SlackViewMiddlewareArgs, ViewSubmitAction} from '@slack/bolt';
-import {OpenAI} from 'openai';
-import type {GptContext} from '../../app';
-import {ActionId} from '../../config/constants';
-import {teamService} from '../../service/team.service';
+import type { AllMiddlewareArgs, SlackViewMiddlewareArgs, ViewSubmitAction } from '@slack/bolt';
+import { OpenAI } from 'openai';
+import type { GptContext } from '../../app';
+import { ActionId } from '../../config/constants';
+import { teamService } from '../../service/team.service';
 
-const handleProofreadingSubmit = async (
-  {
-    ack,
-    body,
-    view,
-    context,
-    logger,
-    client,
-    payload,
-  }: AllMiddlewareArgs<GptContext> & SlackViewMiddlewareArgs<ViewSubmitAction>) => {
+const handleProofreadingSubmit = async ({
+  ack,
+  body,
+  view,
+  context,
+  logger,
+  client,
+  payload,
+}: AllMiddlewareArgs<GptContext> & SlackViewMiddlewareArgs<ViewSubmitAction>) => {
   await ack({
     response_action: 'update',
     view: {

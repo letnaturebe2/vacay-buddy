@@ -1,5 +1,5 @@
-import {OpenAI} from 'openai';
-import type {GptContext} from './app';
+import { OpenAI } from 'openai';
+import type { GptContext } from './app';
 
 const _translation_result_cache: { [key: string]: string } = {};
 
