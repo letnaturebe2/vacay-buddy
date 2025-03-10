@@ -95,7 +95,7 @@ export const buildAppHome = async (context: AppContext): Promise<AnyBlock[]> => 
       type: 'header',
       text: {
         type: 'plain_text',
-        text: ':clipboard: Pending PTO Requests Assigned to Me',
+        text: ':clipboard: Assigned to Me',
         emoji: true,
       },
     },
@@ -134,8 +134,7 @@ export const buildAppHome = async (context: AppContext): Promise<AnyBlock[]> => 
           action_id: 'approve_pto',
           text: {
             type: 'plain_text',
-            text: '✅',
-            emoji: true,
+            text: 'Approve',
           },
           style: 'primary',
           value: 'pto_request_12345',
@@ -145,8 +144,7 @@ export const buildAppHome = async (context: AppContext): Promise<AnyBlock[]> => 
           action_id: 'reject_pto',
           text: {
             type: 'plain_text',
-            text: '❌',
-            emoji: true,
+            text: 'Reject',
           },
           style: 'danger',
           value: 'pto_request_12345',
