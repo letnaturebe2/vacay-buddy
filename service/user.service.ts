@@ -36,23 +36,12 @@ export class UserService {
 
   public async updateAdmins(userIds: string[], team: Team) {
     await dataSource.transaction(async transactionalEntityManager => {
-      const currentTeamAdmins = await transactionalEntityManager.find(User, {
-        where: {
-          isAdmin: true,
-          team: { id: team.id }
-        }
-      });
-
-      currentTeamAdmins.forEach(admin => admin.isAdmin = false);
-      await transactionalEntityManager.save(User, currentTeamAdmins);
-
-      const users = await transactionalEntityManager.find(User, {
-        where: {
-          userId: In(userIds),
-        }
-      });
-      users.forEach(user => user.isAdmin = true);
-      await transactionalEntityManager.save(User, users);
+      await transactionalEntityManager.update(User, { team: team }, { isAdmin: false });
+      await transactionalEntityManager.update(
+        User,
+        { team: team, userId: In(userIds) },
+        { isAdmin: true }
+      );
     });
   }
 
