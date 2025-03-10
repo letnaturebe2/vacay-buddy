@@ -1,10 +1,11 @@
 export enum ActionId {
-  CONFIGURE = 'configure',
   UPDATE_BACK_TO_HOME = 'back-to-home',
+  // admin actions
   UPDATE_ADMIN_PAGE = 'admin-page',
-  OPEN_ADMIN_MANAGE = 'open-admin-manage',
+  OPEN_ADMIN_MODAL = 'open-admin-modal',
   SUBMIT_ADMIN_MANAGE = 'submit-admin-manage',
-  PROOFREAD = 'proofread',
+  // pto actions
+  OPEN_PTO_MODAL = 'open-pto-modal',
 }
 
 

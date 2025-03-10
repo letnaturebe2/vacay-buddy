@@ -18,4 +18,7 @@ export class PtoTemplate extends BaseEntity {
 
   @Column({type: 'text'})
   content: string;
+
+  @Column({default: true})
+  enabled: boolean;
 }

@@ -1,9 +1,9 @@
-import type {AllMiddlewareArgs, App} from '@slack/bolt';
-import {teamService} from "./service/team.service";
-import {AppContext} from "./app";
-import {userService} from "./service/user.service";
+import type { AllMiddlewareArgs, App } from '@slack/bolt';
+import type { AppContext } from './app';
+import { teamService } from './service/team.service';
+import { userService } from './service/user.service';
 
-const setLocale = async ({context, client, next}: AllMiddlewareArgs<AppContext>) => {
+const setLocale = async ({ context, client, next }: AllMiddlewareArgs<AppContext>) => {
   if (!context.userId) {
     return await next();
   }
@@ -18,7 +18,7 @@ const setLocale = async ({context, client, next}: AllMiddlewareArgs<AppContext>)
   await next();
 };
 
-const setUserProfile = async ({context, next}: AllMiddlewareArgs<AppContext>) => {
+const setUserProfile = async ({ context, next }: AllMiddlewareArgs<AppContext>) => {
   if (!context.teamId || !context.userId) {
     return await next();
   }
