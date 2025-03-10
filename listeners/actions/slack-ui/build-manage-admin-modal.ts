@@ -1,7 +1,7 @@
 import type {AnyBlock} from '@slack/types';
+import {User} from "../../../entity/user.model";
 
-export const buildManageAdminModal = async (
-): Promise<AnyBlock[]> => {
+export const buildManageAdminModal = async (admins: User[]): Promise<AnyBlock[]> => {
   return [
     {
       "type": "input",
@@ -11,7 +11,7 @@ export const buildManageAdminModal = async (
         "type": "multi_users_select",
         "action_id": "select_admins",
         "placeholder": {"type": "plain_text", "text": "Search and select users"},
-        "initial_users": [],
+        "initial_users": admins.map(admin => admin.userId),
       }
     }
   ];

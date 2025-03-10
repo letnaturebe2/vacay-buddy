@@ -1,16 +1,19 @@
-import type { AllMiddlewareArgs, SlackEventMiddlewareArgs } from '@slack/bolt';
-import type { AnyBlock } from '@slack/types';
-import type { HomeView } from '@slack/types/dist/views';
-import type { AppContext } from '../../app';
+import type {AllMiddlewareArgs, SlackEventMiddlewareArgs} from '@slack/bolt';
+import type {AnyBlock} from '@slack/types';
+import type {HomeView} from '@slack/types/dist/views';
+import type {AppContext} from '../../app';
 import {buildAppHome} from "./slack-ui/build-app-home";
 
-const appHomeOpenedCallback = async ({
-  client,
-  event,
-  logger,
-  context,
-}: AllMiddlewareArgs<AppContext> & SlackEventMiddlewareArgs<'app_home_opened'>) => {
-  if (event.tab !== 'home') throw new Error('This event is not for the Home tab');
+const appHomeOpenedCallback = async (
+  {
+    client,
+    event,
+    logger,
+    context,
+  }: AllMiddlewareArgs<AppContext> & SlackEventMiddlewareArgs<'app_home_opened'>) => {
+  if (event.tab !== 'messages') {
+    return;
+  }
 
   const blocks: AnyBlock[] = await buildAppHome();
 

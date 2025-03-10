@@ -1,6 +1,8 @@
-import {Team} from '../entity/team';
+import {Team} from '../entity/team.model';
 import {dataSource} from "../config/db";
-import {Repository} from "typeorm";
+import {In, Repository} from "typeorm";
+import {User} from "../entity/user.model";
+import {userService} from "./user.service";
 
 export class TeamService {
   private teamRepository: Repository<Team>;
@@ -9,32 +11,26 @@ export class TeamService {
     this.teamRepository = dataSource.getRepository(Team);
   }
 
-  public async getTeam(teamId: string): Promise<Team | null> {
-    return await this.teamRepository.findOne({where: {team_id: teamId}});
+  public async getOrCreateTeam(teamId: string): Promise<Team> {
+    let team = await this.teamRepository.findOne({where: {teamId: teamId}});
+    if (team === null) {
+      team = await this.createTeam(teamId);
+    }
+    return team;
   }
 
   private async createTeam(teamId: string): Promise<Team> {
     const team = new Team();
-    team.team_id = teamId;
+    team.teamId = teamId;
     return await this.teamRepository.save(team);
   }
 
-  private async updateTeam(teamId: string): Promise<Team> {
-    const team = await this.getTeam(teamId);
-
-    if (!team) {
-      return await this.createTeam(teamId);
-    }
-
-    return await this.teamRepository.save(team);
+  public async getAdmins(team: Team): Promise<User[]> {
+    return await userService.getAdmins(team);
   }
 
-  public async upsertTeam(teamId: string): Promise<Team> {
-    const team = await this.getTeam(teamId);
-    if (!team) {
-      return await this.createTeam(teamId);
-    }
-    return await this.updateTeam(teamId);
+  public async updateAdmins(userIds: string[], team: Team) {
+    await userService.updateAdmins(userIds, team);
   }
 }
 

@@ -1,5 +1,5 @@
-import "reflect-metadata";
 import { DataSource } from "typeorm";
+import { SnakeNamingStrategy } from "typeorm-naming-strategies";
 
 export const dataSource = new DataSource({
   type: "sqlite",
@@ -8,4 +8,5 @@ export const dataSource = new DataSource({
   migrations: ["migration/*.ts"],
   synchronize: true,
   logging: true,
+  namingStrategy: new SnakeNamingStrategy(),
 });

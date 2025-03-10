@@ -1,6 +1,7 @@
 import type {AllMiddlewareArgs, SlackViewMiddlewareArgs, ViewSubmitAction} from '@slack/bolt';
 import type {AppContext} from '../../app';
 import {teamService} from '../../service/team.service';
+import {userService} from "../../service/user.service";
 
 const submitAdminManage = async (
   {
@@ -8,6 +9,7 @@ const submitAdminManage = async (
     body,
     view,
     client,
+    context,
   }: AllMiddlewareArgs<AppContext> & SlackViewMiddlewareArgs<ViewSubmitAction>) => {
   const selectedUsers = view.state.values.select_admins_block.select_admins.selected_users || [];
 
@@ -20,6 +22,14 @@ const submitAdminManage = async (
     });
     return;
   }
+
+  // ensure all selected users are in the team
+  for (const userId of selectedUsers) {
+    await userService.getOrCreateUser(userId, context.team);
+  }
+
+  await teamService.updateAdmins(selectedUsers, context.team);
+
 
   await ack({
     response_action: "update",
@@ -48,7 +58,7 @@ const submitAdminManage = async (
 
   await client.chat.postMessage({
     channel: body.user.id,
-    text: `✅ Admins updated successfully!\nNew Admins: ${selectedUsers.map(user => `<@${user}>`).join(", ")}`,
+    text: `✅ Admins updated successfully!`, // TODO : add more details
   });
 };
 
