@@ -2,6 +2,7 @@ import {Entity, ManyToOne, JoinColumn, Column} from "typeorm";
 import {User} from "./user.model";
 import {PtoRequest} from "./pto-request.model";
 import {BaseEntity} from "./base";
+import {PtoRequestStatus} from "../config/constants";
 
 @Entity()
 export class PtoApproval extends BaseEntity {
@@ -19,13 +20,13 @@ export class PtoApproval extends BaseEntity {
 
   @Column({
     type: 'simple-enum',
-    enum: ['pending', 'approved', 'rejected'],
-    default: 'pending'
+    enum: PtoRequestStatus,
+    default: PtoRequestStatus.Pending
   })
-  status: 'pending' | 'approved' | 'rejected';
+  status: PtoRequestStatus;
 
-  @Column({nullable: true})
-  comment: string;
+  @Column({type: 'text', nullable: true})
+  comment: string | null;
 
   @Column({nullable: true})
   actionDate: Date;

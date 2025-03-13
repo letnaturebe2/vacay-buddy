@@ -3,6 +3,7 @@ import {User} from "./user.model";
 import {PtoTemplate} from "./pto-template.model";
 import {BaseEntity} from "./base";
 import {PtoApproval} from "./pto-approval.model";
+import {PtoRequestStatus} from "../config/constants";
 
 @Entity()
 export class PtoRequest extends BaseEntity {
@@ -29,10 +30,10 @@ export class PtoRequest extends BaseEntity {
 
   @Column({
     type: 'simple-enum',
-    enum: ['pending', 'approved', 'rejected'],
+    enum: PtoRequestStatus,
     default: 'pending'
   })
-  status: 'pending' | 'approved' | 'rejected';
+  status: PtoRequestStatus;
 
   // Relationship to track multiple approvers and their decisions
   @OneToMany(() => PtoApproval, approval => approval.ptoRequest)

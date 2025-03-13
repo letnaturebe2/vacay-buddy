@@ -8,6 +8,11 @@ export enum ActionId {
   OPEN_PTO_MODAL = 'open-pto-modal',
 }
 
+export enum PtoRequestStatus {
+  Pending = 'pending',
+  Approved = 'approved',
+  Rejected = 'rejected'
+}
 
 // noinspection JSUnusedGlobalSymbols
 export const LOCALE_TO_LANG: Record<string, string> = {
