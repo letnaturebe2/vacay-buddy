@@ -1,0 +1,14 @@
+// tsconfig.jest.json
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "types": ["jest", "node"],
+        "esModuleInterop": true,
+        "isolatedModules": true
+    },
+    "include": [
+        "tests/**/*.ts",
+        "tests/types.d.ts"
+    ],
+    "exclude": ["node_modules", "dist"]
+}

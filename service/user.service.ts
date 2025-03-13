@@ -1,12 +1,13 @@
 import {Team} from '../entity/team.model';
-import {dataSource} from "../config/db";
-import {In, Repository} from "typeorm";
+import {DataSource, In, Repository} from "typeorm";
 import {User} from "../entity/user.model";
 
 export class UserService {
   private userRepository: Repository<User>;
+  private dataSource: DataSource;
 
-  constructor() {
+  constructor(dataSource: DataSource) {
+    this.dataSource = dataSource;
     this.userRepository = dataSource.getRepository(User);
   }
 
@@ -35,7 +36,7 @@ export class UserService {
   }
 
   public async updateAdmins(userIds: string[], team: Team) {
-    await dataSource.transaction(async transactionalEntityManager => {
+    await this.dataSource.transaction(async transactionalEntityManager => {
       await transactionalEntityManager.update(User, { team: team }, { isAdmin: false });
       await transactionalEntityManager.update(
         User,
@@ -44,7 +45,4 @@ export class UserService {
       );
     });
   }
-
 }
-
-export const userService = new UserService();

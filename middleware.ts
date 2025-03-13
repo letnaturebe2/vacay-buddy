@@ -1,7 +1,6 @@
 import type { AllMiddlewareArgs, App } from '@slack/bolt';
 import type { AppContext } from './app';
-import { teamService } from './service/team.service';
-import { userService } from './service/user.service';
+import { teamService, userService } from './service';
 
 const setLocale = async ({ context, client, next }: AllMiddlewareArgs<AppContext>) => {
   if (!context.userId) {

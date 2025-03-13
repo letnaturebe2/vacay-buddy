@@ -1,8 +1,6 @@
 import type { AllMiddlewareArgs, BlockAction, SlackActionMiddlewareArgs } from '@slack/bolt';
 import type { AppContext } from '../../app';
 import { ActionId } from '../../config/constants';
-import { teamService } from '../../service/team.service';
-import { buildAdminModal } from './slack-ui/build-admin-modal';
 import { buildPtoModal } from './slack-ui/build-pto-modal';
 
 export const openPtoModal = async ({

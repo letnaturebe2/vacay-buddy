@@ -1,20 +1,30 @@
 {
-    "compilerOptions": {
-        "target": "es6",
-        "module": "commonjs",
-        "lib": ["es6"],
-        "outDir": "./dist",
-        "rootDir": ".",                // src/ 없으니 루트로 설정
-        "strict": true,
-        "strictPropertyInitialization": false,
-        "experimentalDecorators": true,
-        "emitDecoratorMetadata": true,
-        "esModuleInterop": true,
-        "moduleResolution": "node",
-        "sourceMap": true,
-        "skipLibCheck": true,
-        "forceConsistentCasingInFileNames": true
-    },
-    "include": ["*.ts", "config/**/*", "entity/**/*", "migration/**/*"], // 실제 폴더 반영
-    "exclude": ["node_modules", "dist"]
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "lib": [
+      "es6"
+    ],
+    "outDir": "./dist",
+    "rootDir": ".",
+    "strict": true,
+    "strictPropertyInitialization": false,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+  },
+  "include": [
+    "*.ts",
+    "config/**/*",
+    "entity/**/*",
+    "migration/**/*",
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }

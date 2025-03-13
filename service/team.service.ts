@@ -1,13 +1,12 @@
 import {Team} from '../entity/team.model';
-import {dataSource} from "../config/db";
-import {In, Repository} from "typeorm";
+import {DataSource, Repository} from "typeorm";
 import {User} from "../entity/user.model";
-import {userService} from "./user.service";
+import {userService} from "./index";
 
 export class TeamService {
   private teamRepository: Repository<Team>;
 
-  constructor() {
+  constructor(dataSource: DataSource) {
     this.teamRepository = dataSource.getRepository(Team);
   }
 
@@ -33,5 +32,3 @@ export class TeamService {
     await userService.updateAdmins(userIds, team);
   }
 }
-
-export const teamService = new TeamService();
