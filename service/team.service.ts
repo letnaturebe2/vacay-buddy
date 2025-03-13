@@ -1,13 +1,15 @@
 import {Team} from '../entity/team.model';
 import {DataSource, Repository} from "typeorm";
 import {User} from "../entity/user.model";
-import {userService} from "./index";
+import {UserService} from "./user.service";
 
 export class TeamService {
-  private teamRepository: Repository<Team>;
+  private readonly teamRepository: Repository<Team>;
+  private readonly userService: UserService;
 
-  constructor(dataSource: DataSource) {
+  constructor(dataSource: DataSource, userService: UserService) {
     this.teamRepository = dataSource.getRepository(Team);
+    this.userService = userService;
   }
 
   public async getOrCreateTeam(teamId: string): Promise<Team> {
@@ -25,10 +27,10 @@ export class TeamService {
   }
 
   public async getAdmins(team: Team): Promise<User[]> {
-    return await userService.getAdmins(team);
+    return await this.userService.getAdmins(team);
   }
 
   public async updateAdmins(userIds: string[], team: Team) {
-    await userService.updateAdmins(userIds, team);
+    await this.userService.updateAdmins(userIds, team);
   }
 }
