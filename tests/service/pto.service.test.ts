@@ -164,13 +164,25 @@ describe("PtoService Tests", () => {
       const approver = await createUser("approver");
       const template = await createPtoTemplate(team);
 
-      const startDate = new Date("2025-04-05");
-      const endDate = new Date("2025-04-01");
+      let startDate = new Date("2025-04-05");
+      let endDate = new Date("2025-04-01");
 
       // Act & Assert
       await expect(
         ptoService.createPtoRequest(user, template, startDate, endDate, "Reason", [approver])
       ).rejects.toThrow("Start date must be before end date");
+
+      // Arrange
+      startDate = new Date("2025-04-01");
+      endDate = new Date("2025-04-01");
+
+      // Act
+      const result = await ptoService.createPtoRequest(user, template, startDate, endDate, "Reason", [approver]);
+
+      // Assert : same date is valid
+      expect(result).toBeDefined();
+      expect(result.startDate).toEqual(startDate);
+      expect(result.endDate).toEqual(endDate);
     });
   });
 
