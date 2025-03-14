@@ -13,12 +13,10 @@ describe("UserService Tests", () => {
   beforeAll(async () => {
     userRepository = testDataSource.getRepository(User);
     teamRepository = testDataSource.getRepository(Team);
+    userService = new UserService(testDataSource);
   });
 
   beforeEach(async () => {
-    userService = new UserService(testDataSource);
-    jest.clearAllMocks();
-
     await userRepository.clear();
     await teamRepository.clear();
 

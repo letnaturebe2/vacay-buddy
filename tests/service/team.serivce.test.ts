@@ -14,13 +14,11 @@ describe("TeamService Tests", () => {
   beforeAll(async () => {
     teamRepository = testDataSource.getRepository(Team);
     userRepository = testDataSource.getRepository(User);
+    userService = new UserService(testDataSource);
+    teamService = new TeamService(testDataSource, userService);
   });
 
   beforeEach(async () => {
-    userService = new UserService(testDataSource);
-    teamService = new TeamService(testDataSource, userService);
-    jest.clearAllMocks();
-
     await userRepository.clear();
     await teamRepository.clear();
   });

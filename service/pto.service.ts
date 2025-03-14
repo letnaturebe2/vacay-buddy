@@ -1,31 +1,26 @@
-import { DataSource, Repository } from "typeorm";
-import { PtoTemplate } from "../entity/pto-template.model";
+import {DataSource, Repository} from "typeorm";
+import {PtoTemplate} from "../entity/pto-template.model";
 import {PtoRequest} from "../entity/pto-request.model";
-import { PtoApproval } from "../entity/pto-approval.model";
-import { User } from "../entity/user.model";
-import { Team } from "../entity/team.model";
-import {UserService} from "./user.service";
+import {PtoApproval} from "../entity/pto-approval.model";
+import {User} from "../entity/user.model";
+import {Team} from "../entity/team.model";
 import {PtoRequestStatus} from "../config/constants";
 
 export class PtoService {
-  private ptoTemplateRepository: Repository<PtoTemplate>;
-  private ptoRequestRepository: Repository<PtoRequest>;
-  private ptoApprovalRepository: Repository<PtoApproval>;
-  private userService: UserService;
+  private readonly ptoTemplateRepository: Repository<PtoTemplate>;
+  private readonly ptoRequestRepository: Repository<PtoRequest>;
+  private readonly ptoApprovalRepository: Repository<PtoApproval>;
+  private readonly dataSource: DataSource;
 
-  constructor(dataSource: DataSource, userService: UserService) {
+  constructor(dataSource: DataSource) {
     this.ptoTemplateRepository = dataSource.getRepository(PtoTemplate);
     this.ptoRequestRepository = dataSource.getRepository(PtoRequest);
     this.ptoApprovalRepository = dataSource.getRepository(PtoApproval);
-    this.userService = userService;
+    this.dataSource = dataSource;
   }
 
-  async getTemplates(team: Team, enabledOnly = true): Promise<PtoTemplate[]> {
-    const query = { team };
-    if (enabledOnly) {
-      Object.assign(query, { enabled: true });
-    }
-    return this.ptoTemplateRepository.find({ where: query });
+  async getTemplates(team: Team): Promise<PtoTemplate[]> {
+    return this.ptoTemplateRepository.find({ where: {team : { id: team.id } } });
   }
 
   async createTemplate(template: Partial<PtoTemplate>, team: Team): Promise<PtoTemplate> {
@@ -38,7 +33,7 @@ export class PtoService {
 
   async updateTemplate(id: number, templateData: Partial<PtoTemplate>): Promise<PtoTemplate> {
     await this.ptoTemplateRepository.update(id, templateData);
-    return this.ptoTemplateRepository.findOneByOrFail({ id });
+    return this.ptoTemplateRepository.findOneByOrFail({id});
   }
 
   async createPtoRequest(
@@ -46,119 +41,59 @@ export class PtoService {
     template: PtoTemplate,
     startDate: Date,
     endDate: Date,
-    reason: string
+    reason: string,
+    approvers: User[]
   ): Promise<PtoRequest> {
-    const request = this.ptoRequestRepository.create({
-      user,
-      template,
-      startDate,
-      endDate,
-      reason,
-      status: PtoRequestStatus.Pending
-    });
-
-    return this.ptoRequestRepository.save(request);
-  }
-
-  async getPtoRequests(user: User, status?: PtoRequestStatus): Promise<PtoRequest[]> {
-    const query: any = { user };
-    if (status) {
-      query.status = status;
+    if (!approvers || approvers.length === 0) {
+      throw new Error('At least one approver is required for PTO requests');
     }
 
+    if (startDate > endDate) {
+      throw new Error('Start date must be before end date');
+    }
+
+    return this.dataSource.transaction(async (manager) => {
+      const request = this.ptoRequestRepository.create({
+        user,
+        template,
+        startDate,
+        endDate,
+        reason,
+        status: PtoRequestStatus.Pending,
+      });
+
+      const savedRequest = await manager.save(request);
+      const approvals = approvers.map((approver) =>
+        this.ptoApprovalRepository.create({
+          ptoRequest: savedRequest,
+          approver,
+          status: PtoRequestStatus.Pending,
+        })
+      );
+
+      await manager.save(approvals);
+
+      savedRequest.approvals = approvals;
+      savedRequest.template = template;
+
+      return savedRequest;
+    });
+  }
+
+  async getOwnedPtoRequests(user: User): Promise<PtoRequest[]> {
     return this.ptoRequestRepository.find({
-      where: query,
-      relations: ['template', 'approvals', 'approvals.approver']
+      where: {user: {id: user.id}},
+      relations: ['user', 'template', 'approvals', 'approvals.approver']
     });
   }
 
   async getPendingApprovalsForApprover(approver: User): Promise<PtoApproval[]> {
     return this.ptoApprovalRepository.find({
       where: {
-        approver,
+        approver: {id: approver.id},
         status: PtoRequestStatus.Pending
       },
-      relations: ['ptoRequest', 'ptoRequest.user']
+      relations: ['approver', 'ptoRequest', 'ptoRequest.user']
     });
-  }
-
-  async getOverlappingRequests(
-    teamId: string,
-    startDate: Date,
-    endDate: Date,
-    excludeRequestId?: string
-  ): Promise<PtoRequest[]> {
-    // Find users in the team with overlapping PTO requests
-    const queryBuilder = this.ptoRequestRepository
-      .createQueryBuilder('request')
-      .innerJoinAndSelect('request.user', 'user')
-      .innerJoinAndSelect('user.team', 'team')
-      .where('team.id = :teamId', { teamId })
-      .andWhere(
-        '(request.startDate <= :endDate AND request.endDate >= :startDate)',
-        { startDate, endDate }
-      )
-      .andWhere('request.status != :rejectedStatus', { rejectedStatus: 'rejected' });
-
-    if (excludeRequestId) {
-      queryBuilder.andWhere('request.id != :excludeRequestId', { excludeRequestId });
-    }
-
-    return queryBuilder.getMany();
-  }
-
-  // Approval methods
-  async assignApprovers(ptoRequest: PtoRequest, approvers: User[]): Promise<PtoApproval[]> {
-    const approvals = approvers.map(approver =>
-      this.ptoApprovalRepository.create({
-        ptoRequest,
-        approver,
-        status: PtoRequestStatus.Pending
-      })
-    );
-
-    return this.ptoApprovalRepository.save(approvals);
-  }
-
-  async updateApproval(
-    approvalId: number,
-    status: PtoRequestStatus.Approved | PtoRequestStatus.Rejected,
-    comment?: string
-  ): Promise<PtoApproval> {
-    const approval = await this.ptoApprovalRepository.findOneByOrFail({ id: approvalId });
-
-    approval.status = status;
-    approval.comment = comment || null;
-    approval.actionDate = new Date();
-
-    await this.ptoApprovalRepository.save(approval);
-
-    // Check if we need to update the request status
-    await this.updateRequestStatusBasedOnApprovals(approval.ptoRequest.id);
-
-    return approval;
-  }
-
-  private async updateRequestStatusBasedOnApprovals(requestId: number): Promise<void> {
-    const request = await this.ptoRequestRepository.findOne({
-      where: { id: requestId },
-      relations: ['approvals']
-    });
-
-    if (!request) return;
-
-    const approvals = request.approvals || [];
-
-    // If any rejection exists, request is rejected
-    if (approvals.some(a => a.status === PtoRequestStatus.Rejected)) {
-      request.status = PtoRequestStatus.Rejected;
-    }
-    // If all approvals are approved, request is approved
-    else if (approvals.length > 0 && approvals.every(a => a.status === PtoRequestStatus.Approved)) {
-      request.status = PtoRequestStatus.Approved;
-    }
-    // Otherwise it stays pending
-
-    await this.ptoRequestRepository.save(request);
   }
 }
