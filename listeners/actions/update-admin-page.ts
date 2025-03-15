@@ -1,7 +1,7 @@
 import type { AllMiddlewareArgs, BlockAction, SlackActionMiddlewareArgs } from '@slack/bolt';
 import type { HomeView } from '@slack/types/dist/views';
+import { assertIf } from '../../config/utils';
 import { buildAdminPage } from './slack-ui/build-admin-page';
-import {assertIf} from "../../config/utils";
 
 export const updateAdminPage = async ({
   ack,

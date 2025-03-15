@@ -2,8 +2,8 @@ import type { AllMiddlewareArgs, BlockAction, SlackActionMiddlewareArgs } from '
 import type { AnyBlock } from '@slack/types';
 import type { HomeView } from '@slack/types/dist/views';
 import type { AppContext } from '../../app';
+import { assertIf } from '../../config/utils';
 import { buildAppHome } from '../events/slack-ui/build-app-home';
-import {assertIf} from "../../config/utils";
 
 export const updateBackToHome = async ({
   ack,
