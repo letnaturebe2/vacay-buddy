@@ -11,6 +11,7 @@
     "test": "npm run build && npm run lint",
     "dev": "nodemon --ext ts --exec ts-node app.ts",
     "typeorm": "typeorm-ts-node-commonjs",
+    "test:jest": "jest",
     "migration:generate": "npm run typeorm migration:generate migration/migration/ -- -d config/db.ts",
     "migration:run": "npm run typeorm migration:run -- -d config/db.ts"
   },

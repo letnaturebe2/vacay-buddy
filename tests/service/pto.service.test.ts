@@ -217,7 +217,7 @@ describe("PtoService Tests", () => {
 
   });
 
-  describe("getPendingApprovalsForApprover", () => {
+  describe("getPendingApprovalsToReview", () => {
     test("should return pending approvals for an approver", async () => {
       // Arrange
       const team = await createTeam();
@@ -237,7 +237,7 @@ describe("PtoService Tests", () => {
       );
 
       // Act
-      const approvals = await ptoService.getPendingApprovalsForApprover(approver);
+      const approvals = await ptoService.getPendingApprovalsToReview(approver);
 
       // Assert
       expect(approvals).toHaveLength(1);

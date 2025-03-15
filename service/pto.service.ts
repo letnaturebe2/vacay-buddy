@@ -87,7 +87,7 @@ export class PtoService {
     });
   }
 
-  async getPendingApprovalsForApprover(approver: User): Promise<PtoApproval[]> {
+  async getPendingApprovalsToReview(approver: User): Promise<PtoApproval[]> {
     return this.ptoApprovalRepository.find({
       where: {
         approver: {id: approver.id},
