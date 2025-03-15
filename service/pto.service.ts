@@ -67,11 +67,9 @@ export class PtoService {
         })
       );
 
-      await manager.save(approvals);
-
-      savedRequest.approvals = approvals;
-      savedRequest.template = template;
-
+      savedRequest.approvals = await manager.save(approvals);
+      savedRequest.currentApproverId = savedRequest.approvals[0].id;
+      await manager.save(savedRequest);
       return savedRequest;
     });
   }
@@ -83,13 +81,20 @@ export class PtoService {
     });
   }
 
+  /**
+   * Retrieves pending approvals that the given user needs to review
+   * Only returns approvals where the approval ID matches the currentApproverId
+   * of the PTO request, as only the next approver in sequence should see the request
+   */
   async getPendingApprovalsToReview(approver: User): Promise<PtoApproval[]> {
-    return this.ptoApprovalRepository.find({
+    const approvals = await this.ptoApprovalRepository.find({
       where: {
         approver: {id: approver.id},
         status: PtoRequestStatus.Pending
       },
       relations: ['approver', 'ptoRequest', 'ptoRequest.user']
     });
+
+    return approvals.filter(approval => approval.ptoRequest.currentApproverId === approval.id);
   }
 }

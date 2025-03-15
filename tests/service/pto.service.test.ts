@@ -1,12 +1,12 @@
-import { Repository } from "typeorm";
-import { testDataSource } from "../config/test-db";
-import { PtoService } from "../../service/pto.service";
-import { PtoTemplate } from "../../entity/pto-template.model";
-import { PtoRequest } from "../../entity/pto-request.model";
-import { PtoApproval } from "../../entity/pto-approval.model";
-import { User } from "../../entity/user.model";
-import { Team } from "../../entity/team.model";
-import { PtoRequestStatus } from "../../config/constants";
+import {Repository} from "typeorm";
+import {testDataSource} from "../config/test-db";
+import {PtoService} from "../../service/pto.service";
+import {PtoTemplate} from "../../entity/pto-template.model";
+import {PtoRequest} from "../../entity/pto-request.model";
+import {PtoApproval} from "../../entity/pto-approval.model";
+import {User} from "../../entity/user.model";
+import {Team} from "../../entity/team.model";
+import {PtoRequestStatus} from "../../config/constants";
 
 describe("PtoService Tests", () => {
   let ptoService: PtoService;
@@ -142,7 +142,9 @@ describe("PtoService Tests", () => {
       expect(result.reason).toBe("Vacation time");
       expect(result.approvals).toHaveLength(1);
       expect(result.approvals[0].approver.userId).toBe("approver");
+      expect(result.currentApproverId).toBe(result.approvals[0].id);
       expect(result.template.title).toBe("Vacation");
+
     });
 
     test("should throw error if no approvers provided", async () => {
@@ -210,9 +212,11 @@ describe("PtoService Tests", () => {
 
       // Assert
       expect(requests).toHaveLength(1);
-      expect(requests[0].user.userId).toBe("test-user");
-      expect(requests[0].status).toBe(PtoRequestStatus.Pending);
-      expect(requests[0].template.title).toBe("Vacation");
+      const ptoRequest = requests[0];
+      expect(ptoRequest.user.userId).toBe("test-user");
+      expect(ptoRequest.status).toBe(PtoRequestStatus.Pending);
+      expect(ptoRequest.template.title).toBe("Vacation");
+      expect(ptoRequest.currentApproverId).not.toBeNull();
     });
 
   });
@@ -244,6 +248,77 @@ describe("PtoService Tests", () => {
       expect(approvals[0].approver.userId).toBe("approver");
       expect(approvals[0].status).toBe(PtoRequestStatus.Pending);
       expect(approvals[0].ptoRequest.user.userId).toBe("test-user");
+    });
+
+    test("should only show requests to the current approver in the sequence", async () => {
+      // Arrange
+      const team = await createTeam();
+      const user = await createUser("requester", team);
+      const approver1 = await createUser("approver1", team);
+      const approver2 = await createUser("approver2", team);
+      const approver3 = await createUser("approver3", team);
+      const template = await createPtoTemplate(team);
+
+      const ptoRequest = await ptoService.createPtoRequest(
+        user,
+        template,
+        new Date("2025-04-01"),
+        new Date("2025-04-05"),
+        "Vacation time",
+        [approver1, approver2, approver3]
+      );
+
+      // Act
+      const approver1Requests = await ptoService.getPendingApprovalsToReview(approver1);
+      const approver2Requests = await ptoService.getPendingApprovalsToReview(approver2);
+      const approver3Requests = await ptoService.getPendingApprovalsToReview(approver3);
+
+      // Assert
+      expect(approver1Requests).toHaveLength(1);
+      expect(approver1Requests[0].approver.userId).toBe("approver1");
+      expect(approver2Requests).toHaveLength(0);
+      expect(approver3Requests).toHaveLength(0);
+      expect(ptoRequest.currentApproverId).toBe(approver1Requests[0].id);
+    });
+
+    test("should show request to next approver after current approver approves", async () => {
+      // Arrange
+      const team = await createTeam();
+      const user = await createUser("requester", team);
+      const approver1 = await createUser("approver1", team);
+      const approver2 = await createUser("approver2", team);
+      const approver3 = await createUser("approver3", team);
+      const template = await createPtoTemplate(team);
+
+      const ptoRequest = await ptoService.createPtoRequest(
+        user,
+        template,
+        new Date("2025-04-01"),
+        new Date("2025-04-05"),
+        "Vacation time",
+        [approver1, approver2, approver3]
+      );
+
+      // Simulate first approver approving the request
+      const firstApproval = ptoRequest.approvals.find(a => a.approver.userId === "approver1")!;
+      firstApproval.status = PtoRequestStatus.Approved;
+      await ptoApprovalRepository.save(firstApproval);
+
+      // Update the current approver ID to the second approver
+      const secondApproval = ptoRequest.approvals.find(a => a.approver.userId === "approver2")!;
+      ptoRequest.currentApproverId = secondApproval.id;
+      await ptoRequestRepository.save(ptoRequest);
+
+      // Act
+      const approver1Requests = await ptoService.getPendingApprovalsToReview(approver1);
+      const approver2Requests = await ptoService.getPendingApprovalsToReview(approver2);
+      const approver3Requests = await ptoService.getPendingApprovalsToReview(approver3);
+
+      // Assert
+      expect(approver1Requests).toHaveLength(0);
+      expect(approver2Requests).toHaveLength(1);
+      expect(approver2Requests[0].approver.userId).toBe("approver2");
+      expect(approver3Requests).toHaveLength(0);
     });
   });
 });

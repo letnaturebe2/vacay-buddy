@@ -7,7 +7,6 @@ export const testDataSource = new DataSource({
   entities: ["entity/*.ts"],
   migrations: ["migration/*.ts"],
   synchronize: true,
-  dropSchema: true,
-  logging: true,
+  logging: false,
   namingStrategy: new SnakeNamingStrategy(),
 });

@@ -9,7 +9,6 @@ export const updateBackToHome = async ({
   ack,
   client,
   body,
-  logger,
   context,
 }: AllMiddlewareArgs<AppContext> & SlackActionMiddlewareArgs<BlockAction>) => {
   await ack();

@@ -37,4 +37,7 @@ export class PtoRequest extends BaseEntity {
 
   @OneToMany(() => PtoApproval, approval => approval.ptoRequest)
   approvals: PtoApproval[];
+
+  @Column({type: 'integer', nullable: true})
+  currentApproverId: number | null
 }
