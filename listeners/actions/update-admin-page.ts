@@ -1,6 +1,7 @@
 import type { AllMiddlewareArgs, BlockAction, SlackActionMiddlewareArgs } from '@slack/bolt';
 import type { HomeView } from '@slack/types/dist/views';
 import { buildAdminPage } from './slack-ui/build-admin-page';
+import {assertIf} from "../../config/utils";
 
 export const updateAdminPage = async ({
   ack,
@@ -9,7 +10,7 @@ export const updateAdminPage = async ({
 }: AllMiddlewareArgs & SlackActionMiddlewareArgs<BlockAction>) => {
   await ack();
 
-  if (!body.view) throw new Error('body.view is undefined in callbackBackToHome function');
+  assertIf(body.view !== undefined, 'body.view is undefined in callbackBackToHome function');
 
   const ptoTemplates = [
     { name: 'Full-day PTO', status: ':white_check_mark: Enabled', description: 'Take a full day off' },

@@ -35,7 +35,6 @@ export class PtoRequest extends BaseEntity {
   })
   status: PtoRequestStatus;
 
-  // Relationship to track multiple approvers and their decisions
   @OneToMany(() => PtoApproval, approval => approval.ptoRequest)
   approvals: PtoApproval[];
 }

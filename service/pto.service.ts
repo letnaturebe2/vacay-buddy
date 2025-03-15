@@ -5,6 +5,7 @@ import {PtoApproval} from "../entity/pto-approval.model";
 import {User} from "../entity/user.model";
 import {Team} from "../entity/team.model";
 import {PtoRequestStatus} from "../config/constants";
+import {assertIf} from "../config/utils";
 
 export class PtoService {
   private readonly ptoTemplateRepository: Repository<PtoTemplate>;
@@ -20,7 +21,7 @@ export class PtoService {
   }
 
   async getTemplates(team: Team): Promise<PtoTemplate[]> {
-    return this.ptoTemplateRepository.find({ where: {team : { id: team.id } } });
+    return this.ptoTemplateRepository.find({where: {team: {id: team.id}}});
   }
 
   async createTemplate(template: Partial<PtoTemplate>, team: Team): Promise<PtoTemplate> {
@@ -44,13 +45,8 @@ export class PtoService {
     reason: string,
     approvers: User[]
   ): Promise<PtoRequest> {
-    if (!approvers || approvers.length === 0) {
-      throw new Error('At least one approver is required for PTO requests');
-    }
-
-    if (startDate > endDate) {
-      throw new Error('Start date must be before end date');
-    }
+    assertIf(approvers.length > 0, 'At least one approver is required for PTO requests');
+    assertIf(startDate <= endDate, 'Start date must be before end date');
 
     return this.dataSource.transaction(async (manager) => {
       const request = this.ptoRequestRepository.create({

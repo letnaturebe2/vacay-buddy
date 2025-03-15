@@ -3,6 +3,7 @@ import type { AnyBlock } from '@slack/types';
 import type { HomeView } from '@slack/types/dist/views';
 import type { AppContext } from '../../app';
 import { buildAppHome } from '../events/slack-ui/build-app-home';
+import {assertIf} from "../../config/utils";
 
 export const updateBackToHome = async ({
   ack,
@@ -13,7 +14,7 @@ export const updateBackToHome = async ({
 }: AllMiddlewareArgs<AppContext> & SlackActionMiddlewareArgs<BlockAction>) => {
   await ack();
 
-  if (!body.view) throw new Error('No view found in body');
+  assertIf(body.view !== undefined, 'No view found in body');
 
   const blocks: AnyBlock[] = await buildAppHome(context);
   const view: HomeView = {
