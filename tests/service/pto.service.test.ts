@@ -321,4 +321,214 @@ describe("PtoService Tests", () => {
       expect(approver3Requests).toHaveLength(0);
     });
   });
+
+  describe("approve", () => {
+    test("should approve a request and move to next approver", async () => {
+      // Arrange
+      const team = await createTeam();
+      const user = await createUser("requester", team);
+      const approver1 = await createUser("approver1", team);
+      const approver2 = await createUser("approver2", team);
+      const template = await createPtoTemplate(team);
+
+      const ptoRequest = await ptoService.createPtoRequest(
+        user,
+        template,
+        new Date("2025-04-01"),
+        new Date("2025-04-05"),
+        "Vacation time",
+        [approver1, approver2]
+      );
+
+      const firstApproval = ptoRequest.approvals.find(a => a.approver.userId === "approver1")!;
+
+      // Act
+      const result = await ptoService.approve(approver1, firstApproval.id, "Approved");
+
+      // Re-fetch the request
+      const updatedRequest = await ptoRequestRepository.findOne({
+        where: {id: ptoRequest.id},
+        relations: ['approvals']
+      });
+
+      // Assert
+      expect(result.status).toBe(PtoRequestStatus.Approved);
+      expect(result.comment).toBe("Approved");
+      expect(result.actionDate).toBeDefined();
+
+      const secondApprovalId = ptoRequest.approvals.find(a => a.approver.userId === "approver2")!.id;
+      expect(updatedRequest!.currentApproverId).toBe(secondApprovalId);
+      expect(updatedRequest!.status).toBe(PtoRequestStatus.Pending);
+    });
+
+    test("should approve final approval and mark request as approved", async () => {
+      // Arrange
+      const team = await createTeam();
+      const user = await createUser("requester", team);
+      const approver = await createUser("approver", team);
+      const template = await createPtoTemplate(team);
+
+      const ptoRequest = await ptoService.createPtoRequest(
+        user,
+        template,
+        new Date("2025-04-01"),
+        new Date("2025-04-05"),
+        "Vacation time",
+        [approver]
+      );
+
+      const approval = ptoRequest.approvals[0];
+
+      // Act
+      await ptoService.approve(approver, approval.id, "Final approval");
+
+      // Re-fetch the request
+      const updatedRequest = await ptoRequestRepository.findOne({
+        where: {id: ptoRequest.id}
+      });
+
+      // Assert
+      expect(updatedRequest?.status).toBe(PtoRequestStatus.Approved);
+    });
+
+    test("should throw error if non-approver tries to approve", async () => {
+      // Arrange
+      const team = await createTeam();
+      const user = await createUser("requester", team);
+      const correctApprover = await createUser("correct-approver", team);
+      const wrongApprover = await createUser("wrong-approver", team);
+      const template = await createPtoTemplate(team);
+
+      const ptoRequest = await ptoService.createPtoRequest(
+        user,
+        template,
+        new Date("2025-04-01"),
+        new Date("2025-04-05"),
+        "Vacation time",
+        [correctApprover, wrongApprover]
+      );
+
+      const approval = ptoRequest.approvals[0];
+
+      // Act & Assert
+      await expect(
+        ptoService.approve(wrongApprover, approval.id, "Approved")
+      ).rejects.toThrow("You are not the approver for this request");
+    });
+
+    test("should throw error if attempting to approve non-pending approval", async () => {
+      // Arrange
+      const team = await createTeam();
+      const user = await createUser("requester", team);
+      const approver = await createUser("approver", team);
+      const template = await createPtoTemplate(team);
+
+      const ptoRequest = await ptoService.createPtoRequest(
+        user,
+        template,
+        new Date("2025-04-01"),
+        new Date("2025-04-05"),
+        "Vacation time",
+        [approver]
+      );
+
+      const approval = ptoRequest.approvals[0];
+
+      // First approval
+      await ptoService.approve(approver, approval.id, "Approved");
+
+      // Act & Assert - try to approve again
+      await expect(
+        ptoService.approve(approver, approval.id, "Approved again")
+      ).rejects.toThrow("This request has already been processed");
+    });
+  });
+
+  describe("reject", () => {
+    test("should reject a request and mark the entire request as rejected", async () => {
+      // Arrange
+      const team = await createTeam();
+      const user = await createUser("requester", team);
+      const approver1 = await createUser("approver1", team);
+      const approver2 = await createUser("approver2", team);
+      const template = await createPtoTemplate(team);
+
+      const ptoRequest = await ptoService.createPtoRequest(
+        user,
+        template,
+        new Date("2025-04-01"),
+        new Date("2025-04-05"),
+        "Vacation time",
+        [approver1, approver2]
+      );
+
+      const firstApproval = ptoRequest.approvals.find(a => a.approver.userId === "approver1")!;
+
+      // Act
+      const rejected = await ptoService.reject(approver1, firstApproval.id, "Rejected");
+
+      // Re-fetch the request
+      const updatedRequest = await ptoRequestRepository.findOne({
+        where: {id: ptoRequest.id}
+      });
+
+      // Assert
+      expect(rejected.status).toBe(PtoRequestStatus.Rejected);
+      expect(rejected.comment).toBe("Rejected");
+      expect(rejected.actionDate).toBeDefined();
+      expect(updatedRequest?.status).toBe(PtoRequestStatus.Rejected);
+    });
+
+    test("should throw error if non-approver tries to reject", async () => {
+      // Arrange
+      const team = await createTeam();
+      const user = await createUser("requester", team);
+      const correctApprover = await createUser("correct-approver", team);
+      const wrongApprover = await createUser("wrong-approver", team);
+      const template = await createPtoTemplate(team);
+
+      const ptoRequest = await ptoService.createPtoRequest(
+        user,
+        template,
+        new Date("2025-04-01"),
+        new Date("2025-04-05"),
+        "Vacation time",
+        [correctApprover]
+      );
+
+      const approval = ptoRequest.approvals[0];
+
+      // Act & Assert
+      await expect(
+        ptoService.reject(wrongApprover, approval.id, "Rejected")
+      ).rejects.toThrow("You are not the approver for this request");
+    });
+
+    test("should throw error if attempting to reject non-pending approval", async () => {
+      // Arrange
+      const team = await createTeam();
+      const user = await createUser("requester", team);
+      const approver = await createUser("approver", team);
+      const template = await createPtoTemplate(team);
+
+      const ptoRequest = await ptoService.createPtoRequest(
+        user,
+        template,
+        new Date("2025-04-01"),
+        new Date("2025-04-05"),
+        "Vacation time",
+        [approver]
+      );
+
+      const approval = ptoRequest.approvals[0];
+
+      // First reject
+      await ptoService.reject(approver, approval.id, "Rejected");
+
+      // Act & Assert - try to reject again
+      await expect(
+        ptoService.reject(approver, approval.id, "Rejected again")
+      ).rejects.toThrow("This request has already been processed");
+    });
+  });
 });

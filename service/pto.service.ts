@@ -81,6 +81,55 @@ export class PtoService {
     });
   }
 
+  private async getValidatedApproval(approver: User, approvalId: number): Promise<PtoApproval> {
+    const approval = await this.ptoApprovalRepository.findOneOrFail({
+      where: {id: approvalId},
+      relations: ['approver', 'ptoRequest', 'ptoRequest.approvals']
+    });
+
+    if (!approver.isAdmin) {
+      assert(approver.id === approval.approver.id, 'You are not the approver for this request');
+    }
+
+    assert(approval.status === PtoRequestStatus.Pending, 'This request has already been processed');
+
+    return approval;
+  }
+
+  async approve(approver: User, approvalId: number, comment: string): Promise<PtoApproval> {
+    const approval = await this.getValidatedApproval(approver, approvalId);
+
+    const requestApprovals = approval.ptoRequest.approvals;
+    const ptoRequest = approval.ptoRequest;
+
+    const nextApproverIndex = requestApprovals.findIndex((a) => a.id === approvalId) + 1;
+    if (nextApproverIndex < requestApprovals.length) {
+      ptoRequest.currentApproverId = requestApprovals[nextApproverIndex].id;
+    } else {
+      ptoRequest.status = PtoRequestStatus.Approved;
+    }
+    await this.ptoRequestRepository.save(ptoRequest);
+
+    approval.status = PtoRequestStatus.Approved;
+    approval.comment = comment;
+    approval.actionDate = new Date();
+
+    return this.ptoApprovalRepository.save(approval);
+  }
+
+  async reject(approver: User, approvalId: number, comment: string): Promise<PtoApproval> {
+    const approval = await this.getValidatedApproval(approver, approvalId);
+
+    const ptoRequest = approval.ptoRequest;
+    ptoRequest.status = PtoRequestStatus.Rejected;
+    await this.ptoRequestRepository.save(ptoRequest);
+
+    approval.status = PtoRequestStatus.Rejected;
+    approval.comment = comment;
+    approval.actionDate = new Date();
+
+    return this.ptoApprovalRepository.save(approval);
+  }
   /**
    * Retrieves pending approvals that the given user needs to review
    * Only returns approvals where the approval ID matches the currentApproverId
