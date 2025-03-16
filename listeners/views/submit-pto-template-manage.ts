@@ -1,8 +1,10 @@
 import type { AllMiddlewareArgs, SlackViewMiddlewareArgs, ViewSubmitAction } from '@slack/bolt';
+import type { HomeView } from '@slack/types/dist/views';
 import type { AppContext } from '../../app';
-import {ptoService, teamService, userService} from '../../service';
-import {assert} from "../../config/utils";
-import {PtoTemplate} from "../../entity/pto-template.model";
+import { assert } from '../../config/utils';
+import type { PtoTemplate } from '../../entity/pto-template.model';
+import { ptoService, teamService, userService } from '../../service';
+import { buildAdminPage } from '../actions/slack-ui/build-admin-page';
 
 const submitPtoTemplateManage = async ({
   ack,
@@ -13,45 +15,41 @@ const submitPtoTemplateManage = async ({
 }: AllMiddlewareArgs<AppContext> & SlackViewMiddlewareArgs<ViewSubmitAction>) => {
   const title = view.state.values.block_id_title.action_id_title.value;
   const content = view.state.values.block_id_content.action_id_content.value;
-  const enabled = view.state.values.block_id_status.action_id_status.selected_option!.value === 'enabled';
+  assert(!!view.state.values.block_id_status.action_id_status.selected_option, 'Status is required');
+  const enabled = view.state.values.block_id_status.action_id_status.selected_option.value === 'enabled';
   const description = view.state.values.block_id_description.action_id_description.value;
+  // get private_metadata
+  const privateMetadata = JSON.parse(view.private_metadata);
+  const updateTargetViewId = privateMetadata.viewId;
+  const updateTargetViewHash = privateMetadata.viewHash;
 
   assert(!!title, 'Title is required');
   assert(!!content, 'Content is required');
-  assert(!!description, 'Description is required');
 
   const templateData: Partial<PtoTemplate> = {
     title,
-    description,
     content,
     enabled,
+    description,
   };
 
-  const template = await ptoService.upsertTemplate(templateData, context.team);
+  await ptoService.upsertTemplate(templateData, context.team);
+  const templates = await ptoService.getTemplates(context.team);
+
+  const blocks = await buildAdminPage(templates);
+  const homeView: HomeView = {
+    type: 'home',
+    blocks: blocks,
+  };
 
   await ack({
-    response_action: 'update',
-    view: {
-      type: 'modal',
-      callback_id: body.view.callback_id,
-      title: {
-        type: 'plain_text',
-        text: view.title.text,
-      },
-      close: {
-        type: 'plain_text',
-        text: 'Close',
-      },
-      blocks: [
-        {
-          type: 'section',
-          text: {
-            type: 'mrkdwn',
-            text: `:white_check_mark: *${template.title}* Template created successfully!`,
-          },
-        },
-      ],
-    },
+    response_action: 'clear',
+  });
+
+  await client.views.update({
+    view_id: updateTargetViewId,
+    hash: updateTargetViewHash,
+    view: homeView,
   });
 };
 

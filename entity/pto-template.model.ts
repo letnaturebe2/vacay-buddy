@@ -13,8 +13,8 @@ export class PtoTemplate extends BaseEntity {
   @Column()
   title: string;
 
-  @Column({length: 1024})
-  description: string;
+  @Column({type: 'varchar', length: 1024, nullable: true})
+  description: string | null;
 
   @Column({type: 'text'})
   content: string;

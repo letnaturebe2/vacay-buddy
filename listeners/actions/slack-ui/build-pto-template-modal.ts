@@ -1,9 +1,9 @@
-import type {AnyBlock} from '@slack/types';
-import type {User} from '../../../entity/user.model';
+import type { AnyBlock } from '@slack/types';
+import type { User } from '../../../entity/user.model';
 
-import type {View} from '@slack/types';
-import {PtoTemplate} from "../../../entity/pto-template.model";
-import {DEFAULT_PTO_TEMPLATE_CONTENT} from "../../../config/constants";
+import type { View } from '@slack/types';
+import { DEFAULT_PTO_TEMPLATE_CONTENT } from '../../../config/constants';
+import type { PtoTemplate } from '../../../entity/pto-template.model';
 
 export const buildPtoTemplateModal = async (ptoTemplate?: PtoTemplate): Promise<AnyBlock[]> => {
   const initialTitle = ptoTemplate?.title || '';
@@ -46,16 +46,16 @@ export const buildPtoTemplateModal = async (ptoTemplate?: PtoTemplate): Promise<
         type: 'static_select',
         action_id: 'action_id_status',
         initial_option: {
-          text: {type: 'plain_text', text: initialStatus},
+          text: { type: 'plain_text', text: initialStatus },
           value: initialStatus,
         },
         options: [
           {
-            text: {type: 'plain_text', text: 'enabled'},
+            text: { type: 'plain_text', text: 'enabled' },
             value: 'enabled',
           },
           {
-            text: {type: 'plain_text', text: 'disabled'},
+            text: { type: 'plain_text', text: 'disabled' },
             value: 'disabled',
           },
         ],
