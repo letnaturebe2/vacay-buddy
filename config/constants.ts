@@ -32,4 +32,19 @@ export const LOCALE_TO_LANG: Record<string, string> = {
   'ko-KR': 'Korean',
 };
 
+const DEFAULT_TEMPLATE = [
+  {name: 'Full-day PTO', status: ':white_check_mark: Enabled', description: 'Take a full day off'},
+  {
+    name: 'Half-day Morning PTO',
+    status: ':white_check_mark: Enabled',
+    description: 'Take a half day off in the morning',
+  },
+  {
+    name: 'Half-day Afternoon PTO',
+    status: ':x: Disabled',
+    description:
+      'Take a half day off in the afternoon, starting after lunch and ending at the close of business hours',
+  },
+];
+
 export const DEFAULT_PTO_TEMPLATE_CONTENT = '📅 Date Range: MM/DD/YYYY - MM/DD/YYYY\n📝 Reason: \n\nPlease provide the date range and reason for your PTO request.';

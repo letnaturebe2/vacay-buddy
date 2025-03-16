@@ -57,7 +57,7 @@ export const buildAdminPage = async (
       block_id: 'pto_templates_header',
       text: {
         type: 'plain_text',
-        text: 'PTO Templates :spiral_calendar_pad:',
+        text: ':spiral_calendar_pad: PTO Templates',
         emoji: true,
       },
     },
