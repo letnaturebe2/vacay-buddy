@@ -1,14 +1,11 @@
-import type { AnyBlock } from '@slack/types';
-import { RichTextInput } from '@slack/types/dist/block-kit/block-elements';
-import type { RichTextBlock } from '@slack/types/dist/block-kit/blocks';
-import { ActionId } from '../../../config/constants';
+import type {AnyBlock} from '@slack/types';
+import {RichTextInput} from '@slack/types/dist/block-kit/block-elements';
+import type {RichTextBlock} from '@slack/types/dist/block-kit/blocks';
+import {ActionId} from '../../../config/constants';
+import {PtoTemplate} from "../../../entity/pto-template.model";
 
 export const buildAdminPage = async (
-  ptoTemplates: {
-    name: string;
-    status: string;
-    description: string;
-  }[],
+  ptoTemplates: PtoTemplate[],
 ): Promise<AnyBlock[]> => {
   const blocks: AnyBlock[] = [
     {
@@ -69,14 +66,14 @@ export const buildAdminPage = async (
   for (const template of ptoTemplates) {
     blocks.push({
       type: 'section',
-      block_id: `template_${template.name}`,
+      block_id: `template_${template.title}`,
       text: {
         type: 'mrkdwn',
-        text: `*${template.name}*\n>Status: ${template.status}\n>Description:\n>${template.description || 'No description provided.'}`,
+        text: `*${template.title}*\n>Status: ${template.enabled ? 'Enabled' : 'Disabled'}\n>Description:\n>${template.description || 'No description provided.'}`,
       },
       accessory: {
         type: 'overflow',
-        action_id: `template_${template.name}_overflow`,
+        action_id: `template_${template.title}_overflow`,
         options: [
           {
             text: {
@@ -84,7 +81,7 @@ export const buildAdminPage = async (
               text: ':pencil2: Edit',
               emoji: true,
             },
-            value: `edit_${template.name}`,
+            value: `edit_${template.title}`,
           },
           {
             text: {
@@ -92,7 +89,7 @@ export const buildAdminPage = async (
               text: ':x: Delete',
               emoji: true,
             },
-            value: `delete_${template.name}`,
+            value: `delete_${template.title}`,
           },
         ],
       },

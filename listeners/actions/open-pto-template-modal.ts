@@ -1,9 +1,9 @@
 import type { AllMiddlewareArgs, BlockAction, SlackActionMiddlewareArgs } from '@slack/bolt';
 import type { AppContext } from '../../app';
 import { ActionId } from '../../config/constants';
-import { buildPtoModal } from './slack-ui/build-pto-modal';
+import { buildPtoTemplateModal } from './slack-ui/build-pto-template-modal';
 
-export const openPtoModal = async ({
+export const openPtoTemplateModal = async ({
   ack,
   client,
   body,
@@ -11,14 +11,14 @@ export const openPtoModal = async ({
 }: AllMiddlewareArgs<AppContext> & SlackActionMiddlewareArgs<BlockAction>) => {
   await ack();
 
-  const blocks = await buildPtoModal();
+  const blocks = await buildPtoTemplateModal();
 
   await client.views.open({
     trigger_id: body.trigger_id,
     view: {
       type: 'modal',
-      callback_id: ActionId.SUBMIT_ADMIN_MANAGE,
-      title: { type: 'plain_text', text: 'Manage Admins' },
+      callback_id: ActionId.SUBMIT_PTO_TEMPLATE_MANAGE,
+      title: { type: 'plain_text', text: 'Manage PTO Template' },
       blocks: blocks,
       submit: {
         type: 'plain_text',

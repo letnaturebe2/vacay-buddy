@@ -24,6 +24,14 @@ export class PtoService {
     return this.ptoTemplateRepository.find({where: {team: {id: team.id}}});
   }
 
+  async upsertTemplate(template: Partial<PtoTemplate>, team: Team): Promise<PtoTemplate> {
+    if (template.id) {
+      return this.updateTemplate(template.id, template);
+    } else {
+      return this.createTemplate(template, team);
+    }
+  }
+
   async createTemplate(template: Partial<PtoTemplate>, team: Team): Promise<PtoTemplate> {
     const newTemplate = this.ptoTemplateRepository.create({
       ...template,
@@ -130,6 +138,7 @@ export class PtoService {
 
     return this.ptoApprovalRepository.save(approval);
   }
+
   /**
    * Retrieves pending approvals that the given user needs to review
    * Only returns approvals where the approval ID matches the currentApproverId

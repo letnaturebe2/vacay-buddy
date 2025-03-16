@@ -2,12 +2,15 @@ import type { AllMiddlewareArgs, BlockAction, SlackActionMiddlewareArgs } from '
 import type { HomeView } from '@slack/types/dist/views';
 import { assert } from '../../config/utils';
 import { buildAdminPage } from './slack-ui/build-admin-page';
+import {ptoService} from "../../service";
+import {AppContext} from "../../app";
 
 export const updateAdminPage = async ({
   ack,
   client,
   body,
-}: AllMiddlewareArgs & SlackActionMiddlewareArgs<BlockAction>) => {
+  context,
+}: AllMiddlewareArgs<AppContext> & SlackActionMiddlewareArgs<BlockAction>) => {
   await ack();
 
   assert(body.view !== undefined, 'body.view is undefined in callbackBackToHome function');
@@ -27,7 +30,9 @@ export const updateAdminPage = async ({
     },
   ];
 
-  const blocks = await buildAdminPage(ptoTemplates);
+  const templates = await ptoService.getTemplates(context.team);
+
+  const blocks = await buildAdminPage(templates);
 
   const view: HomeView = {
     type: 'home',

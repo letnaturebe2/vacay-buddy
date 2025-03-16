@@ -4,6 +4,7 @@ export enum ActionId {
   UPDATE_ADMIN_PAGE = 'admin-page',
   OPEN_ADMIN_MODAL = 'open-admin-modal',
   SUBMIT_ADMIN_MANAGE = 'submit-admin-manage',
+  SUBMIT_PTO_TEMPLATE_MANAGE = 'submit-pto-template-manage',
   // pto actions
   OPEN_PTO_MODAL = 'open-pto-modal',
 }
@@ -30,3 +31,5 @@ export const LOCALE_TO_LANG: Record<string, string> = {
   'zh-TW': 'Chinese',
   'ko-KR': 'Korean',
 };
+
+export const DEFAULT_PTO_TEMPLATE_CONTENT = '📅 Date Range: MM/DD/YYYY - MM/DD/YYYY\n📝 Reason: \n\nPlease provide the date range and reason for your PTO request.';
