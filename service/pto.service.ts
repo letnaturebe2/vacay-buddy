@@ -32,7 +32,7 @@ export class PtoService {
     }
   }
 
-  async createTemplate(template: Partial<PtoTemplate>, team: Team): Promise<PtoTemplate> {
+  private async createTemplate(template: Partial<PtoTemplate>, team: Team): Promise<PtoTemplate> {
     const newTemplate = this.ptoTemplateRepository.create({
       ...template,
       team
@@ -40,7 +40,7 @@ export class PtoService {
     return this.ptoTemplateRepository.save(newTemplate);
   }
 
-  async updateTemplate(id: number, templateData: Partial<PtoTemplate>): Promise<PtoTemplate> {
+  private async updateTemplate(id: number, templateData: Partial<PtoTemplate>): Promise<PtoTemplate> {
     await this.ptoTemplateRepository.update(id, templateData);
     return this.ptoTemplateRepository.findOneByOrFail({id});
   }

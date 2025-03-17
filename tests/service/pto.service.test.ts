@@ -73,7 +73,7 @@ describe("PtoService Tests", () => {
       };
 
       // Act
-      const result = await ptoService.createTemplate(templateData, team);
+      const result = await ptoService.upsertTemplate(templateData, team);
 
       // Assert
       expect(result).toBeDefined();
@@ -96,6 +96,7 @@ describe("PtoService Tests", () => {
       const template = await createPtoTemplate(team);
 
       const updateData: Partial<PtoTemplate> = {
+        id: team.id,
         title: "New Name",
         description: "New description",
         content: "New content",
@@ -103,7 +104,7 @@ describe("PtoService Tests", () => {
       };
 
       // Act
-      const result = await ptoService.updateTemplate(template.id, updateData);
+      const result = await ptoService.upsertTemplate(updateData, team);
 
       // Assert
       expect(result.title).toBe(updateData.title);
