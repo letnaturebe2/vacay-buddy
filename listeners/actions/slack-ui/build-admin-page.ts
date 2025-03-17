@@ -64,14 +64,14 @@ export const buildAdminPage = async (ptoTemplates: PtoTemplate[]): Promise<AnyBl
   for (const template of ptoTemplates) {
     blocks.push({
       type: 'section',
-      block_id: `template_${template.title}`,
+      block_id: `template_${template.id}`,
       text: {
         type: 'mrkdwn',
         text: `*${template.title}*\n>Status: ${template.enabled ? 'Enabled' : 'Disabled'}\n>Description:\n>${template.description || 'No description provided.'}`,
       },
       accessory: {
         type: 'overflow',
-        action_id: `template_${template.title}_overflow`,
+        action_id: ActionId.OPEN_PTO_MANAGE_MODAL,
         options: [
           {
             text: {
@@ -79,7 +79,7 @@ export const buildAdminPage = async (ptoTemplates: PtoTemplate[]): Promise<AnyBl
               text: ':pencil2: Edit',
               emoji: true,
             },
-            value: `edit_${template.title}`,
+            value: `edit/${template.id}`,
           },
           {
             text: {
@@ -87,7 +87,7 @@ export const buildAdminPage = async (ptoTemplates: PtoTemplate[]): Promise<AnyBl
               text: ':x: Delete',
               emoji: true,
             },
-            value: `delete_${template.title}`,
+            value: `delete/${template.id}`,
           },
         ],
       },
@@ -100,7 +100,7 @@ export const buildAdminPage = async (ptoTemplates: PtoTemplate[]): Promise<AnyBl
     elements: [
       {
         type: 'button',
-        action_id: ActionId.OPEN_PTO_MODAL,
+        action_id: ActionId.OPEN_PTO_MANAGE_MODAL,
         text: {
           type: 'plain_text',
           text: ':spiral_calendar_pad: Manage PTO Templates',

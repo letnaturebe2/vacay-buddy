@@ -20,6 +20,10 @@ export class PtoService {
     this.dataSource = dataSource;
   }
 
+  async getTemplate(id: number): Promise<PtoTemplate> {
+    return this.ptoTemplateRepository.findOneByOrFail({id});
+  }
+
   async getTemplates(team: Team): Promise<PtoTemplate[]> {
     return this.ptoTemplateRepository.find({where: {team: {id: team.id}}});
   }
@@ -30,6 +34,10 @@ export class PtoService {
     } else {
       return this.createTemplate(template, team);
     }
+  }
+
+  async deleteTemplate(id: number): Promise<void> {
+    await this.ptoTemplateRepository.delete(id);
   }
 
   private async createTemplate(template: Partial<PtoTemplate>, team: Team): Promise<PtoTemplate> {

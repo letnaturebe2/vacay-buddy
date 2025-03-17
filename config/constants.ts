@@ -6,7 +6,7 @@ export enum ActionId {
   SUBMIT_ADMIN_MANAGE = 'submit-admin-manage',
   SUBMIT_PTO_TEMPLATE_MANAGE = 'submit-pto-template-manage',
   // pto actions
-  OPEN_PTO_MODAL = 'open-pto-modal',
+  OPEN_PTO_MANAGE_MODAL = 'open-pto-manage-modal',
 }
 
 export enum PtoRequestStatus {
@@ -46,5 +46,11 @@ const DEFAULT_TEMPLATE = [
       'Take a half day off in the afternoon, starting after lunch and ending at the close of business hours',
   },
 ];
+
+export enum PtoTemplateManageType {
+  CREATE = 'create',
+  EDIT = 'edit',
+  DELETE = 'delete',
+}
 
 export const DEFAULT_PTO_TEMPLATE_CONTENT = '📅 Date Range: MM/DD/YYYY - MM/DD/YYYY\n📝 Reason: \n\nPlease provide the date range and reason for your PTO request.';
