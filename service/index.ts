@@ -5,4 +5,4 @@ import {PtoService} from "./pto.service";
 
 export const userService = new UserService(dataSource);
 export const teamService = new TeamService(dataSource, userService);
-export const ptoService = new PtoService(dataSource);
+export const ptoService = new PtoService(dataSource, userService);

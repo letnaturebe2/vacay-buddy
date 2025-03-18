@@ -7,8 +7,10 @@ import {PtoApproval} from "../../entity/pto-approval.model";
 import {User} from "../../entity/user.model";
 import {Team} from "../../entity/team.model";
 import {PtoRequestStatus} from "../../config/constants";
+import {UserService} from "../../service/user.service";
 
 describe("PtoService Tests", () => {
+  let userService: UserService;
   let ptoService: PtoService;
   let ptoTemplateRepository: Repository<PtoTemplate>;
   let ptoRequestRepository: Repository<PtoRequest>;
@@ -23,7 +25,8 @@ describe("PtoService Tests", () => {
     userRepository = testDataSource.getRepository(User);
     teamRepository = testDataSource.getRepository(Team);
 
-    ptoService = new PtoService(testDataSource);
+    userService = new UserService(testDataSource);
+    ptoService = new PtoService(testDataSource, userService);
   });
 
   beforeEach(async () => {
@@ -82,6 +85,7 @@ describe("PtoService Tests", () => {
       expect(result.content).toBe(templateData.content);
       expect(result.enabled).toBe(templateData.enabled);
       expect(result.team.teamId).toBe("test-team");
+      expect(result.daysConsumed).toBe(1);
 
       const savedTemplates = await ptoService.getTemplates(team);
       expect(savedTemplates).toHaveLength(1);
@@ -96,11 +100,12 @@ describe("PtoService Tests", () => {
       const template = await createPtoTemplate(team);
 
       const updateData: Partial<PtoTemplate> = {
-        id: team.id,
+        id: template.id,
         title: "New Name",
         description: "New description",
         content: "New content",
         enabled: false,
+        daysConsumed: 2
       };
 
       // Act
@@ -111,6 +116,7 @@ describe("PtoService Tests", () => {
       expect(result.description).toBe(updateData.description);
       expect(result.content).toBe(updateData.content);
       expect(result.enabled).toBe(updateData.enabled);
+      expect(result.daysConsumed).toBe(2);
     });
   });
 
@@ -327,7 +333,7 @@ describe("PtoService Tests", () => {
     test("should approve a request and move to next approver", async () => {
       // Arrange
       const team = await createTeam();
-      const user = await createUser("requester", team);
+      let user = await createUser("requester", team);
       const approver1 = await createUser("approver1", team);
       const approver2 = await createUser("approver2", team);
       const template = await createPtoTemplate(team);
@@ -357,15 +363,19 @@ describe("PtoService Tests", () => {
       expect(result.comment).toBe("Approved");
       expect(result.actionDate).toBeDefined();
 
-      const secondApprovalId = ptoRequest.approvals.find(a => a.approver.userId === "approver2")!.id;
+      const secondApprovalId = ptoRequest.approvals
+        .find(a => a.approver.userId === "approver2")!.id;
       expect(updatedRequest!.currentApproverId).toBe(secondApprovalId);
       expect(updatedRequest!.status).toBe(PtoRequestStatus.Pending);
+
+      user = await userRepository.findOneOrFail({where: {userId: user.userId}});
+      expect(user.usedPtoDays).toBe(0);
     });
 
     test("should approve final approval and mark request as approved", async () => {
       // Arrange
       const team = await createTeam();
-      const user = await createUser("requester", team);
+      let user = await createUser("requester", team);
       const approver = await createUser("approver", team);
       const template = await createPtoTemplate(team);
 
@@ -390,6 +400,8 @@ describe("PtoService Tests", () => {
 
       // Assert
       expect(updatedRequest?.status).toBe(PtoRequestStatus.Approved);
+      user = await userRepository.findOneOrFail({where: {userId: user.userId}});
+      expect(user.usedPtoDays).toBe(template.daysConsumed);
     });
 
     test("should throw error if non-approver tries to approve", async () => {

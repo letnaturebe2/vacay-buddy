@@ -6,18 +6,21 @@ import {User} from "../entity/user.model";
 import {Team} from "../entity/team.model";
 import {PtoRequestStatus} from "../config/constants";
 import {assert} from "../config/utils";
+import {UserService} from "./user.service";
 
 export class PtoService {
   private readonly ptoTemplateRepository: Repository<PtoTemplate>;
   private readonly ptoRequestRepository: Repository<PtoRequest>;
   private readonly ptoApprovalRepository: Repository<PtoApproval>;
+  private readonly userService: UserService;
   private readonly dataSource: DataSource;
 
-  constructor(dataSource: DataSource) {
+  constructor(dataSource: DataSource, userService: UserService) {
     this.ptoTemplateRepository = dataSource.getRepository(PtoTemplate);
     this.ptoRequestRepository = dataSource.getRepository(PtoRequest);
     this.ptoApprovalRepository = dataSource.getRepository(PtoApproval);
     this.dataSource = dataSource;
+    this.userService = userService;
   }
 
   async getTemplate(id: number): Promise<PtoTemplate> {
@@ -100,7 +103,7 @@ export class PtoService {
   private async getValidatedApproval(approver: User, approvalId: number): Promise<PtoApproval> {
     const approval = await this.ptoApprovalRepository.findOneOrFail({
       where: {id: approvalId},
-      relations: ['approver', 'ptoRequest', 'ptoRequest.approvals']
+      relations: ['approver', 'ptoRequest', 'ptoRequest.approvals', 'ptoRequest.user', 'ptoRequest.template']
     });
 
     if (!approver.isAdmin) {
@@ -122,14 +125,18 @@ export class PtoService {
     if (nextApproverIndex < requestApprovals.length) {
       ptoRequest.currentApproverId = requestApprovals[nextApproverIndex].id;
     } else {
+      // All approvers have approved the request
       ptoRequest.status = PtoRequestStatus.Approved;
+      // update user's used PTO days
+      await this.userService.updateUser(
+        ptoRequest.user.userId,
+        {usedPtoDays: ptoRequest.user.usedPtoDays + ptoRequest.template.daysConsumed});
     }
-    await this.ptoRequestRepository.save(ptoRequest);
 
+    await this.ptoRequestRepository.save(ptoRequest);
     approval.status = PtoRequestStatus.Approved;
     approval.comment = comment;
     approval.actionDate = new Date();
-
     return this.ptoApprovalRepository.save(approval);
   }
 
