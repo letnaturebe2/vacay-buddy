@@ -7,6 +7,7 @@ export enum ActionId {
   SUBMIT_PTO_TEMPLATE_MANAGE = 'submit-pto-template-manage',
   // pto actions
   OPEN_PTO_MANAGE_MODAL = 'open-pto-manage-modal',
+  OPEN_PTO_REQUEST_MODAL = 'open-pto-request-modal',
 }
 
 export enum PtoRequestStatus {

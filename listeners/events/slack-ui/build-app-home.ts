@@ -73,7 +73,7 @@ export const buildAppHome = async (context: AppContext): Promise<AnyBlock[]> => 
       elements: [
         {
           type: 'button',
-          action_id: 'submit_pto_request',
+          action_id: ActionId.OPEN_PTO_REQUEST_MODAL,
           text: {
             type: 'plain_text',
             text: ':calendar: Start Request',
