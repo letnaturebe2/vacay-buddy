@@ -29,14 +29,16 @@ const submitPtoTemplateManage = async ({
     assert(!!view.state.values.block_id_status.action_id_status.selected_option, 'Status is required');
     const enabled = view.state.values.block_id_status.action_id_status.selected_option.value === 'enabled';
     const description = view.state.values.block_id_description.action_id_description.value;
+    const daysConsumed = view.state.values.block_id_days_consumed.action_id_days_consumed.value;
 
-    assert(!!title && !!content, 'Title and content are required');
+    assert(!!title && !!content && !!daysConsumed, 'Title and content are required');
 
     const templateData: Partial<PtoTemplate> = {
       title,
       content,
       enabled,
       description,
+      daysConsumed: Number(daysConsumed),
     };
 
     if (templateId > 0) {

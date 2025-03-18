@@ -53,4 +53,5 @@ export enum PtoTemplateManageType {
   DELETE = 'delete',
 }
 
-export const DEFAULT_PTO_TEMPLATE_CONTENT = '📅 Date Range: MM/DD/YYYY - MM/DD/YYYY\n📝 Reason: \n\nPlease provide the date range and reason for your PTO request.';
+export const DEFAULT_PTO_TEMPLATE_TITLE = 'PTO';
+export const DEFAULT_PTO_TEMPLATE_CONTENT = '📅 Date Range: MM/DD/YYYY - MM/DD/YYYY\n📝 Reason: ';

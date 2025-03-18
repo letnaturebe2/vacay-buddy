@@ -67,7 +67,7 @@ export const buildAdminPage = async (ptoTemplates: PtoTemplate[]): Promise<AnyBl
       block_id: `template_${template.id}`,
       text: {
         type: 'mrkdwn',
-        text: `*${template.title}*\n>Status: ${template.enabled ? 'Enabled' : 'Disabled'}\n>Description:\n>${template.description || 'No description provided.'}`,
+        text: `*${template.title}*\n>Status: ${template.enabled ? 'Enabled' : 'Disabled'}\n>Days Consumed: ${template.daysConsumed}\n>`,
       },
       accessory: {
         type: 'overflow',

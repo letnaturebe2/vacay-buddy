@@ -2,14 +2,15 @@ import type { AnyBlock } from '@slack/types';
 import type { User } from '../../../entity/user.model';
 
 import type { View } from '@slack/types';
-import { DEFAULT_PTO_TEMPLATE_CONTENT } from '../../../config/constants';
+import { DEFAULT_PTO_TEMPLATE_CONTENT, DEFAULT_PTO_TEMPLATE_TITLE } from '../../../config/constants';
 import type { PtoTemplate } from '../../../entity/pto-template.model';
 
 export const buildPtoTemplateModal = async (ptoTemplate?: PtoTemplate): Promise<AnyBlock[]> => {
-  const initialTitle = ptoTemplate?.title || '';
+  const initialTitle = ptoTemplate?.title || DEFAULT_PTO_TEMPLATE_TITLE;
   const initialContent = ptoTemplate?.content || DEFAULT_PTO_TEMPLATE_CONTENT;
   const initialStatus = ptoTemplate?.enabled === false ? 'disabled' : 'enabled';
   const initialDescription = ptoTemplate?.description || '';
+  const initialDaysConsumed = ptoTemplate?.daysConsumed || 1;
 
   return [
     {
@@ -63,6 +64,22 @@ export const buildPtoTemplateModal = async (ptoTemplate?: PtoTemplate): Promise<
       label: {
         type: 'plain_text',
         text: 'Status',
+      },
+    },
+    {
+      type: 'input',
+      block_id: 'block_id_days_consumed',
+      element: {
+        type: 'number_input',
+        action_id: 'action_id_days_consumed',
+        is_decimal_allowed: true,
+        initial_value: initialDaysConsumed.toString(),
+        min_value: '0',
+        max_value: '30',
+      },
+      label: {
+        type: 'plain_text',
+        text: 'Days Consumed',
       },
     },
     {
