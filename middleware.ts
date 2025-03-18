@@ -2,8 +2,8 @@ import type { AllMiddlewareArgs, App } from '@slack/bolt';
 import type { AppContext } from './app';
 import { teamService, userService } from './service';
 
-const setLocale = async ({ context, client, next }: AllMiddlewareArgs<AppContext>) => {
-  if (!context.userId) {
+const loadAppContext = async ({ context, client, next }: AllMiddlewareArgs<AppContext>) => {
+  if (!context.teamId || !context.userId) {
     return await next();
   }
 
@@ -13,24 +13,22 @@ const setLocale = async ({ context, client, next }: AllMiddlewareArgs<AppContext
   });
 
   context.locale = result.user?.locale ?? 'en-US';
-
-  await next();
-};
-
-const setUserProfile = async ({ context, next }: AllMiddlewareArgs<AppContext>) => {
-  if (!context.teamId || !context.userId) {
-    return await next();
-  }
-
   context.team = await teamService.getOrCreateTeam(context.teamId);
   context.user = await userService.getOrCreateUser(context.userId, context.team);
+
+  if (context.user.name !== result.user?.real_name) {
+    context.user.name = result.user?.real_name ?? '';
+    await userService.updateUser(context.userId, {
+      ...context.user,
+      name: context.user.name,
+    });
+  }
 
   await next();
 };
 
 const registerMiddleware = (app: App) => {
-  app.use(setLocale);
-  app.use(setUserProfile);
+  app.use(loadAppContext);
 };
 
 export default registerMiddleware;

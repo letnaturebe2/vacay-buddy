@@ -16,4 +16,7 @@ export class User extends BaseEntity {
 
   @Column({default: false})
   isAdmin: boolean;
+
+  @Column({type: "varchar", nullable: true, length: 255})
+  name: string | null;
 }
