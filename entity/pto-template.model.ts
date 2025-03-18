@@ -21,4 +21,7 @@ export class PtoTemplate extends BaseEntity {
 
   @Column({default: true})
   enabled: boolean;
+
+  @Column({type: "float", default: 1})
+  daysConsumed: number;
 }

@@ -19,4 +19,10 @@ export class User extends BaseEntity {
 
   @Column({type: "varchar", nullable: true, length: 255})
   name: string | null;
+
+  @Column({type: "float", default: 15})
+  annualPtoDays: number;
+
+  @Column({type: "float", default: 0})
+  usedPtoDays: number;
 }

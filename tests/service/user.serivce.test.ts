@@ -40,6 +40,8 @@ describe("UserService Tests", () => {
       expect(result).toBeDefined();
       expect(result.userId).toBe("existing");
       expect(result.id).toBe(user.id);
+      expect(result.annualPtoDays).toBe(15);
+      expect(result.usedPtoDays).toBe(0);
     });
 
     test("should create new user when not found", async () => {
@@ -56,6 +58,7 @@ describe("UserService Tests", () => {
         where: { userId: "new-user" },
         relations: { team: true }
       });
+
       expect(savedUser).toBeDefined();
     });
   });
