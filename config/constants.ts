@@ -11,6 +11,7 @@ export enum ActionId {
   SELECT_PTO_TEMPLATE = 'select-pto-template',
   SUBMIT_PTO_REQUEST = 'submit-pto-request',
   OPEN_PTO_APPROVAL_MODAL = 'open-pto-approval-modal',
+  OPEN_MY_REQUEST_MODAL = 'open-my-request-modal',
 }
 
 export enum PtoRequestStatus {

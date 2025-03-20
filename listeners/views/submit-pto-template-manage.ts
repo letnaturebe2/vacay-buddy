@@ -16,8 +16,6 @@ const submitPtoTemplateManage = async ({
 }: AllMiddlewareArgs<AppContext> & SlackViewMiddlewareArgs<ViewSubmitAction>) => {
   // get private_metadata
   const privateMetadata = JSON.parse(view.private_metadata);
-  const updateTargetViewId = privateMetadata.viewId;
-  const updateTargetViewHash = privateMetadata.viewHash;
   const templateId: number = privateMetadata.templateId;
   const actionType: PtoTemplateManageType = privateMetadata.actionType;
 
@@ -60,8 +58,8 @@ const submitPtoTemplateManage = async ({
   });
 
   await client.views.update({
-    view_id: updateTargetViewId,
-    hash: updateTargetViewHash,
+    view_id: privateMetadata.viewId,
+    hash: privateMetadata.viewHash,
     view: homeView,
   });
 };

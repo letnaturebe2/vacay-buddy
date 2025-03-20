@@ -1,9 +1,13 @@
 import type { AllMiddlewareArgs, SlackViewMiddlewareArgs, ViewSubmitAction } from '@slack/bolt';
+import type { AnyBlock } from '@slack/types';
+import type { HomeView } from '@slack/types/dist/views';
 import type { AppContext } from '../../app';
 import { ActionId } from '../../config/constants';
 import { assert } from '../../config/utils';
 import type { User } from '../../entity/user.model';
 import { ptoService, userService } from '../../service';
+import { buildAdminPage } from '../actions/slack-ui/build-admin-page';
+import { buildAppHome } from '../events/slack-ui/build-app-home';
 
 const submitPtoRequest = async ({
   ack,
@@ -62,8 +66,20 @@ const submitPtoRequest = async ({
     approvers,
   );
 
+  const blocks: AnyBlock[] = await buildAppHome(context);
+  const homeView: HomeView = {
+    type: 'home',
+    blocks: blocks,
+  };
+
   await ack({
     response_action: 'clear',
+  });
+
+  await client.views.update({
+    view_id: privateMetadata.viewId,
+    hash: privateMetadata.viewHash,
+    view: homeView,
   });
 };
 

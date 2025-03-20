@@ -2,6 +2,7 @@ import type { AnyBlock } from '@slack/types';
 import type { AppContext } from '../../../app';
 import { ActionId } from '../../../config/constants';
 import { ptoService } from '../../../service';
+import { buildPtoList } from './components/build-pto-list';
 
 export const buildAppHome = async (context: AppContext): Promise<AnyBlock[]> => {
   const blocks: AnyBlock[] = [];
@@ -129,32 +130,48 @@ export const buildAppHome = async (context: AppContext): Promise<AnyBlock[]> => 
     });
   } else {
     for (const approval of ptoApprovals) {
-      const request = approval.ptoRequest;
-      const startDate = new Date(request.startDate).toISOString().split('T')[0];
-      const endDate = new Date(request.endDate).toISOString().split('T')[0];
+      const ptoListBlocks = buildPtoList(approval.ptoRequest, 'block_id_approval');
+      blocks.push(...ptoListBlocks);
+    }
+  }
 
-      blocks.push({
-        type: 'section',
-        block_id: `block_id_request_${request.id}`,
-        text: {
+  // PTO request list created by me
+  blocks.push(
+    {
+      type: 'header',
+      text: {
+        type: 'plain_text',
+        text: ':calendar: My PTO Requests',
+        emoji: true,
+      },
+    },
+    {
+      type: 'context',
+      elements: [
+        {
           type: 'mrkdwn',
-          text: `<@${request.user.userId}> *${request.title}* (${startDate} - ${endDate})`,
+          text: 'Your submitted PTO requests and their current status.',
         },
-        accessory: {
-          type: 'button',
-          text: {
-            type: 'plain_text',
-            text: 'Review',
-            emoji: true,
-          },
-          value: `${approval.id}`,
-          action_id: ActionId.OPEN_PTO_APPROVAL_MODAL,
-        },
-      });
+      ],
+    },
+    {
+      type: 'divider',
+    },
+  );
 
-      blocks.push({
-        type: 'divider',
-      });
+  const ptoRequests = await ptoService.getOwnedPtoRequests(context.user);
+  if (ptoRequests.length === 0) {
+    blocks.push({
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: 'You have not submitted any PTO requests yet.',
+      },
+    });
+  } else {
+    for (const ptoRequest of ptoRequests) {
+      const ptoListBlocks = buildPtoList(ptoRequest, 'block_id_request');
+      blocks.push(...ptoListBlocks);
     }
   }
 
