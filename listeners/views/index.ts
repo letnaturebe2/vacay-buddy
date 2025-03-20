@@ -1,8 +1,8 @@
 import type { App } from '@slack/bolt';
 import { ActionId } from '../../config/constants';
 import submitAdminManage from './submit-admin-manage';
+import submitPtoRequest from './submit-pto-request';
 import submitPtoTemplateManage from './submit-pto-template-manage';
-import submitPtoRequest from "./submit-pto-request";
 
 const register = (app: App) => {
   app.view(ActionId.SUBMIT_ADMIN_MANAGE, submitAdminManage);

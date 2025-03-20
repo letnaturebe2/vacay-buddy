@@ -1,57 +1,57 @@
-import type {AnyBlock} from '@slack/types';
-import type {User} from '../../../entity/user.model';
+import type { AnyBlock } from '@slack/types';
+import type { User } from '../../../entity/user.model';
 
-import type {View} from '@slack/types';
-import {ActionId, DEFAULT_PTO_TEMPLATE_CONTENT, DEFAULT_PTO_TEMPLATE_TITLE} from '../../../config/constants';
-import type {PtoTemplate} from '../../../entity/pto-template.model';
-import {assert} from "../../../config/utils";
+import type { View } from '@slack/types';
+import { ActionId, DEFAULT_PTO_TEMPLATE_CONTENT, DEFAULT_PTO_TEMPLATE_TITLE } from '../../../config/constants';
+import { assert } from '../../../config/utils';
+import type { PtoTemplate } from '../../../entity/pto-template.model';
 
 export const buildPtoRequestModal = async (
   templates: PtoTemplate[],
   selected: PtoTemplate,
-  user: User
+  user: User,
 ): Promise<AnyBlock[]> => {
   assert(templates.length > 0, 'No PTO templates found');
 
   const today = new Date().toISOString().split('T')[0];
   const tomorrow = new Date(new Date(today).getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-  const templateOptions = templates.map(template => {
+  const templateOptions = templates.map((template) => {
     return {
       text: {
-        type: "plain_text",
+        type: 'plain_text',
         text: template.title,
       },
-      value: template.id.toString()
+      value: template.id.toString(),
     } as const;
   });
 
   return [
     {
-      block_id: "block_id_select_template",
-      type: "section",
+      block_id: 'block_id_select_template',
+      type: 'section',
       text: {
-        type: "mrkdwn",
-        text: `*:calendar: Select PTO Template* \n_This template consumes: *${selected.daysConsumed}* day(s)_`
+        type: 'mrkdwn',
+        text: `*:calendar: Select PTO Template* \n_This template consumes: *${selected.daysConsumed}* day(s)_`,
       },
       accessory: {
-        type: "static_select",
+        type: 'static_select',
         placeholder: {
-          type: "plain_text",
-          text: "Select a template",
+          type: 'plain_text',
+          text: 'Select a template',
         },
         initial_option: {
           text: {
-            type: "plain_text",
-            text: selected.title
+            type: 'plain_text',
+            text: selected.title,
           },
-          value: selected.id.toString()
+          value: selected.id.toString(),
         },
         options: templateOptions,
-        action_id: ActionId.SELECT_PTO_TEMPLATE
-      }
+        action_id: ActionId.SELECT_PTO_TEMPLATE,
+      },
     },
     {
-      type: 'divider'
+      type: 'divider',
     },
     {
       type: 'input',

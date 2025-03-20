@@ -1,18 +1,17 @@
-import type {AllMiddlewareArgs, SlackViewMiddlewareArgs, ViewSubmitAction} from '@slack/bolt';
-import type {AppContext} from '../../app';
-import {assert} from '../../config/utils';
-import {ptoService, userService} from '../../service';
-import {ActionId} from "../../config/constants";
-import {User} from "../../entity/user.model";
+import type { AllMiddlewareArgs, SlackViewMiddlewareArgs, ViewSubmitAction } from '@slack/bolt';
+import type { AppContext } from '../../app';
+import { ActionId } from '../../config/constants';
+import { assert } from '../../config/utils';
+import type { User } from '../../entity/user.model';
+import { ptoService, userService } from '../../service';
 
-const submitPtoRequest = async (
-  {
-    ack,
-    body,
-    view,
-    client,
-    context,
-  }: AllMiddlewareArgs<AppContext> & SlackViewMiddlewareArgs<ViewSubmitAction>) => {
+const submitPtoRequest = async ({
+  ack,
+  body,
+  view,
+  client,
+  context,
+}: AllMiddlewareArgs<AppContext> & SlackViewMiddlewareArgs<ViewSubmitAction>) => {
   // Get private metadata
   const privateMetadata = JSON.parse(view.private_metadata);
 
@@ -56,20 +55,12 @@ const submitPtoRequest = async (
     return;
   }
 
-
   const approvers: User[] = await Promise.all(
-    approverIds.map(userId => userService.getOrCreateUser(userId, context.team))
+    approverIds.map((userId) => userService.getOrCreateUser(userId, context.team)),
   );
 
   const selectedTemplate = await ptoService.getTemplate(templateId);
-  const request = await ptoService.createPtoRequest(
-    context.user,
-    selectedTemplate,
-    start,
-    end,
-    content,
-    approvers,
-  )
+  const request = await ptoService.createPtoRequest(context.user, selectedTemplate, start, end, content, approvers);
 
   await ack({
     response_action: 'clear',

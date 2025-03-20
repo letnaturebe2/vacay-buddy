@@ -3,9 +3,9 @@ import { ActionId } from '../../config/constants';
 import { openAdminModal } from './open-admin-modal';
 import { openPtoManageTemplateModal } from './open-pto-manage-template-modal';
 import { openPtoRequestModal } from './open-pto-request-modal';
+import { selectPtoTemplate } from './select-pto-template';
 import { updateAdminPage } from './update-admin-page';
 import { updateBackToHome } from './update-back-to-home';
-import {selectPtoTemplate} from "./select-pto-template";
 
 const register = (app: App) => {
   app.action(ActionId.UPDATE_BACK_TO_HOME, updateBackToHome);
