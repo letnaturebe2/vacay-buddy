@@ -1,8 +1,6 @@
 import type { AnyBlock } from '@slack/types';
-import type { AppContext } from '../../../../app';
 import { ActionId } from '../../../../config/constants';
 import type { PtoRequest } from '../../../../entity/pto-request.model';
-import { ptoService } from '../../../../service';
 
 export const buildPtoList = (request: PtoRequest, blockId: string): AnyBlock[] => {
   const blocks: AnyBlock[] = [];
@@ -14,7 +12,7 @@ export const buildPtoList = (request: PtoRequest, blockId: string): AnyBlock[] =
     block_id: `${blockId}_${request.id}`,
     text: {
       type: 'mrkdwn',
-      text: `*${request.title}* (${startDate} - ${endDate}) \nStatus: *${request.status}*`,
+      text: `*${request.title}* (${startDate} - ${endDate}) \n Type: ${request.template.title}`,
     },
     accessory: {
       type: 'button',

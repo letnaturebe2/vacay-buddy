@@ -18,9 +18,6 @@ export const buildAppHome = async (context: AppContext): Promise<AnyBlock[]> => 
       },
     },
     {
-      type: 'divider',
-    },
-    {
       type: 'section',
       text: {
         type: 'mrkdwn',
@@ -90,7 +87,7 @@ export const buildAppHome = async (context: AppContext): Promise<AnyBlock[]> => 
       type: 'header',
       text: {
         type: 'plain_text',
-        text: ':calendar: Create PTO Request',
+        text: ':memo: Create PTO Request',
         emoji: true,
       },
     },
@@ -112,7 +109,7 @@ export const buildAppHome = async (context: AppContext): Promise<AnyBlock[]> => 
           action_id: ActionId.OPEN_PTO_REQUEST_MODAL,
           text: {
             type: 'plain_text',
-            text: ':calendar: Start Request',
+            text: ':memo: Start Request',
             emoji: true,
           },
           style: 'primary',
@@ -169,13 +166,13 @@ export const buildAppHome = async (context: AppContext): Promise<AnyBlock[]> => 
     }
   }
 
-  // PTO request list created by me
+  // My pending PTO requests
   blocks.push(
     {
       type: 'header',
       text: {
         type: 'plain_text',
-        text: ':calendar: My PTO Requests',
+        text: ':calendar: My Pending PTO Request',
         emoji: true,
       },
     },
@@ -193,17 +190,17 @@ export const buildAppHome = async (context: AppContext): Promise<AnyBlock[]> => 
     },
   );
 
-  const ptoRequests = await ptoService.getOwnedPtoRequests(context.user);
-  if (ptoRequests.length === 0) {
+  const pendingRequests = await ptoService.getMyPendingPtoRequests(context.user);
+  if (pendingRequests.length === 0) {
     blocks.push({
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: 'You have not submitted any PTO requests yet.',
+        text: 'You have no pending PTO requests.',
       },
     });
   } else {
-    for (const ptoRequest of ptoRequests) {
+    for (const ptoRequest of pendingRequests) {
       const ptoListBlocks = buildPtoList(ptoRequest, 'block_id_request');
       blocks.push(...ptoListBlocks);
     }

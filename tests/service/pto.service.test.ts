@@ -219,7 +219,7 @@ describe("PtoService Tests", () => {
       );
 
       // Act
-      const requests = await ptoService.getOwnedPtoRequests(user);
+      const requests = await ptoService.getMyPtoRequests(user);
 
       // Assert
       expect(requests).toHaveLength(1);

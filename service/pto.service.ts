@@ -95,7 +95,14 @@ export class PtoService {
     });
   }
 
-  async getOwnedPtoRequests(user: User): Promise<PtoRequest[]> {
+  async getMyPendingPtoRequests(user: User): Promise<PtoRequest[]> {
+    return this.ptoRequestRepository.find({
+      where: {user: {id: user.id}, status: PtoRequestStatus.Pending},
+      relations: ['user', 'template', 'approvals', 'approvals.approver']
+    });
+  }
+
+  async getMyPtoRequests(user: User): Promise<PtoRequest[]> {
     return this.ptoRequestRepository.find({
       where: {user: {id: user.id}},
       relations: ['user', 'template', 'approvals', 'approvals.approver']
