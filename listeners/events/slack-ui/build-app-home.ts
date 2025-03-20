@@ -1,6 +1,7 @@
-import type { AnyBlock } from '@slack/types';
-import type { AppContext } from '../../../app';
-import { ActionId } from '../../../config/constants';
+import type {AnyBlock} from '@slack/types';
+import type {AppContext} from '../../../app';
+import {ActionId} from '../../../config/constants';
+import {ptoService} from "../../../service";
 
 export const buildAppHome = async (context: AppContext): Promise<AnyBlock[]> => {
   const blocks: AnyBlock[] = [];
@@ -116,87 +117,49 @@ export const buildAppHome = async (context: AppContext): Promise<AnyBlock[]> => 
   );
 
   // PTO request list assigned to me
-  blocks.push(
-    {
+  const ptoApprovals = await ptoService.getPendingApprovalsToReview(context.user);
+
+  if (ptoApprovals.length === 0) {
+    blocks.push({
       type: 'section',
-      block_id: 'request_1',
       text: {
         type: 'mrkdwn',
-        text: '<@U07FTGE8HE3> requested PTO from *Feb 20 - Feb 22* \nReason: 🏝️ Vacation',
-      },
-    },
-    {
-      type: 'actions',
-      block_id: 'request_1_actions',
-      elements: [
-        {
-          type: 'button',
-          action_id: 'approve_pto',
-          text: {
-            type: 'plain_text',
-            text: 'Approve',
-          },
-          style: 'primary',
-          value: 'pto_request_12345',
-        },
-        {
-          type: 'button',
-          action_id: 'reject_pto',
-          text: {
-            type: 'plain_text',
-            text: 'Reject',
-          },
-          style: 'danger',
-          value: 'pto_request_12345',
-        },
-      ],
-    },
-  );
+        text: 'No pending PTO requests assigned to you.'
+      }
+    });
+  } else {
+    for (const approval of ptoApprovals) {
+      const request = approval.ptoRequest;
+      const startDate = new Date(request.startDate).toISOString().split('T')[0]; // YYYY-MM-DD format
+      const endDate = new Date(request.endDate).toISOString().split('T')[0]; // YYYY-MM-DD format
 
-  blocks.push(
-    {
-      type: 'section',
-      block_id: 'request_2',
-      text: {
-        type: 'mrkdwn',
-        text: '<@U07FTRANDOM> requested PTO from *Feb 25 - Feb 28* \nReason: 🤒 Sick Leave (Awaiting approval from @ApproverUser)',
-      },
-    },
-    {
-      type: 'actions',
-      block_id: 'request_2_actions',
-      elements: [
-        {
+      blocks.push({
+        type: 'section',
+        block_id: `block_id_request_${request.id}`,
+        text: {
+          type: 'mrkdwn',
+          text: `<@${request.user.userId}> ${request.template.title} from *${startDate} - ${endDate}*`
+        },
+        accessory: {
           type: 'button',
-          action_id: 'approve_pto',
           text: {
             type: 'plain_text',
-            text: 'Approve ✅',
-            emoji: true,
+            text: 'Review',
+            emoji: true
           },
-          style: 'primary',
-          value: 'pto_request_67890',
-        },
-        {
-          type: 'button',
-          action_id: 'reject_pto',
-          text: {
-            type: 'plain_text',
-            text: 'Reject ❌',
-            emoji: true,
-          },
-          style: 'danger',
-          value: 'pto_request_67890',
-        },
-      ],
-    },
-  );
+          value: `${approval.id}`,
+          action_id: ActionId.OPEN_PTO_APPROVAL_MODAL
+        }
+      });
 
-  // info
+      blocks.push({
+        type: 'divider'
+      });
+    }
+  }
+
+  // bottom help info
   blocks.push(
-    {
-      type: 'divider',
-    },
     {
       type: 'context',
       block_id: 'help_info',

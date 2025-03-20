@@ -165,7 +165,7 @@ export class PtoService {
         approver: {id: approver.id},
         status: PtoRequestStatus.Pending
       },
-      relations: ['approver', 'ptoRequest', 'ptoRequest.user']
+      relations: ['approver', 'ptoRequest', 'ptoRequest.user', 'ptoRequest.template']
     });
 
     return approvals.filter(approval => approval.ptoRequest.currentApproverId === approval.id);
