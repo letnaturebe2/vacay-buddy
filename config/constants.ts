@@ -1,6 +1,6 @@
 export enum ActionId {
-  UPDATE_BACK_TO_HOME = 'back-to-home',
   // admin actions
+  UPDATE_BACK_TO_HOME = 'back-to-home',
   UPDATE_ADMIN_PAGE = 'admin-page',
   OPEN_ADMIN_MODAL = 'open-admin-modal',
   SUBMIT_ADMIN_MANAGE = 'submit-admin-manage',
@@ -12,6 +12,7 @@ export enum ActionId {
   SUBMIT_PTO_REQUEST = 'submit-pto-request',
   OPEN_PTO_APPROVAL_MODAL = 'open-pto-approval-modal',
   OPEN_MY_REQUEST_MODAL = 'open-my-request-modal',
+  OPEN_MY_REQUEST_STATUS_MODAL = 'open-my-request-status-modal',
 }
 
 export enum PtoRequestStatus {

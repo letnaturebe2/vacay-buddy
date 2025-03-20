@@ -7,6 +7,40 @@ import { buildPtoList } from './components/build-pto-list';
 export const buildAppHome = async (context: AppContext): Promise<AnyBlock[]> => {
   const blocks: AnyBlock[] = [];
 
+  // pto status summary
+  blocks.push(
+    {
+      type: 'header',
+      text: {
+        type: 'plain_text',
+        text: ':chart_with_upwards_trend: My PTO Summary',
+        emoji: true,
+      },
+    },
+    {
+      type: 'divider',
+    },
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: `*Used PTO*: ${context.user.usedPtoDays}/${context.user.annualPtoDays} days\n*Remaining*: ${(context.user.annualPtoDays - context.user.usedPtoDays).toFixed(1)} days`,
+      },
+      accessory: {
+        type: 'button',
+        text: {
+          type: 'plain_text',
+          text: 'View',
+        },
+        value: `${context.user.userId}`,
+        action_id: ActionId.OPEN_MY_REQUEST_STATUS_MODAL,
+      },
+    },
+    {
+      type: 'divider',
+    },
+  );
+
   // Only show admin settings to admins
   if (context.user.isAdmin) {
     blocks.push(
