@@ -55,6 +55,22 @@ export const buildPtoRequestModal = async (
     },
     {
       type: 'input',
+      block_id: 'block_id_title',
+      element: {
+        action_id: `action_id_title_${new Date().toISOString()}`, // slack requires unique action_id to refresh same element
+        type: 'plain_text_input',
+        placeholder: {
+          type: 'plain_text',
+          text: 'Enter title',
+        },
+      },
+      label: {
+        type: 'plain_text',
+        text: 'Title',
+      },
+    },
+    {
+      type: 'input',
       block_id: 'block_id_content',
       element: {
         action_id: `action_id_content_${new Date().toISOString()}`, // slack requires unique action_id to refresh same element

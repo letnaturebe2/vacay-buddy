@@ -61,6 +61,7 @@ export class PtoService {
     template: PtoTemplate,
     startDate: Date,
     endDate: Date,
+    title: string,
     reason: string,
     approvers: User[]
   ): Promise<PtoRequest> {
@@ -73,6 +74,7 @@ export class PtoService {
         template,
         startDate,
         endDate,
+        title,
         reason,
         status: PtoRequestStatus.Pending,
       });

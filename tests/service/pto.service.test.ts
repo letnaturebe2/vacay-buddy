@@ -137,6 +137,7 @@ describe("PtoService Tests", () => {
         startDate,
         endDate,
         "Vacation time",
+        "Vacation time",
         [approver]
       );
 
@@ -146,6 +147,7 @@ describe("PtoService Tests", () => {
       expect(result.status).toBe(PtoRequestStatus.Pending);
       expect(result.startDate).toEqual(startDate);
       expect(result.endDate).toEqual(endDate);
+      expect(result.title).toBe("Vacation time");
       expect(result.reason).toBe("Vacation time");
       expect(result.approvals).toHaveLength(1);
       expect(result.approvals[0].approver.userId).toBe("approver");
@@ -162,7 +164,7 @@ describe("PtoService Tests", () => {
 
       // Act & Assert
       await expect(
-        ptoService.createPtoRequest(user, template, new Date(), new Date(), "Reason", [])
+        ptoService.createPtoRequest(user, template, new Date(), new Date(), "Title", "Reason", [])
       ).rejects.toThrow("At least one approver is required for PTO requests");
     });
 
@@ -178,7 +180,7 @@ describe("PtoService Tests", () => {
 
       // Act & Assert
       await expect(
-        ptoService.createPtoRequest(user, template, startDate, endDate, "Reason", [approver])
+        ptoService.createPtoRequest(user, template, startDate, endDate, "Title", "Reason", [approver])
       ).rejects.toThrow("Start date must be before end date");
 
       // Arrange
@@ -186,7 +188,8 @@ describe("PtoService Tests", () => {
       endDate = new Date("2025-04-01");
 
       // Act
-      const result = await ptoService.createPtoRequest(user, template, startDate, endDate, "Reason", [approver]);
+      const result = await ptoService.createPtoRequest
+      (user, template, startDate, endDate, "Title", "Reason", [approver]);
 
       // Assert : same date is valid
       expect(result).toBeDefined();
@@ -210,6 +213,7 @@ describe("PtoService Tests", () => {
         template,
         startDate,
         endDate,
+        "Vacation time",
         "Vacation time",
         [approver]
       );
@@ -244,6 +248,7 @@ describe("PtoService Tests", () => {
         startDate,
         endDate,
         "Vacation time",
+        "Vacation time",
         [approver]
       );
 
@@ -271,6 +276,7 @@ describe("PtoService Tests", () => {
         template,
         new Date("2025-04-01"),
         new Date("2025-04-05"),
+        "Vacation time",
         "Vacation time",
         [approver1, approver2, approver3]
       );
@@ -302,6 +308,7 @@ describe("PtoService Tests", () => {
         template,
         new Date("2025-04-01"),
         new Date("2025-04-05"),
+        "Vacation time",
         "Vacation time",
         [approver1, approver2, approver3]
       );
@@ -344,6 +351,7 @@ describe("PtoService Tests", () => {
         new Date("2025-04-01"),
         new Date("2025-04-05"),
         "Vacation time",
+        "Vacation time",
         [approver1, approver2]
       );
 
@@ -385,6 +393,7 @@ describe("PtoService Tests", () => {
         new Date("2025-04-01"),
         new Date("2025-04-05"),
         "Vacation time",
+        "Vacation time",
         [approver]
       );
 
@@ -418,6 +427,7 @@ describe("PtoService Tests", () => {
         new Date("2025-04-01"),
         new Date("2025-04-05"),
         "Vacation time",
+        "Vacation time",
         [correctApprover, wrongApprover]
       );
 
@@ -441,6 +451,7 @@ describe("PtoService Tests", () => {
         template,
         new Date("2025-04-01"),
         new Date("2025-04-05"),
+        "Vacation time",
         "Vacation time",
         [approver]
       );
@@ -471,6 +482,7 @@ describe("PtoService Tests", () => {
         template,
         new Date("2025-04-01"),
         new Date("2025-04-05"),
+        "Vacation time",
         "Vacation time",
         [approver1, approver2]
       );
@@ -506,6 +518,7 @@ describe("PtoService Tests", () => {
         new Date("2025-04-01"),
         new Date("2025-04-05"),
         "Vacation time",
+        "Vacation time",
         [correctApprover]
       );
 
@@ -529,6 +542,7 @@ describe("PtoService Tests", () => {
         template,
         new Date("2025-04-01"),
         new Date("2025-04-05"),
+        "Vacation time",
         "Vacation time",
         [approver]
       );

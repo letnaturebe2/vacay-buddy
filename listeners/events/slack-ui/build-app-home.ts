@@ -1,7 +1,7 @@
-import type {AnyBlock} from '@slack/types';
-import type {AppContext} from '../../../app';
-import {ActionId} from '../../../config/constants';
-import {ptoService} from "../../../service";
+import type { AnyBlock } from '@slack/types';
+import type { AppContext } from '../../../app';
+import { ActionId } from '../../../config/constants';
+import { ptoService } from '../../../service';
 
 export const buildAppHome = async (context: AppContext): Promise<AnyBlock[]> => {
   const blocks: AnyBlock[] = [];
@@ -124,53 +124,51 @@ export const buildAppHome = async (context: AppContext): Promise<AnyBlock[]> => 
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: 'No pending PTO requests assigned to you.'
-      }
+        text: 'No pending PTO requests assigned to you.',
+      },
     });
   } else {
     for (const approval of ptoApprovals) {
       const request = approval.ptoRequest;
-      const startDate = new Date(request.startDate).toISOString().split('T')[0]; // YYYY-MM-DD format
-      const endDate = new Date(request.endDate).toISOString().split('T')[0]; // YYYY-MM-DD format
+      const startDate = new Date(request.startDate).toISOString().split('T')[0];
+      const endDate = new Date(request.endDate).toISOString().split('T')[0];
 
       blocks.push({
         type: 'section',
         block_id: `block_id_request_${request.id}`,
         text: {
           type: 'mrkdwn',
-          text: `<@${request.user.userId}> ${request.template.title} from *${startDate} - ${endDate}*`
+          text: `<@${request.user.userId}> *${request.title}* (${startDate} - ${endDate})`,
         },
         accessory: {
           type: 'button',
           text: {
             type: 'plain_text',
             text: 'Review',
-            emoji: true
+            emoji: true,
           },
           value: `${approval.id}`,
-          action_id: ActionId.OPEN_PTO_APPROVAL_MODAL
-        }
+          action_id: ActionId.OPEN_PTO_APPROVAL_MODAL,
+        },
       });
 
       blocks.push({
-        type: 'divider'
+        type: 'divider',
       });
     }
   }
 
   // bottom help info
-  blocks.push(
-    {
-      type: 'context',
-      block_id: 'help_info',
-      elements: [
-        {
-          type: 'mrkdwn',
-          text: 'Need help? Contact <mailto:hr@example.com|HR Team> for any PTO-related inquiries. :love_letter:',
-        },
-      ],
-    },
-  );
+  blocks.push({
+    type: 'context',
+    block_id: 'help_info',
+    elements: [
+      {
+        type: 'mrkdwn',
+        text: 'Need help? Contact <mailto:hr@example.com|HR Team> for any PTO-related inquiries. :love_letter:',
+      },
+    ],
+  });
 
   return blocks;
 };

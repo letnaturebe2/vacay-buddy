@@ -25,6 +25,9 @@ export class PtoRequest extends BaseEntity {
   @Column({type: 'date'})
   endDate: Date;
 
+  @Column({type: 'varchar', length: 255})
+  title: string;
+
   @Column({type: 'text'})
   reason: string;
 

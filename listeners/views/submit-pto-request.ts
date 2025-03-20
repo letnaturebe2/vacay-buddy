@@ -25,11 +25,13 @@ const submitPtoRequest = async ({
   // Extract dates
   const startDate = values.block_id_start_date.action_id_start_date.selected_date;
   const endDate = values.block_id_end_date.action_id_end_date.selected_date;
+  const titleBlock = values.block_id_title;
+  const title = titleBlock[Object.keys(titleBlock)[0]].value; // because of Date timestamp
   const contentBlock = values.block_id_content;
   const content = contentBlock[Object.keys(contentBlock)[0]].value; // because of Date timestamp
   const approverIds = values.block_id_approvers.action_id_approvers.selected_users ?? [];
 
-  assert(!!startDate && !!endDate && !!content, 'Start and end dates are required');
+  assert(!!startDate && !!endDate && !!title && !!content, 'Start and end dates are required');
 
   const start = new Date(startDate);
   const end = new Date(endDate);
@@ -45,22 +47,20 @@ const submitPtoRequest = async ({
     return;
   }
 
-  if (approverIds.length < 1) {
-    await ack({
-      response_action: 'errors',
-      errors: {
-        block_id_approvers: 'You must select at least one approver.',
-      },
-    });
-    return;
-  }
-
   const approvers: User[] = await Promise.all(
     approverIds.map((userId) => userService.getOrCreateUser(userId, context.team)),
   );
 
   const selectedTemplate = await ptoService.getTemplate(templateId);
-  const request = await ptoService.createPtoRequest(context.user, selectedTemplate, start, end, content, approvers);
+  const request = await ptoService.createPtoRequest(
+    context.user,
+    selectedTemplate,
+    start,
+    end,
+    title,
+    content,
+    approvers,
+  );
 
   await ack({
     response_action: 'clear',
