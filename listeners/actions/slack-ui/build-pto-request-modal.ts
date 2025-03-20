@@ -1,42 +1,70 @@
-import type { AnyBlock } from '@slack/types';
-import type { User } from '../../../entity/user.model';
+import type {AnyBlock} from '@slack/types';
+import type {User} from '../../../entity/user.model';
 
-import type { View } from '@slack/types';
-import { DEFAULT_PTO_TEMPLATE_CONTENT, DEFAULT_PTO_TEMPLATE_TITLE } from '../../../config/constants';
-import type { PtoTemplate } from '../../../entity/pto-template.model';
+import type {View} from '@slack/types';
+import {ActionId, DEFAULT_PTO_TEMPLATE_CONTENT, DEFAULT_PTO_TEMPLATE_TITLE} from '../../../config/constants';
+import type {PtoTemplate} from '../../../entity/pto-template.model';
+import {assert} from "../../../config/utils";
 
-export const buildPtoRequestModal = async (): Promise<AnyBlock[]> => {
-  const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+export const buildPtoRequestModal = async (
+  templates: PtoTemplate[],
+  selected: PtoTemplate,
+  user: User
+): Promise<AnyBlock[]> => {
+  assert(templates.length > 0, 'No PTO templates found');
+
+  const today = new Date().toISOString().split('T')[0];
+  const tomorrow = new Date(new Date(today).getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+  const templateOptions = templates.map(template => {
+    return {
+      text: {
+        type: "plain_text",
+        text: template.title,
+      },
+      value: template.id.toString()
+    } as const;
+  });
 
   return [
     {
-      type: 'input',
-      block_id: 'block_id_template',
-      element: {
-        type: 'static_select',
-        action_id: 'action_id_template',
+      block_id: "block_id_select_template",
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: `*:calendar: Select PTO Template* \n_This template consumes: *${selected.daysConsumed}* day(s)_`
+      },
+      accessory: {
+        type: "static_select",
         placeholder: {
-          type: 'plain_text',
-          text: 'Select a PTO type',
+          type: "plain_text",
+          text: "Select a template",
         },
-        options: [
-          {
-            text: { type: 'plain_text', text: 'Vacation' },
-            value: 'vacation',
+        initial_option: {
+          text: {
+            type: "plain_text",
+            text: selected.title
           },
-          {
-            text: { type: 'plain_text', text: 'Sick Leave' },
-            value: 'sick_leave',
-          },
-          {
-            text: { type: 'plain_text', text: 'Personal Day' },
-            value: 'personal_day',
-          },
-        ],
+          value: selected.id.toString()
+        },
+        options: templateOptions,
+        action_id: ActionId.SELECT_PTO_TEMPLATE
+      }
+    },
+    {
+      type: 'divider'
+    },
+    {
+      type: 'input',
+      block_id: 'block_id_content',
+      element: {
+        action_id: `action_id_content_${new Date().toISOString()}`, // slack requires unique action_id to refresh same element
+        type: 'plain_text_input',
+        multiline: true,
+        initial_value: selected.content,
       },
       label: {
         type: 'plain_text',
-        text: 'PTO Type',
+        text: 'Content',
       },
     },
     {
@@ -62,7 +90,7 @@ export const buildPtoRequestModal = async (): Promise<AnyBlock[]> => {
       element: {
         type: 'datepicker',
         action_id: 'action_id_end_date',
-        initial_date: today,
+        initial_date: tomorrow,
         placeholder: {
           type: 'plain_text',
           text: 'Select end date',
@@ -75,28 +103,13 @@ export const buildPtoRequestModal = async (): Promise<AnyBlock[]> => {
     },
     {
       type: 'input',
-      block_id: 'block_id_all_day',
+      block_id: 'block_id_approvers',
+      label: { type: 'plain_text', text: 'Assign Approvers' },
       element: {
-        type: 'radio_buttons',
-        action_id: 'action_id_all_day',
-        initial_option: {
-          text: { type: 'plain_text', text: 'Full days' },
-          value: 'full',
-        },
-        options: [
-          {
-            text: { type: 'plain_text', text: 'Full days' },
-            value: 'full',
-          },
-          {
-            text: { type: 'plain_text', text: 'Half days' },
-            value: 'half',
-          },
-        ],
-      },
-      label: {
-        type: 'plain_text',
-        text: 'Duration',
+        type: 'multi_users_select',
+        action_id: 'action_id_approvers',
+        placeholder: { type: 'plain_text', text: 'Search and select approvers' },
+        // initial_users: admins.map((admin) => admin.userId),  // TODO: get default user's template approvers
       },
     },
   ];

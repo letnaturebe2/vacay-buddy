@@ -6,7 +6,7 @@ import {PtoRequest} from "../../entity/pto-request.model";
 import {PtoApproval} from "../../entity/pto-approval.model";
 import {User} from "../../entity/user.model";
 import {Team} from "../../entity/team.model";
-import {PtoRequestStatus} from "../../config/constants";
+import {DEFAULT_PTO_TEMPLATE_CONTENT, PtoRequestStatus} from "../../config/constants";
 import {UserService} from "../../service/user.service";
 
 describe("PtoService Tests", () => {
@@ -58,7 +58,7 @@ describe("PtoService Tests", () => {
     const template = new PtoTemplate();
     template.title = data.title || "Vacation";
     template.description = data.description || "Vacation template";
-    template.content = data.content || "📅 Date Range: MM/DD/YYYY - MM/DD/YYYY\n📝 Reason: ";
+    template.content = data.content || DEFAULT_PTO_TEMPLATE_CONTENT;
     template.enabled = data.enabled ?? true;
     template.team = team;
     return ptoTemplateRepository.save(template);
@@ -71,7 +71,7 @@ describe("PtoService Tests", () => {
       const templateData: Partial<PtoTemplate> = {
         title: "Vacation",
         description: "Annual vacation template",
-        content: "📅 Date Range: MM/DD/YYYY - MM/DD/YYYY\n📝 Reason: Vacation",
+        content: DEFAULT_PTO_TEMPLATE_CONTENT,
         enabled: true,
       };
 

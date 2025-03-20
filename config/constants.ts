@@ -8,6 +8,8 @@ export enum ActionId {
   // pto actions
   OPEN_PTO_MANAGE_MODAL = 'open-pto-manage-modal',
   OPEN_PTO_REQUEST_MODAL = 'open-pto-request-modal',
+  SELECT_PTO_TEMPLATE = 'select-pto-template',
+  SUBMIT_PTO_REQUEST = 'submit-pto-request',
 }
 
 export enum PtoRequestStatus {
@@ -55,4 +57,4 @@ export enum PtoTemplateManageType {
 }
 
 export const DEFAULT_PTO_TEMPLATE_TITLE = 'PTO';
-export const DEFAULT_PTO_TEMPLATE_CONTENT = '📅 Date Range: MM/DD/YYYY - MM/DD/YYYY\n📝 Reason: ';
+export const DEFAULT_PTO_TEMPLATE_CONTENT = '📅 Date Range: YYYY/MM/DD - YYYY/MM/DD\n📝 Reason: ';
