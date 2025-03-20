@@ -3,6 +3,7 @@ import { ActionId } from '../../config/constants';
 import { openAdminModal } from './open-admin-modal';
 import { openPtoManageTemplateModal } from './open-pto-manage-template-modal';
 import { openPtoRequestModal } from './open-pto-request-modal';
+import { openRequestApproveModal } from './open-request-approve-modal';
 import { selectPtoTemplate } from './select-pto-template';
 import { updateAdminPage } from './update-admin-page';
 import { updateBackToHome } from './update-back-to-home';
@@ -14,6 +15,7 @@ const register = (app: App) => {
   app.action(ActionId.OPEN_PTO_MANAGE_MODAL, openPtoManageTemplateModal);
   app.action(ActionId.OPEN_PTO_REQUEST_MODAL, openPtoRequestModal);
   app.action(ActionId.SELECT_PTO_TEMPLATE, selectPtoTemplate);
+  app.action(ActionId.OPEN_REQUEST_APPROVE_MODAL, openRequestApproveModal);
 };
 
 export default { register };

@@ -1,5 +1,6 @@
 import type { AnyBlock } from '@slack/types';
 import { ActionId } from '../../../../config/constants';
+import { formatToYYYYMMDD } from '../../../../config/utils';
 import type { PtoRequest } from '../../../../entity/pto-request.model';
 
 export const buildPtoList = (request: PtoRequest, blockId: string): AnyBlock[] => {
@@ -21,7 +22,7 @@ export const buildPtoList = (request: PtoRequest, blockId: string): AnyBlock[] =
         text: 'View',
       },
       value: `${request.id}`,
-      action_id: ActionId.OPEN_MY_REQUEST_MODAL,
+      action_id: ActionId.OPEN_REQUEST_APPROVE_MODAL,
     },
   });
 
@@ -31,7 +32,3 @@ export const buildPtoList = (request: PtoRequest, blockId: string): AnyBlock[] =
 
   return blocks;
 };
-
-function formatToYYYYMMDD(date: Date): string {
-  return new Date(date).toISOString().split('T')[0];
-}
