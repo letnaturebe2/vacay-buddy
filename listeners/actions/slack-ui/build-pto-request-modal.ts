@@ -14,7 +14,6 @@ export const buildPtoRequestModal = async (
   assert(templates.length > 0, 'No PTO templates found');
 
   const today = new Date().toISOString().split('T')[0];
-  const tomorrow = new Date(new Date(today).getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
   const templateOptions = templates.map((template) => {
     return {
       text: {
@@ -106,7 +105,7 @@ export const buildPtoRequestModal = async (
       element: {
         type: 'datepicker',
         action_id: 'action_id_end_date',
-        initial_date: tomorrow,
+        initial_date: today,
         placeholder: {
           type: 'plain_text',
           text: 'Select end date',

@@ -5,7 +5,7 @@ import {PtoApproval} from "../entity/pto-approval.model";
 import {User} from "../entity/user.model";
 import {Team} from "../entity/team.model";
 import {PtoRequestStatus} from "../config/constants";
-import {assert} from "../config/utils";
+import {assert, isSameDay} from "../config/utils";
 import {UserService} from "./user.service";
 
 export class PtoService {
@@ -67,6 +67,10 @@ export class PtoService {
   ): Promise<PtoRequest> {
     assert(approvers.length > 0, 'At least one approver is required for PTO requests');
     assert(startDate <= endDate, 'Start date must be before end date');
+
+    if (template.daysConsumed < 1) {
+      assert(isSameDay(startDate, endDate), 'Start and end date must be the same for templates that consume less than 1 day');
+    }
 
     return this.dataSource.transaction(async (manager) => {
       const request = this.ptoRequestRepository.create({

@@ -1,4 +1,4 @@
-import {Entity, ManyToOne, JoinColumn, Column, Index} from "typeorm";
+import {Entity, ManyToOne, JoinColumn, Column, Index, Check} from "typeorm";
 import {Team} from "./team.model";
 import {BaseEntity} from "./base";
 
@@ -23,5 +23,6 @@ export class PtoTemplate extends BaseEntity {
   enabled: boolean;
 
   @Column({type: "float", default: 1})
+  @Check("days_consumed >= 0 AND days_consumed <= 1")
   daysConsumed: number;
 }

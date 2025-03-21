@@ -8,7 +8,6 @@ export const buildPtoApproveModal = async (request: PtoRequest, user: User): Pro
   // Calculate date range and days
   const startDate = request.startDate;
   const endDate = request.endDate;
-  const daysRequested = 1;
 
   const formattedStartDate = formatToYYYYMMDD(startDate);
   const formattedEndDate = formatToYYYYMMDD(endDate);
@@ -31,7 +30,7 @@ export const buildPtoApproveModal = async (request: PtoRequest, user: User): Pro
         },
         {
           type: 'mrkdwn',
-          text: `*Days:*\n${daysRequested} ${daysRequested > 1 ? 'days' : 'day'}`,
+          text: `*Days:*\n${request.consumedDays} ${request.consumedDays > 1 ? 'days' : 'day'}`,
         },
       ],
     },

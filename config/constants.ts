@@ -62,4 +62,4 @@ export enum PtoTemplateManageType {
 }
 
 export const DEFAULT_PTO_TEMPLATE_TITLE = 'PTO';
-export const DEFAULT_PTO_TEMPLATE_CONTENT = '📅 Date Range: YYYY/MM/DD - YYYY/MM/DD\n📝 Reason: ';
+export const DEFAULT_PTO_TEMPLATE_CONTENT = '📝 Reason: ';

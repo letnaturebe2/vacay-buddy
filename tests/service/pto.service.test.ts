@@ -60,6 +60,7 @@ describe("PtoService Tests", () => {
     template.description = data.description || "Vacation template";
     template.content = data.content || DEFAULT_PTO_TEMPLATE_CONTENT;
     template.enabled = data.enabled ?? true;
+    template.daysConsumed = data.daysConsumed ?? 1;
     template.team = team;
     return ptoTemplateRepository.save(template);
   };
@@ -105,7 +106,7 @@ describe("PtoService Tests", () => {
         description: "New description",
         content: "New content",
         enabled: false,
-        daysConsumed: 2
+        daysConsumed: 0.5
       };
 
       // Act
@@ -116,7 +117,7 @@ describe("PtoService Tests", () => {
       expect(result.description).toBe(updateData.description);
       expect(result.content).toBe(updateData.content);
       expect(result.enabled).toBe(updateData.enabled);
-      expect(result.daysConsumed).toBe(2);
+      expect(result.daysConsumed).toBe(0.5);
     });
   });
 
@@ -128,10 +129,10 @@ describe("PtoService Tests", () => {
       const approver = await createUser("approver", team);
       const template = await createPtoTemplate(team);
       const startDate = new Date("2025-04-01");
-      const endDate = new Date("2025-04-05");
+      const endDate = new Date("2025-04-01");
 
       // Act
-      const result = await ptoService.createPtoRequest(
+      const request = await ptoService.createPtoRequest(
         user,
         template,
         startDate,
@@ -142,18 +143,18 @@ describe("PtoService Tests", () => {
       );
 
       // Assert
-      expect(result).toBeDefined();
-      expect(result.user.userId).toBe("test-user");
-      expect(result.status).toBe(PtoRequestStatus.Pending);
-      expect(result.startDate).toEqual(startDate);
-      expect(result.endDate).toEqual(endDate);
-      expect(result.title).toBe("Vacation time");
-      expect(result.reason).toBe("Vacation time");
-      expect(result.approvals).toHaveLength(1);
-      expect(result.approvals[0].approver.userId).toBe("approver");
-      expect(result.currentApproverId).toBe(result.approvals[0].id);
-      expect(result.template.title).toBe("Vacation");
-
+      expect(request).toBeDefined();
+      expect(request.user.userId).toBe("test-user");
+      expect(request.status).toBe(PtoRequestStatus.Pending);
+      expect(request.startDate).toEqual(startDate);
+      expect(request.endDate).toEqual(endDate);
+      expect(request.title).toBe("Vacation time");
+      expect(request.reason).toBe("Vacation time");
+      expect(request.approvals).toHaveLength(1);
+      expect(request.approvals[0].approver.userId).toBe("approver");
+      expect(request.currentApproverId).toBe(request.approvals[0].id);
+      expect(request.template.title).toBe("Vacation");
+      expect(request.consumedDays).toBe(1);
     });
 
     test("should throw error if no approvers provided", async () => {
@@ -195,6 +196,26 @@ describe("PtoService Tests", () => {
       expect(result).toBeDefined();
       expect(result.startDate).toEqual(startDate);
       expect(result.endDate).toEqual(endDate);
+    });
+
+    test("should throw error when using half-day template with different start and end dates", async () => {      // Arrange
+      const team = await createTeam();
+      const user = await createUser("test-user");
+      const approver = await createUser("approver");
+      const template = await createPtoTemplate(team, {daysConsumed: 0.5}); // Half-day template
+
+      const startDate = new Date("2025-04-01");
+      const endDate = new Date("2025-04-02"); // Different date
+
+      // Act & Assert
+      await expect(
+        ptoService.createPtoRequest(user, template, startDate, endDate, "Half-day PTO", "Taking half day", [approver])
+      ).rejects.toThrow("Start and end date must be the same for templates that consume less than 1 day");
+
+      // Act
+      const result = await ptoService.createPtoRequest(
+        user, template, startDate, new Date("2025-04-01"), "Half-day PTO", "Taking half day", [approver]);
+      expect(result.consumedDays).toBe(0.5);
     });
   });
 

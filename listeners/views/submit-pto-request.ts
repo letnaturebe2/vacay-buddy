@@ -3,7 +3,7 @@ import type { AnyBlock } from '@slack/types';
 import type { HomeView } from '@slack/types/dist/views';
 import type { AppContext } from '../../app';
 import { ActionId } from '../../config/constants';
-import { assert } from '../../config/utils';
+import { assert, isSameDay } from '../../config/utils';
 import type { User } from '../../entity/user.model';
 import { ptoService, userService } from '../../service';
 import { buildAdminPage } from '../actions/slack-ui/build-admin-page';
@@ -51,11 +51,22 @@ const submitPtoRequest = async ({
     return;
   }
 
+  const selectedTemplate = await ptoService.getTemplate(templateId);
+
+  if (selectedTemplate.daysConsumed < 1 && !isSameDay(start, end)) {
+    await ack({
+      response_action: 'errors',
+      errors: {
+        block_id_end_date: 'This template type requires same start and end dates',
+      },
+    });
+    return;
+  }
+
   const approvers: User[] = await Promise.all(
     approverIds.map((userId) => userService.getOrCreateUser(userId, context.team)),
   );
 
-  const selectedTemplate = await ptoService.getTemplate(templateId);
   const request = await ptoService.createPtoRequest(
     context.user,
     selectedTemplate,
