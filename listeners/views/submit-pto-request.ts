@@ -2,11 +2,9 @@ import type { AllMiddlewareArgs, SlackViewMiddlewareArgs, ViewSubmitAction } fro
 import type { AnyBlock } from '@slack/types';
 import type { HomeView } from '@slack/types/dist/views';
 import type { AppContext } from '../../app';
-import { ActionId } from '../../config/constants';
-import { assert, isSameDay } from '../../config/utils';
+import {assert, isSameDay, showAdminSection} from '../../config/utils';
 import type { User } from '../../entity/user.model';
-import { ptoService, userService } from '../../service';
-import { buildAdminPage } from '../actions/slack-ui/build-admin-page';
+import {ptoService, teamService, userService} from '../../service';
 import { buildAppHome } from '../events/slack-ui/build-app-home';
 
 const submitPtoRequest = async ({
@@ -77,7 +75,8 @@ const submitPtoRequest = async ({
     approvers,
   );
 
-  const blocks: AnyBlock[] = await buildAppHome(context);
+  const admins = await teamService.getAdmins(context.team);
+  const blocks: AnyBlock[] = await buildAppHome(context, showAdminSection(context.user, admins));
   const homeView: HomeView = {
     type: 'home',
     blocks: blocks,

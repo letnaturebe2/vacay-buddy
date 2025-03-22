@@ -1,21 +1,24 @@
-import type { AllMiddlewareArgs, BlockAction, SlackActionMiddlewareArgs } from '@slack/bolt';
-import type { AnyBlock } from '@slack/types';
-import type { HomeView } from '@slack/types/dist/views';
-import type { AppContext } from '../../app';
-import { assert } from '../../config/utils';
-import { buildAppHome } from '../events/slack-ui/build-app-home';
+import type {AllMiddlewareArgs, BlockAction, SlackActionMiddlewareArgs} from '@slack/bolt';
+import type {AnyBlock} from '@slack/types';
+import type {HomeView} from '@slack/types/dist/views';
+import type {AppContext} from '../../app';
+import {assert, showAdminSection} from '../../config/utils';
+import {buildAppHome} from '../events/slack-ui/build-app-home';
+import {teamService} from "../../service";
 
-export const updateBackToHome = async ({
-  ack,
-  client,
-  body,
-  context,
-}: AllMiddlewareArgs<AppContext> & SlackActionMiddlewareArgs<BlockAction>) => {
+export const updateBackToHome = async (
+  {
+    ack,
+    client,
+    body,
+    context,
+  }: AllMiddlewareArgs<AppContext> & SlackActionMiddlewareArgs<BlockAction>) => {
   await ack();
 
   assert(body.view !== undefined, 'No view found in body');
 
-  const blocks: AnyBlock[] = await buildAppHome(context);
+  const admins = await teamService.getAdmins(context.team);
+  const blocks: AnyBlock[] = await buildAppHome(context, showAdminSection(context.user, admins));
   const view: HomeView = {
     type: 'home',
     blocks: blocks,

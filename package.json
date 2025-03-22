@@ -34,6 +34,7 @@
     "@slack/bolt": "^4.2.0",
     "dotenv": "~16.4.7",
     "express": "^5.0.1",
+    "mysql2": "^3.14.0",
     "openai": "^4.85.2",
     "reflect-metadata": "^0.2.2",
     "typeorm-naming-strategies": "^4.1.0"

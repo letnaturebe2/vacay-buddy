@@ -4,7 +4,10 @@ import { ActionId } from '../../../config/constants';
 import { ptoService } from '../../../service';
 import { buildPtoList } from './components/build-pto-list';
 
-export const buildAppHome = async (context: AppContext): Promise<AnyBlock[]> => {
+export const buildAppHome = async (
+  context: AppContext,
+  showAdminSection: boolean
+): Promise<AnyBlock[]> => {
   const blocks: AnyBlock[] = [];
 
   // pto status summary
@@ -39,7 +42,7 @@ export const buildAppHome = async (context: AppContext): Promise<AnyBlock[]> => 
   );
 
   // Only show admin settings to admins
-  if (context.user.isAdmin) {
+  if (showAdminSection) {
     blocks.push(
       {
         type: 'header',
