@@ -30,7 +30,7 @@ export const buildPtoApproveModal = async (request: PtoRequest, user: User): Pro
         },
         {
           type: 'mrkdwn',
-          text: `*Days:*\n${request.consumedDays} ${request.consumedDays > 1 ? 'days' : 'day'}`,
+          text: `*Days Requested:*\n${request.consumedDays} ${request.consumedDays > 1 ? 'days' : 'day'}`,
         },
       ],
     },

@@ -4,10 +4,7 @@ import { ActionId } from '../../../config/constants';
 import { ptoService } from '../../../service';
 import { buildPtoList } from './components/build-pto-list';
 
-export const buildAppHome = async (
-  context: AppContext,
-  showAdminSection: boolean
-): Promise<AnyBlock[]> => {
+export const buildAppHome = async (context: AppContext, showAdminSection: boolean): Promise<AnyBlock[]> => {
   const blocks: AnyBlock[] = [];
 
   // pto status summary

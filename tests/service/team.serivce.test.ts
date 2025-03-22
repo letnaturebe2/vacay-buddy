@@ -23,35 +23,33 @@ describe("TeamService Tests", () => {
     await teamRepository.clear();
   });
 
-  describe("getOrCreateTeam", () => {
-    test("should get existing team", async () => {
+  describe("getTeam and createTeam", () => {
+    test("should get existing team and create new team when not found", async () => {
       // Arrange
-      const team = new Team();
-      team.teamId = "existing-team";
-      await teamRepository.save(team);
+      const existingTeam = new Team();
+      existingTeam.teamId = "existing-team";
+      await teamRepository.save(existingTeam);
 
-      // Act
-      const result = await teamService.getOrCreateTeam("existing-team");
+      // Act - Create new team
+      const newTeam = await teamService.createTeam("new-team");
 
-      // Assert
-      expect(result).toBeDefined();
-      expect(result.teamId).toBe("existing-team");
-      expect(result.id).toBe(team.id);
-    });
+      // Assert - New team creation
+      expect(newTeam).toBeDefined();
+      expect(newTeam.teamId).toBe("new-team");
 
-    test("should create new team when not found", async () => {
-      // Act
-      const result = await teamService.getOrCreateTeam("new-team");
-
-      // Assert
-      expect(result).toBeDefined();
-      expect(result.teamId).toBe("new-team");
-
-      // Verify in DB
+      // Verify new team in DB
       const savedTeam = await teamRepository.findOne({
         where: { teamId: "new-team" }
       });
       expect(savedTeam).toBeDefined();
+
+      // Act - Get existing team
+      const foundTeam = await teamService.getTeam("existing-team");
+
+      // Assert - Get existing team
+      expect(foundTeam).toBeDefined();
+      expect(foundTeam!.teamId).toBe("existing-team");
+      expect(foundTeam!.id).toBe(existingTeam.id);
     });
   });
 

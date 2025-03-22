@@ -1,18 +1,17 @@
-import type {AllMiddlewareArgs, BlockAction, SlackActionMiddlewareArgs} from '@slack/bolt';
-import type {AnyBlock} from '@slack/types';
-import type {HomeView} from '@slack/types/dist/views';
-import type {AppContext} from '../../app';
-import {assert, showAdminSection} from '../../config/utils';
-import {buildAppHome} from '../events/slack-ui/build-app-home';
-import {teamService} from "../../service";
+import type { AllMiddlewareArgs, BlockAction, SlackActionMiddlewareArgs } from '@slack/bolt';
+import type { AnyBlock } from '@slack/types';
+import type { HomeView } from '@slack/types/dist/views';
+import type { AppContext } from '../../app';
+import { assert, showAdminSection } from '../../config/utils';
+import { teamService } from '../../service';
+import { buildAppHome } from '../events/slack-ui/build-app-home';
 
-export const updateBackToHome = async (
-  {
-    ack,
-    client,
-    body,
-    context,
-  }: AllMiddlewareArgs<AppContext> & SlackActionMiddlewareArgs<BlockAction>) => {
+export const updateBackToHome = async ({
+  ack,
+  client,
+  body,
+  context,
+}: AllMiddlewareArgs<AppContext> & SlackActionMiddlewareArgs<BlockAction>) => {
   await ack();
 
   assert(body.view !== undefined, 'No view found in body');

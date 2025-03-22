@@ -45,7 +45,7 @@ export const LOCALE_TO_LANG: Record<string, string> = {
 export const DEFAULT_PTO_TEMPLATE_TITLE = 'PTO';
 export const DEFAULT_PTO_TEMPLATE_CONTENT = '📋 Leave Request Details: \n - Reason: \n';
 
-const DEFAULT_TEMPLATE: Partial<PtoTemplate>[] = [
+export const DEFAULT_TEMPLATE: Partial<PtoTemplate>[] = [
   {
     title: 'Full-day Leave',
     description: 'Take a full day off',

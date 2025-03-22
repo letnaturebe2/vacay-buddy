@@ -4,7 +4,7 @@ import {PtoRequest} from "../entity/pto-request.model";
 import {PtoApproval} from "../entity/pto-approval.model";
 import {User} from "../entity/user.model";
 import {Team} from "../entity/team.model";
-import {PtoRequestStatus} from "../config/constants";
+import {DEFAULT_TEMPLATE, PtoRequestStatus} from "../config/constants";
 import {assert, isSameDay} from "../config/utils";
 import {UserService} from "./user.service";
 
@@ -68,7 +68,7 @@ export class PtoService {
     assert(approvers.length > 0, 'At least one approver is required for PTO requests');
     assert(startDate <= endDate, 'Start date must be before end date');
 
-    if (template.daysConsumed < 1) {
+    if (template.daysConsumed < 1 && template.daysConsumed > 0) {
       assert(isSameDay(startDate, endDate), 'Start and end date must be the same for templates that consume less than 1 day');
     }
 
@@ -97,6 +97,18 @@ export class PtoService {
       await manager.save(savedRequest);
       return savedRequest;
     });
+  }
+
+  /**
+   * Creates default PTO templates for a team when it's first created
+   * These default templates are provided automatically to every new team
+   */
+  async createDefaultPtoTemplates(team: Team): Promise<PtoTemplate[]> {
+    const defaultTemplatePromises = DEFAULT_TEMPLATE.map((template) => {
+      return this.createTemplate(template, team);
+    });
+
+    return Promise.all(defaultTemplatePromises);
   }
 
   async getPtoRequest(id: number): Promise<PtoRequest> {

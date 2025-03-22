@@ -6,7 +6,7 @@ import {PtoRequest} from "../../entity/pto-request.model";
 import {PtoApproval} from "../../entity/pto-approval.model";
 import {User} from "../../entity/user.model";
 import {Team} from "../../entity/team.model";
-import {DEFAULT_PTO_TEMPLATE_CONTENT, PtoRequestStatus} from "../../config/constants";
+import {DEFAULT_PTO_TEMPLATE_CONTENT, DEFAULT_TEMPLATE, PtoRequestStatus} from "../../config/constants";
 import {UserService} from "../../service/user.service";
 
 describe("PtoService Tests", () => {
@@ -94,6 +94,37 @@ describe("PtoService Tests", () => {
     });
   });
 
+  describe("createDefaultPtoTemplates", () => {
+    test("should create default PTO templates for a new team", async () => {
+      // Arrange
+      const team = await createTeam("new-team");
+
+      // Act
+      const templates = await ptoService.createDefaultPtoTemplates(team);
+
+      // Assert
+      expect(templates).toBeDefined();
+      expect(Array.isArray(templates)).toBe(true);
+      expect(templates.length).toBeGreaterThan(0);
+
+      // Verify the templates were actually persisted
+      const savedTemplates = await ptoService.getTemplates(team);
+      expect(savedTemplates.length).toBe(templates.length);
+
+      // Check that default templates match the templates defined in DEFAULT_TEMPLATE
+      expect(templates.length).toBe(DEFAULT_TEMPLATE.length);
+
+      // Verify properties of the created templates
+      templates.forEach((template, index) => {
+        expect(template.id).toBeDefined();
+        expect(template.team.teamId).toBe("new-team");
+        expect(template.title).toBe(DEFAULT_TEMPLATE[index].title);
+        expect(template.content).toBe(DEFAULT_TEMPLATE[index].content);
+        expect(template.description).toBe(DEFAULT_TEMPLATE[index].description);
+      });
+    });
+  });
+
   describe("updateTemplate", () => {
     test("should update an existing PTO template", async () => {
       // Arrange
@@ -157,6 +188,36 @@ describe("PtoService Tests", () => {
       expect(request.consumedDays).toBe(1);
     });
 
+    test("should create PTO request with daysConsumed=0 template", async () => {
+      // Arrange
+      const team = await createTeam();
+      const user = await createUser("test-user", team);
+      const approver = await createUser("approver", team);
+      const template = await createPtoTemplate(team, {daysConsumed: 0});
+      const startDate = new Date("2025-04-01");
+      const endDate = new Date("2025-04-10");
+
+      // Act
+      const request = await ptoService.createPtoRequest(
+        user,
+        template,
+        startDate,
+        endDate,
+        "Non-working day",
+        "Non-working day request",
+        [approver]
+      );
+
+      // Assert
+      expect(request).toBeDefined();
+      expect(request.user.userId).toBe("test-user");
+      expect(request.status).toBe(PtoRequestStatus.Pending);
+      expect(request.startDate).toEqual(startDate);
+      expect(request.endDate).toEqual(endDate);
+      expect(request.title).toBe("Non-working day");
+      expect(request.consumedDays).toBe(0);
+    });
+
     test("should throw error if no approvers provided", async () => {
       // Arrange
       const team = await createTeam();
@@ -217,6 +278,7 @@ describe("PtoService Tests", () => {
         user, template, startDate, new Date("2025-04-01"), "Half-day PTO", "Taking half day", [approver]);
       expect(result.consumedDays).toBe(0.5);
     });
+
   });
 
   describe("getPtoRequests", () => {

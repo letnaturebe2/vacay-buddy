@@ -12,15 +12,11 @@ export class TeamService {
     this.userService = userService;
   }
 
-  public async getOrCreateTeam(teamId: string): Promise<Team> {
-    let team = await this.teamRepository.findOne({where: {teamId: teamId}});
-    if (team === null) {
-      team = await this.createTeam(teamId);
-    }
-    return team;
+  public async getTeam(teamId: string): Promise<Team | null> {
+    return await this.teamRepository.findOne({where: {teamId: teamId}});
   }
 
-  private async createTeam(teamId: string): Promise<Team> {
+  public async createTeam(teamId: string): Promise<Team> {
     const team = new Team();
     team.teamId = teamId;
     return await this.teamRepository.save(team);

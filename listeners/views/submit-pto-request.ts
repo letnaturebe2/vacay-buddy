@@ -2,9 +2,9 @@ import type { AllMiddlewareArgs, SlackViewMiddlewareArgs, ViewSubmitAction } fro
 import type { AnyBlock } from '@slack/types';
 import type { HomeView } from '@slack/types/dist/views';
 import type { AppContext } from '../../app';
-import {assert, isSameDay, showAdminSection} from '../../config/utils';
+import { assert, isSameDay, showAdminSection } from '../../config/utils';
 import type { User } from '../../entity/user.model';
-import {ptoService, teamService, userService} from '../../service';
+import { ptoService, teamService, userService } from '../../service';
 import { buildAppHome } from '../events/slack-ui/build-app-home';
 
 const submitPtoRequest = async ({
@@ -51,7 +51,7 @@ const submitPtoRequest = async ({
 
   const selectedTemplate = await ptoService.getTemplate(templateId);
 
-  if (selectedTemplate.daysConsumed < 1 && !isSameDay(start, end)) {
+  if (selectedTemplate.daysConsumed < 1 && selectedTemplate.daysConsumed > 0 && !isSameDay(start, end)) {
     await ack({
       response_action: 'errors',
       errors: {
