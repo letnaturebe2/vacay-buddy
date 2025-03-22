@@ -6,6 +6,7 @@ import { assert, isSameDay, showAdminSection } from '../../config/utils';
 import type { User } from '../../entity/user.model';
 import { ptoService, teamService, userService } from '../../service';
 import { buildAppHome } from '../events/slack-ui/build-app-home';
+import {buildPtoApproveBlocks} from "../actions/slack-ui/build-pto-approve-blocks";
 
 const submitPtoRequest = async ({
   ack,
@@ -74,6 +75,19 @@ const submitPtoRequest = async ({
     content,
     approvers,
   );
+
+  // Notify current approver
+  const approver = approvers[0];
+  await client.chat.postMessage({
+    channel: approver.userId,
+    blocks: await buildPtoApproveBlocks(request, true),
+  });
+
+  // Notify requester
+  await client.chat.postMessage({
+    channel: context.user.userId,
+    blocks: await buildPtoApproveBlocks(request, false),
+  });
 
   const admins = await teamService.getAdmins(context.team);
   const blocks: AnyBlock[] = await buildAppHome(context, showAdminSection(context.user, admins));

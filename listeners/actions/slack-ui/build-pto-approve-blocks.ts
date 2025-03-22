@@ -3,8 +3,9 @@ import {ActionId, PtoRequestStatus} from '../../../config/constants';
 import {formatToYYYYMMDD} from '../../../config/utils';
 import type {PtoRequest} from '../../../entity/pto-request.model';
 
-export const buildPtoApproveModal = async (request: PtoRequest, isApprover: boolean): Promise<AnyBlock[]> => {
-  // Calculate date range and days
+export const buildPtoApproveBlocks = async (
+  request: PtoRequest, isApprover: boolean
+): Promise<AnyBlock[]> => {
   const startDate = request.startDate;
   const endDate = request.endDate;
 

@@ -4,7 +4,7 @@ import { ActionId } from '../../config/constants';
 import { assert } from '../../config/utils';
 import type { PtoApproval } from '../../entity/pto-approval.model';
 import { ptoService } from '../../service';
-import { buildPtoApproveModal } from './slack-ui/build-pto-approve-modal';
+import { buildPtoApproveBlocks } from './slack-ui/build-pto-approve-blocks';
 import { buildPtoRequestModal } from './slack-ui/build-pto-request-modal';
 
 export const openRequestApproveModal = async ({
@@ -26,7 +26,7 @@ export const openRequestApproveModal = async ({
     (approve) => approve.id === request.currentApproverId,
   );
   const isApprover = currentPtoApproval?.approverId === context.user.id;
-  const blocks = await buildPtoApproveModal(request, isApprover);
+  const blocks = await buildPtoApproveBlocks(request, isApprover);
 
   const private_metadata = JSON.stringify({
     viewId: body.view.id,
