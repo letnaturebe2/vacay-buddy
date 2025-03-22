@@ -18,6 +18,9 @@ export class PtoApproval extends BaseEntity {
   @JoinColumn({name: "approver_id"})
   approver: User;
 
+  @Column({name: "approver_id"})
+  approverId: number;
+
   @Column({
     type: 'simple-enum',
     enum: PtoRequestStatus,

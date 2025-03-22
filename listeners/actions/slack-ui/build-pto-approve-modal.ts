@@ -2,9 +2,8 @@ import type { AnyBlock } from '@slack/types';
 import { ActionId } from '../../../config/constants';
 import { formatToYYYYMMDD } from '../../../config/utils';
 import type { PtoRequest } from '../../../entity/pto-request.model';
-import type { User } from '../../../entity/user.model';
 
-export const buildPtoApproveModal = async (request: PtoRequest, user: User): Promise<AnyBlock[]> => {
+export const buildPtoApproveModal = async (request: PtoRequest, isApprover: boolean): Promise<AnyBlock[]> => {
   // Calculate date range and days
   const startDate = request.startDate;
   const endDate = request.endDate;
@@ -43,7 +42,7 @@ export const buildPtoApproveModal = async (request: PtoRequest, user: User): Pro
     },
   ];
 
-  if (user.id !== request.user.id) {
+  if (isApprover) {
     blocks.push(
       {
         type: 'divider',

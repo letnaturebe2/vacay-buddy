@@ -2,6 +2,7 @@ import type { AllMiddlewareArgs, BlockAction, SlackActionMiddlewareArgs } from '
 import type { AppContext } from '../../app';
 import { ActionId } from '../../config/constants';
 import { assert } from '../../config/utils';
+import type { PtoApproval } from '../../entity/pto-approval.model';
 import { ptoService } from '../../service';
 import { buildPtoApproveModal } from './slack-ui/build-pto-approve-modal';
 import { buildPtoRequestModal } from './slack-ui/build-pto-request-modal';
@@ -21,7 +22,11 @@ export const openRequestApproveModal = async ({
 
   const requestId = Number(action.value);
   const request = await ptoService.getPtoRequest(requestId);
-  const blocks = await buildPtoApproveModal(request, context.user);
+  const currentPtoApproval: PtoApproval | undefined = request.approvals.find(
+    (approve) => approve.id === request.currentApproverId,
+  );
+  const isApprover = currentPtoApproval?.approverId === context.user.id;
+  const blocks = await buildPtoApproveModal(request, isApprover);
 
   const private_metadata = JSON.stringify({
     viewId: body.view.id,
