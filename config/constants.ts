@@ -1,3 +1,5 @@
+import {PtoTemplate} from "../entity/pto-template.model";
+
 export enum ActionId {
   // admin actions
   UPDATE_BACK_TO_HOME = 'back-to-home',
@@ -40,19 +42,40 @@ export const LOCALE_TO_LANG: Record<string, string> = {
   'ko-KR': 'Korean',
 };
 
-const DEFAULT_TEMPLATE = [
-  {name: 'Full-day PTO', status: ':white_check_mark: Enabled', description: 'Take a full day off'},
+export const DEFAULT_PTO_TEMPLATE_TITLE = 'PTO';
+export const DEFAULT_PTO_TEMPLATE_CONTENT = '📋 Leave Request Details: \n - Reason: \n';
+
+const DEFAULT_TEMPLATE: Partial<PtoTemplate>[] = [
   {
-    name: 'Half-day Morning PTO',
-    status: ':white_check_mark: Enabled',
-    description: 'Take a half day off in the morning',
+    title: 'Full-day Leave',
+    description: 'Take a full day off',
+    daysConsumed: 1.0,
+    content: DEFAULT_PTO_TEMPLATE_CONTENT
   },
   {
-    name: 'Half-day Afternoon PTO',
-    status: ':x: Disabled',
-    description:
-      'Take a half day off in the afternoon, starting after lunch and ending at the close of business hours',
+    title: 'Morning Half-day Leave',
+    description: 'Take the morning off',
+    daysConsumed: 0.5,
+    content: DEFAULT_PTO_TEMPLATE_CONTENT
   },
+  {
+    title: 'Afternoon Half-day Leave',
+    description: 'Take the afternoon off',
+    daysConsumed: 0.5,
+    content: DEFAULT_PTO_TEMPLATE_CONTENT
+  },
+  {
+    title: 'Sick Leave',
+    description: 'Leave due to illness',
+    daysConsumed: 1.0,
+    content: DEFAULT_PTO_TEMPLATE_CONTENT
+  },
+  {
+    title: 'Reward Leave',
+    description: 'Special leave granted as a reward',
+    daysConsumed: 0.0,
+    content: DEFAULT_PTO_TEMPLATE_CONTENT
+  }
 ];
 
 export enum PtoTemplateManageType {
@@ -61,5 +84,3 @@ export enum PtoTemplateManageType {
   DELETE = 'delete',
 }
 
-export const DEFAULT_PTO_TEMPLATE_TITLE = 'PTO';
-export const DEFAULT_PTO_TEMPLATE_CONTENT = '📝 Reason: ';

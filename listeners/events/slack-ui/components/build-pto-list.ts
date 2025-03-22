@@ -13,7 +13,7 @@ export const buildPtoList = (request: PtoRequest, blockId: string): AnyBlock[] =
     block_id: `${blockId}_${request.id}`,
     text: {
       type: 'mrkdwn',
-      text: `*${request.title}* (${startDate} - ${endDate}) \n Type: ${request.template.title}`,
+      text: `*${request.title}* (${startDate} - ${endDate})`,
     },
     accessory: {
       type: 'button',
