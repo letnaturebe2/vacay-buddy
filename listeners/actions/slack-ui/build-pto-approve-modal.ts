@@ -1,7 +1,7 @@
-import type { AnyBlock } from '@slack/types';
-import { ActionId } from '../../../config/constants';
-import { formatToYYYYMMDD } from '../../../config/utils';
-import type { PtoRequest } from '../../../entity/pto-request.model';
+import type {AnyBlock} from '@slack/types';
+import {ActionId, PtoRequestStatus} from '../../../config/constants';
+import {formatToYYYYMMDD} from '../../../config/utils';
+import type {PtoRequest} from '../../../entity/pto-request.model';
 
 export const buildPtoApproveModal = async (request: PtoRequest, isApprover: boolean): Promise<AnyBlock[]> => {
   // Calculate date range and days
@@ -11,7 +11,34 @@ export const buildPtoApproveModal = async (request: PtoRequest, isApprover: bool
   const formattedStartDate = formatToYYYYMMDD(startDate);
   const formattedEndDate = formatToYYYYMMDD(endDate);
 
+  const approversSection = {
+    type: 'section',
+    text: {
+      type: 'mrkdwn',
+      text: '*Approvers:* \n' + request.approvals.map((approval) => {
+        let statusEmoji;
+
+        switch (approval.status) {
+          case PtoRequestStatus.Approved:
+            statusEmoji = '✅';
+            break;
+          case PtoRequestStatus.Rejected:
+            statusEmoji = '❌';
+            break;
+          default:
+            statusEmoji = '🔄';
+        }
+
+        return `<@${approval.approver.userId}>${statusEmoji}`;
+      }).join('  ')
+    }
+  };
+
   const blocks: AnyBlock[] = [
+    approversSection,
+    {
+      type: 'divider',
+    },
     {
       type: 'section',
       fields: [
