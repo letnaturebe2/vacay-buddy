@@ -5,8 +5,9 @@ import type { AppContext } from '../../app';
 import { assert, isSameDay, showAdminSection } from '../../config/utils';
 import type { User } from '../../entity/user.model';
 import { ptoService, teamService, userService } from '../../service';
+import { buildRequestDecisionModal } from '../actions/slack-ui/build-request-decision-modal';
 import { buildAppHome } from '../events/slack-ui/build-app-home';
-import {buildPtoApproveBlocks} from "../actions/slack-ui/build-pto-approve-blocks";
+import { buildRequestDecisionBlocks } from './slack-ui/build-request-decision-blocks';
 
 const submitPtoRequest = async ({
   ack,
@@ -80,13 +81,13 @@ const submitPtoRequest = async ({
   const approver = approvers[0];
   await client.chat.postMessage({
     channel: approver.userId,
-    blocks: await buildPtoApproveBlocks(request, true),
+    blocks: await buildRequestDecisionBlocks(request, true),
   });
 
   // Notify requester
   await client.chat.postMessage({
     channel: context.user.userId,
-    blocks: await buildPtoApproveBlocks(request, false),
+    blocks: await buildRequestDecisionBlocks(request, false),
   });
 
   const admins = await teamService.getAdmins(context.team);

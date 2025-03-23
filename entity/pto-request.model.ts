@@ -55,7 +55,7 @@ export class PtoRequest extends BaseEntity {
   approvals: PtoApproval[];
 
   @Column({type: 'integer', nullable: true})
-  currentApproverId: number | null
+  currentApprovalId: number | null
 
   get consumedDays(): number {
     const daysDifference = Math.floor(

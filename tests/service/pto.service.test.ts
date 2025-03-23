@@ -183,7 +183,7 @@ describe("PtoService Tests", () => {
       expect(request.reason).toBe("Vacation time");
       expect(request.approvals).toHaveLength(1);
       expect(request.approvals[0].approver.userId).toBe("approver");
-      expect(request.currentApproverId).toBe(request.approvals[0].id);
+      expect(request.currentApprovalId).toBe(request.approvals[0].id);
       expect(request.template.title).toBe("Vacation");
       expect(request.consumedDays).toBe(1);
     });
@@ -310,7 +310,7 @@ describe("PtoService Tests", () => {
       expect(ptoRequest.user.userId).toBe("test-user");
       expect(ptoRequest.status).toBe(PtoRequestStatus.Pending);
       expect(ptoRequest.template.title).toBe("Vacation");
-      expect(ptoRequest.currentApproverId).not.toBeNull();
+      expect(ptoRequest.currentApprovalId).not.toBeNull();
     });
 
   });
@@ -365,16 +365,16 @@ describe("PtoService Tests", () => {
       );
 
       // Act
-      const approver1Requests = await ptoService.getPendingApprovalsToReview(approver1);
-      const approver2Requests = await ptoService.getPendingApprovalsToReview(approver2);
-      const approver3Requests = await ptoService.getPendingApprovalsToReview(approver3);
+      const approver1Approvals = await ptoService.getPendingApprovalsToReview(approver1);
+      const approver2Approvals = await ptoService.getPendingApprovalsToReview(approver2);
+      const approver3Approvals = await ptoService.getPendingApprovalsToReview(approver3);
 
       // Assert
-      expect(approver1Requests).toHaveLength(1);
-      expect(approver1Requests[0].approver.userId).toBe("approver1");
-      expect(approver2Requests).toHaveLength(0);
-      expect(approver3Requests).toHaveLength(0);
-      expect(ptoRequest.currentApproverId).toBe(approver1Requests[0].id);
+      expect(approver1Approvals).toHaveLength(1);
+      expect(approver1Approvals[0].approver.userId).toBe("approver1");
+      expect(approver2Approvals).toHaveLength(0);
+      expect(approver3Approvals).toHaveLength(0);
+      expect(ptoRequest.currentApprovalId).toBe(approver1Approvals[0].id);
     });
 
     test("should show request to next approver after current approver approves", async () => {
@@ -403,7 +403,7 @@ describe("PtoService Tests", () => {
 
       // Update the current approver ID to the second approver
       const secondApproval = ptoRequest.approvals.find(a => a.approver.userId === "approver2")!;
-      ptoRequest.currentApproverId = secondApproval.id;
+      ptoRequest.currentApprovalId = secondApproval.id;
       await ptoRequestRepository.save(ptoRequest);
 
       // Act
@@ -456,7 +456,7 @@ describe("PtoService Tests", () => {
 
       const secondApprovalId = ptoRequest.approvals
         .find(a => a.approver.userId === "approver2")!.id;
-      expect(updatedRequest!.currentApproverId).toBe(secondApprovalId);
+      expect(updatedRequest!.currentApprovalId).toBe(secondApprovalId);
       expect(updatedRequest!.status).toBe(PtoRequestStatus.Pending);
 
       user = await userRepository.findOneOrFail({where: {userId: user.userId}});

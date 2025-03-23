@@ -4,8 +4,7 @@ import { ActionId } from '../../config/constants';
 import { assert } from '../../config/utils';
 import type { PtoApproval } from '../../entity/pto-approval.model';
 import { ptoService } from '../../service';
-import { buildPtoApproveBlocks } from './slack-ui/build-pto-approve-blocks';
-import { buildPtoRequestModal } from './slack-ui/build-pto-request-modal';
+import { buildRequestDecisionModal } from './slack-ui/build-request-decision-modal';
 
 export const openRequestApproveModal = async ({
   ack,
@@ -17,30 +16,37 @@ export const openRequestApproveModal = async ({
 }: AllMiddlewareArgs<AppContext> & SlackActionMiddlewareArgs<BlockAction>) => {
   await ack();
 
-  assert(!!body.view, 'body.view.id is undefined');
   assert(action.type === 'button' && !!action.value, 'action type must be button and have value');
 
   const requestId = Number(action.value);
   const request = await ptoService.getPtoRequest(requestId);
   const currentPtoApproval: PtoApproval | undefined = request.approvals.find(
-    (approve) => approve.id === request.currentApproverId,
+    (approve) => approve.id === request.currentApprovalId,
   );
   const isApprover = currentPtoApproval?.approverId === context.user.id;
-  const blocks = await buildPtoApproveBlocks(request, isApprover);
+  const blocks = await buildRequestDecisionModal(request, isApprover);
 
-  const private_metadata = JSON.stringify({
-    viewId: body.view.id,
-    viewHash: body.view.hash,
-  });
+  let privateMetadata;
+  // if the request is from a modal, store the viewId and viewHash for render the updated view
+  if (body.view) {
+    privateMetadata = JSON.stringify({
+      viewId: body.view.id,
+      viewHash: body.view.hash,
+    });
+  }
 
   await client.views.open({
     trigger_id: body.trigger_id,
     view: {
       type: 'modal',
-      private_metadata: private_metadata,
-      callback_id: ActionId.SUBMIT_PTO_REQUEST,
-      title: { type: 'plain_text', text: 'Request PTO' },
+      private_metadata: privateMetadata,
+      callback_id: ActionId.SUBMIT_DECISION_REQUEST,
+      title: { type: 'plain_text', text: 'PTO Request Review' },
       blocks: blocks,
+      submit: {
+        type: 'plain_text',
+        text: 'Submit',
+      },
     },
   });
 };

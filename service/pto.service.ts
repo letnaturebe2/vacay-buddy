@@ -93,7 +93,7 @@ export class PtoService {
       );
 
       savedRequest.approvals = await manager.save(approvals);
-      savedRequest.currentApproverId = savedRequest.approvals[0].id;
+      savedRequest.currentApprovalId = savedRequest.approvals[0].id;
       await manager.save(savedRequest);
       return savedRequest;
     });
@@ -155,7 +155,7 @@ export class PtoService {
 
     const nextApproverIndex = requestApprovals.findIndex((a) => a.id === approvalId) + 1;
     if (nextApproverIndex < requestApprovals.length) {
-      ptoRequest.currentApproverId = requestApprovals[nextApproverIndex].id;
+      ptoRequest.currentApprovalId = requestApprovals[nextApproverIndex].id;
     } else {
       // All approvers have approved the request
       ptoRequest.status = PtoRequestStatus.Approved;
@@ -200,6 +200,6 @@ export class PtoService {
       relations: ['approver', 'ptoRequest', 'ptoRequest.user', 'ptoRequest.template']
     });
 
-    return approvals.filter(approval => approval.ptoRequest.currentApproverId === approval.id);
+    return approvals.filter(approval => approval.ptoRequest.currentApprovalId === approval.id);
   }
 }

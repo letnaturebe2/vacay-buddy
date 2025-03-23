@@ -22,7 +22,7 @@ export const buildPtoList = (request: PtoRequest, blockId: string): AnyBlock[] =
         text: 'View',
       },
       value: `${request.id}`,
-      action_id: ActionId.OPEN_REQUEST_APPROVE_MODAL,
+      action_id: ActionId.OPEN_DECISION_MODAL,
     },
   });
 

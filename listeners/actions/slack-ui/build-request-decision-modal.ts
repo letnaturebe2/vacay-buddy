@@ -3,7 +3,7 @@ import {ActionId, PtoRequestStatus} from '../../../config/constants';
 import {formatToYYYYMMDD} from '../../../config/utils';
 import type {PtoRequest} from '../../../entity/pto-request.model';
 
-export const buildPtoApproveBlocks = async (
+export const buildRequestDecisionModal = async (
   request: PtoRequest, isApprover: boolean
 ): Promise<AnyBlock[]> => {
   const startDate = request.startDate;
@@ -76,32 +76,61 @@ export const buildPtoApproveBlocks = async (
         type: 'divider',
       },
       {
-        type: 'actions',
-        block_id: 'approve_deny_actions',
-        elements: [
-          {
-            type: 'button',
+        type: 'input',
+        block_id: 'block_id_decision',
+        element: {
+          type: 'radio_buttons',
+          action_id: 'action_id_decision',
+          options: [
+            {
+              text: {
+                type: 'plain_text',
+                text: 'Approve',
+                emoji: true,
+              },
+              value: `approve_${request.id}`
+            },
+            {
+              text: {
+                type: 'plain_text',
+                text: 'Reject',
+                emoji: true,
+              },
+              value: `reject_${request.id}`
+            }
+          ],
+          initial_option: {
             text: {
               type: 'plain_text',
               text: 'Approve',
               emoji: true,
             },
-            style: 'primary',
-            value: request.id.toString(),
-            action_id: ActionId.CLOSE_APPROVE_PTO_REQUEST,
+            value: `approve_${request.id}`
+          }
+        },
+        label: {
+          type: 'plain_text',
+          text: 'Decision',
+          emoji: true
+        }
+      },
+      {
+        type: 'input',
+        block_id: 'block_id_comment',
+        optional: true,
+        element: {
+          type: 'plain_text_input',
+          action_id: 'action_id_comment',
+          multiline: true,
+          placeholder: {
+            type: 'plain_text',
+            text: 'Add a comment...',
           },
-          {
-            type: 'button',
-            text: {
-              type: 'plain_text',
-              text: 'Deny',
-              emoji: true,
-            },
-            style: 'danger',
-            value: request.id.toString(),
-            action_id: ActionId.CLOSE_DENY_PTO_REQUEST,
-          },
-        ],
+        },
+        label: {
+          type: 'plain_text',
+          text: 'Comment',
+        },
       },
     );
   }

@@ -15,7 +15,7 @@ const register = (app: App) => {
   app.action(ActionId.OPEN_PTO_MANAGE_MODAL, openPtoManageTemplateModal);
   app.action(ActionId.OPEN_PTO_REQUEST_MODAL, openPtoRequestModal);
   app.action(ActionId.SELECT_PTO_TEMPLATE, selectPtoTemplate);
-  app.action(ActionId.OPEN_REQUEST_APPROVE_MODAL, openRequestApproveModal);
+  app.action(ActionId.OPEN_DECISION_MODAL, openRequestApproveModal);
 };
 
 export default { register };
