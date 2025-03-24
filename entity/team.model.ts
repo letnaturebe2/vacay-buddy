@@ -1,6 +1,6 @@
-import {Entity, Column, Index, OneToMany} from "typeorm";
-import {User} from "./user.model";
-import {BaseEntity} from "./base";
+import { Column, Entity, Index, OneToMany } from 'typeorm';
+import { BaseEntity } from './base';
+import { User } from './user.model';
 
 @Entity()
 export class Team extends BaseEntity {
@@ -8,6 +8,9 @@ export class Team extends BaseEntity {
   @Column()
   teamId: string;
 
-  @OneToMany(() => User, (user) => user.team)
+  @OneToMany(
+    () => User,
+    (user) => user.team,
+  )
   users: User[];
 }

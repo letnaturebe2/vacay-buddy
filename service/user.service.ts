@@ -1,7 +1,7 @@
-import {Team} from '../entity/team.model';
-import {DataSource, In, Repository} from "typeorm";
-import {User} from "../entity/user.model";
-import {assert} from "../config/utils";
+import { DataSource, In, Repository } from 'typeorm';
+import { assert } from '../config/utils';
+import { Team } from '../entity/team.model';
+import { User } from '../entity/user.model';
 
 export class UserService {
   private userRepository: Repository<User>;
@@ -13,7 +13,7 @@ export class UserService {
   }
 
   public async updateUser(userId: string, userData: Partial<User>): Promise<User> {
-    const user = await this.userRepository.findOne({where: {userId: userId}});
+    const user = await this.userRepository.findOne({ where: { userId: userId } });
     assert(!!user, `user not found: ${userId}`);
 
     Object.assign(user, userData);
@@ -21,7 +21,7 @@ export class UserService {
   }
 
   public async getOrCreateUser(userId: string, team: Team): Promise<User> {
-    let user = await this.userRepository.findOne({where: {userId: userId}});
+    let user = await this.userRepository.findOne({ where: { userId: userId } });
     if (user === null) {
       user = await this.createUser(userId, team);
     }
@@ -39,19 +39,15 @@ export class UserService {
     return await this.userRepository.find({
       where: {
         isAdmin: true,
-        team: {id: team.id}
-      }
+        team: { id: team.id },
+      },
     });
   }
 
   public async updateAdmins(userIds: string[], team: Team) {
-    await this.dataSource.transaction(async transactionalEntityManager => {
-      await transactionalEntityManager.update(User, {team: team}, {isAdmin: false});
-      await transactionalEntityManager.update(
-        User,
-        {team: team, userId: In(userIds)},
-        {isAdmin: true}
-      );
+    await this.dataSource.transaction(async (transactionalEntityManager) => {
+      await transactionalEntityManager.update(User, { team: team }, { isAdmin: false });
+      await transactionalEntityManager.update(User, { team: team, userId: In(userIds) }, { isAdmin: true });
     });
   }
 }

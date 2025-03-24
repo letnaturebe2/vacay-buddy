@@ -1,7 +1,7 @@
-import {Team} from '../entity/team.model';
-import {DataSource, Repository} from "typeorm";
-import {User} from "../entity/user.model";
-import {UserService} from "./user.service";
+import { DataSource, Repository } from 'typeorm';
+import { Team } from '../entity/team.model';
+import { User } from '../entity/user.model';
+import { UserService } from './user.service';
 
 export class TeamService {
   private readonly teamRepository: Repository<Team>;
@@ -13,7 +13,7 @@ export class TeamService {
   }
 
   public async getTeam(teamId: string): Promise<Team | null> {
-    return await this.teamRepository.findOne({where: {teamId: teamId}});
+    return await this.teamRepository.findOne({ where: { teamId: teamId } });
   }
 
   public async createTeam(teamId: string): Promise<Team> {

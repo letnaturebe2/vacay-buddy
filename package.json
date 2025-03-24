@@ -6,8 +6,8 @@
   "scripts": {
     "build": "tsc",
     "start": "npm run build && node ./dist/app.js",
-    "lint": "npx @biomejs/biome check *.ts listeners",
-    "lint:fix": "npx @biomejs/biome check --write *.ts listeners",
+    "lint": "npx @biomejs/biome check *.ts  listeners service entity",
+    "lint:fix": "npx @biomejs/biome check --write *.ts  listeners service entity",
     "test": "npm run build && npm run lint",
     "dev": "nodemon --ext ts --exec ts-node app.ts",
     "typeorm": "typeorm-ts-node-commonjs",

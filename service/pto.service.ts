@@ -1,12 +1,12 @@
-import {DataSource, Repository} from "typeorm";
-import {PtoTemplate} from "../entity/pto-template.model";
-import {PtoRequest} from "../entity/pto-request.model";
-import {PtoApproval} from "../entity/pto-approval.model";
-import {User} from "../entity/user.model";
-import {Team} from "../entity/team.model";
-import {DEFAULT_TEMPLATE, PtoRequestStatus} from "../config/constants";
-import {assert, isSameDay} from "../config/utils";
-import {UserService} from "./user.service";
+import { DataSource, Repository } from 'typeorm';
+import { DEFAULT_TEMPLATE, PtoRequestStatus } from '../config/constants';
+import { assert, isSameDay } from '../config/utils';
+import { PtoApproval } from '../entity/pto-approval.model';
+import { PtoRequest } from '../entity/pto-request.model';
+import { PtoTemplate } from '../entity/pto-template.model';
+import { Team } from '../entity/team.model';
+import { User } from '../entity/user.model';
+import { UserService } from './user.service';
 
 export class PtoService {
   private readonly ptoTemplateRepository: Repository<PtoTemplate>;
@@ -24,19 +24,19 @@ export class PtoService {
   }
 
   async getTemplate(id: number): Promise<PtoTemplate> {
-    return this.ptoTemplateRepository.findOneByOrFail({id});
+    return this.ptoTemplateRepository.findOneByOrFail({ id });
   }
 
   async getTemplates(team: Team): Promise<PtoTemplate[]> {
-    return this.ptoTemplateRepository.find({where: {team: {id: team.id}}});
+    return this.ptoTemplateRepository.find({ where: { team: { id: team.id } } });
   }
 
   async upsertTemplate(template: Partial<PtoTemplate>, team: Team): Promise<PtoTemplate> {
     if (template.id) {
       return this.updateTemplate(template.id, template);
-    } else {
-      return this.createTemplate(template, team);
     }
+
+    return this.createTemplate(template, team);
   }
 
   async deleteTemplate(id: number): Promise<void> {
@@ -46,14 +46,14 @@ export class PtoService {
   private async createTemplate(template: Partial<PtoTemplate>, team: Team): Promise<PtoTemplate> {
     const newTemplate = this.ptoTemplateRepository.create({
       ...template,
-      team
+      team,
     });
     return this.ptoTemplateRepository.save(newTemplate);
   }
 
   private async updateTemplate(id: number, templateData: Partial<PtoTemplate>): Promise<PtoTemplate> {
     await this.ptoTemplateRepository.update(id, templateData);
-    return this.ptoTemplateRepository.findOneByOrFail({id});
+    return this.ptoTemplateRepository.findOneByOrFail({ id });
   }
 
   async createPtoRequest(
@@ -63,13 +63,16 @@ export class PtoService {
     endDate: Date,
     title: string,
     reason: string,
-    approvers: User[]
+    approvers: User[],
   ): Promise<PtoRequest> {
     assert(approvers.length > 0, 'At least one approver is required for PTO requests');
     assert(startDate <= endDate, 'Start date must be before end date');
 
     if (template.daysConsumed < 1 && template.daysConsumed > 0) {
-      assert(isSameDay(startDate, endDate), 'Start and end date must be the same for templates that consume less than 1 day');
+      assert(
+        isSameDay(startDate, endDate),
+        'Start and end date must be the same for templates that consume less than 1 day',
+      );
     }
 
     return this.dataSource.transaction(async (manager) => {
@@ -89,7 +92,7 @@ export class PtoService {
           ptoRequest: savedRequest,
           approver,
           status: PtoRequestStatus.Pending,
-        })
+        }),
       );
 
       savedRequest.approvals = await manager.save(approvals);
@@ -113,29 +116,29 @@ export class PtoService {
 
   async getPtoRequest(id: number): Promise<PtoRequest> {
     return this.ptoRequestRepository.findOneOrFail({
-      where: {id},
-      relations: ['user', 'template', 'approvals', 'approvals.approver']
+      where: { id },
+      relations: ['user', 'template', 'approvals', 'approvals.approver'],
     });
   }
 
   async getMyPendingPtoRequests(user: User): Promise<PtoRequest[]> {
     return this.ptoRequestRepository.find({
-      where: {user: {id: user.id}, status: PtoRequestStatus.Pending},
-      relations: ['user', 'template', 'approvals', 'approvals.approver']
+      where: { user: { id: user.id }, status: PtoRequestStatus.Pending },
+      relations: ['user', 'template', 'approvals', 'approvals.approver'],
     });
   }
 
   async getMyPtoRequests(user: User): Promise<PtoRequest[]> {
     return this.ptoRequestRepository.find({
-      where: {user: {id: user.id}},
-      relations: ['user', 'template', 'approvals', 'approvals.approver']
+      where: { user: { id: user.id } },
+      relations: ['user', 'template', 'approvals', 'approvals.approver'],
     });
   }
 
   private async getValidatedApproval(approver: User, approvalId: number): Promise<PtoApproval> {
     const approval = await this.ptoApprovalRepository.findOneOrFail({
-      where: {id: approvalId},
-      relations: ['approver', 'ptoRequest', 'ptoRequest.approvals', 'ptoRequest.user', 'ptoRequest.template']
+      where: { id: approvalId },
+      relations: ['approver', 'ptoRequest', 'ptoRequest.approvals', 'ptoRequest.user', 'ptoRequest.template'],
     });
 
     if (!approver.isAdmin) {
@@ -160,9 +163,9 @@ export class PtoService {
       // All approvers have approved the request
       ptoRequest.status = PtoRequestStatus.Approved;
       // update user's used PTO days
-      await this.userService.updateUser(
-        ptoRequest.user.userId,
-        {usedPtoDays: ptoRequest.user.usedPtoDays + ptoRequest.template.daysConsumed});
+      await this.userService.updateUser(ptoRequest.user.userId, {
+        usedPtoDays: ptoRequest.user.usedPtoDays + ptoRequest.template.daysConsumed,
+      });
     }
 
     await this.ptoRequestRepository.save(ptoRequest);
@@ -194,12 +197,12 @@ export class PtoService {
   async getPendingApprovalsToReview(approver: User): Promise<PtoApproval[]> {
     const approvals = await this.ptoApprovalRepository.find({
       where: {
-        approver: {id: approver.id},
-        status: PtoRequestStatus.Pending
+        approver: { id: approver.id },
+        status: PtoRequestStatus.Pending,
       },
-      relations: ['approver', 'ptoRequest', 'ptoRequest.user', 'ptoRequest.template']
+      relations: ['approver', 'ptoRequest', 'ptoRequest.user', 'ptoRequest.template'],
     });
 
-    return approvals.filter(approval => approval.ptoRequest.currentApprovalId === approval.id);
+    return approvals.filter((approval) => approval.ptoRequest.currentApprovalId === approval.id);
   }
 }
