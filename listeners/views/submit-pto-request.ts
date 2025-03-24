@@ -5,7 +5,6 @@ import type { AppContext } from '../../app';
 import { assert, isSameDay, showAdminSection } from '../../config/utils';
 import type { User } from '../../entity/user.model';
 import { ptoService, teamService, userService } from '../../service';
-import { buildRequestDecisionModal } from '../actions/slack-ui/build-request-decision-modal';
 import { buildAppHome } from '../events/slack-ui/build-app-home';
 import { buildRequestDecisionBlocks } from './slack-ui/build-request-decision-blocks';
 
