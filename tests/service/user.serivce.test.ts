@@ -1,6 +1,6 @@
 import { UserService } from "../../src/service/user.service";
-import { User } from "../../entity/user.model";
-import { Team } from "../../entity/team.model";
+import { User } from "../../src/entity/user.model";
+import { Team } from "../../src/entity/team.model";
 import { Repository } from "typeorm";
 import { testDataSource } from "../config/test-db";
 

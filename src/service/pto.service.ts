@@ -1,11 +1,11 @@
 import { DataSource, Repository } from 'typeorm';
-import { DEFAULT_TEMPLATE, PtoRequestStatus } from '../config/constants';
-import { assert, isSameDay } from '../config/utils';
-import { PtoApproval } from '../../entity/pto-approval.model';
-import { PtoRequest } from '../../entity/pto-request.model';
-import { PtoTemplate } from '../../entity/pto-template.model';
-import { Team } from '../../entity/team.model';
-import { User } from '../../entity/user.model';
+import { DEFAULT_TEMPLATE, PtoRequestStatus } from '../constants';
+import { PtoApproval } from '../entity/pto-approval.model';
+import { PtoRequest } from '../entity/pto-request.model';
+import { PtoTemplate } from '../entity/pto-template.model';
+import { Team } from '../entity/team.model';
+import { User } from '../entity/user.model';
+import { assert, isSameDay } from '../utils';
 import { UserService } from './user.service';
 
 export class PtoService {

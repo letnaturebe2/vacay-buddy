@@ -6,14 +6,14 @@
   "scripts": {
     "build": "tsc",
     "start": "npm run build && node ./dist/app.js",
-    "lint": "npx @biomejs/biome check *.ts  listeners src/service entity",
-    "lint:fix": "npx @biomejs/biome check --write *.ts  listeners src/service entity",
+    "lint": "npx @biomejs/biome check src",
+    "lint:fix": "npx @biomejs/biome check --write src",
     "test": "npm run build && npm run lint",
     "dev": "nodemon --ext ts --exec ts-node src/app.ts",
     "typeorm": "typeorm-ts-node-commonjs",
     "test:jest": "jest",
-    "migration:generate": "npm run typeorm migration:generate src/migration/migration/ -- -d src/config/db.ts",
-    "migration:run": "npm run typeorm migration:run -- -d src/config/db.ts"
+    "migration:generate": "npm run typeorm migration:generate src/migration/migration/ -- -d src/db.ts",
+    "migration:run": "npm run typeorm migration:run -- -d src/db.ts"
   },
   "author": "Slack Technologies, LLC",
   "license": "MIT",

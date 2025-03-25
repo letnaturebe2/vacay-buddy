@@ -1,6 +1,6 @@
 import type { AllMiddlewareArgs, App } from '@slack/bolt';
 import type { AppContext } from './app';
-import type { Team } from '../entity/team.model';
+import type { Team } from './entity/team.model';
 import { ptoService, teamService, userService } from './service';
 
 const loadAppContext = async ({ context, client, next }: AllMiddlewareArgs<AppContext>) => {

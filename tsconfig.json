@@ -20,7 +20,7 @@
   "include": [
     "*.ts",
     "src/config/**/*",
-    "entity/**/*",
+    "src/entity/**/*",
     "src/migration/**/*"
   ],
   "exclude": [

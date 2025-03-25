@@ -1,6 +1,6 @@
 import { DataSource, Repository } from 'typeorm';
-import { Team } from '../../entity/team.model';
-import { User } from '../../entity/user.model';
+import { Team } from '../entity/team.model';
+import { User } from '../entity/user.model';
 import { UserService } from './user.service';
 
 export class TeamService {

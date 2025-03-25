@@ -1,4 +1,4 @@
-import { dataSource } from '../config/db';
+import { dataSource } from '../db';
 import { PtoService } from './pto.service';
 import { TeamService } from './team.service';
 import { UserService } from './user.service';

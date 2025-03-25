@@ -1,7 +1,7 @@
 import { DataSource, In, Repository } from 'typeorm';
-import { assert } from '../config/utils';
-import { Team } from '../../entity/team.model';
-import { User } from '../../entity/user.model';
+import { Team } from '../entity/team.model';
+import { User } from '../entity/user.model';
+import { assert } from '../utils';
 
 export class UserService {
   private userRepository: Repository<User>;
