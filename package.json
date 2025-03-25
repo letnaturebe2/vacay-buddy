@@ -32,12 +32,14 @@
   },
   "dependencies": {
     "@slack/bolt": "^4.2.0",
+    "@types/xlsx": "^0.0.35",
     "dotenv": "~16.4.7",
     "express": "^5.0.1",
     "mysql2": "^3.14.0",
     "openai": "^4.85.2",
     "reflect-metadata": "^0.2.2",
-    "typeorm-naming-strategies": "^4.1.0"
+    "typeorm-naming-strategies": "^4.1.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
