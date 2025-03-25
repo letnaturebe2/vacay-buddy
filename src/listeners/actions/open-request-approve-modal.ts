@@ -26,7 +26,7 @@ export const openRequestApproveModal = async ({
   const isApprover = currentPtoApproval?.approverId === context.user.id;
   const blocks = await buildRequestDecisionModal(request, isApprover);
 
-  let privateMetadata: string | undefined;
+  let privateMetadata: string = '{}';
 
   // if the request is from a modal, store the viewId and viewHash for render the updated view
   if (body.view) {

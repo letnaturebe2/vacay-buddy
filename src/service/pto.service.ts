@@ -1,12 +1,12 @@
-import { DataSource, Repository } from 'typeorm';
-import { DEFAULT_TEMPLATE, PtoRequestStatus } from '../constants';
-import { PtoApproval } from '../entity/pto-approval.model';
-import { PtoRequest } from '../entity/pto-request.model';
-import { PtoTemplate } from '../entity/pto-template.model';
-import { Team } from '../entity/team.model';
-import { User } from '../entity/user.model';
-import { assert, isSameDay } from '../utils';
-import { UserService } from './user.service';
+import {DataSource, Repository} from 'typeorm';
+import {DEFAULT_TEMPLATE, PtoRequestStatus} from '../constants';
+import {PtoApproval} from '../entity/pto-approval.model';
+import {PtoRequest} from '../entity/pto-request.model';
+import {PtoTemplate} from '../entity/pto-template.model';
+import {Team} from '../entity/team.model';
+import {User} from '../entity/user.model';
+import {assert, isSameDay} from '../utils';
+import {UserService} from './user.service';
 
 export class PtoService {
   private readonly ptoTemplateRepository: Repository<PtoTemplate>;
@@ -24,11 +24,11 @@ export class PtoService {
   }
 
   async getTemplate(id: number): Promise<PtoTemplate> {
-    return this.ptoTemplateRepository.findOneByOrFail({ id });
+    return this.ptoTemplateRepository.findOneByOrFail({id});
   }
 
   async getTemplates(team: Team): Promise<PtoTemplate[]> {
-    return this.ptoTemplateRepository.find({ where: { team: { id: team.id } } });
+    return this.ptoTemplateRepository.find({where: {team: {id: team.id}}});
   }
 
   async upsertTemplate(template: Partial<PtoTemplate>, team: Team): Promise<PtoTemplate> {
@@ -53,7 +53,7 @@ export class PtoService {
 
   private async updateTemplate(id: number, templateData: Partial<PtoTemplate>): Promise<PtoTemplate> {
     await this.ptoTemplateRepository.update(id, templateData);
-    return this.ptoTemplateRepository.findOneByOrFail({ id });
+    return this.ptoTemplateRepository.findOneByOrFail({id});
   }
 
   async createPtoRequest(
@@ -116,29 +116,29 @@ export class PtoService {
 
   async getPtoRequest(id: number): Promise<PtoRequest> {
     return this.ptoRequestRepository.findOneOrFail({
-      where: { id },
+      where: {id},
       relations: ['user', 'template', 'approvals', 'approvals.approver'],
     });
   }
 
   async getMyPendingPtoRequests(user: User): Promise<PtoRequest[]> {
     return this.ptoRequestRepository.find({
-      where: { user: { id: user.id }, status: PtoRequestStatus.Pending },
+      where: {user: {id: user.id}, status: PtoRequestStatus.Pending},
       relations: ['user', 'template', 'approvals', 'approvals.approver'],
     });
   }
 
   async getMyPtoRequests(user: User): Promise<PtoRequest[]> {
     return this.ptoRequestRepository.find({
-      where: { user: { id: user.id } },
+      where: {user: {id: user.id}},
       relations: ['user', 'template', 'approvals', 'approvals.approver'],
     });
   }
 
   private async getApproval(approvalId: number): Promise<PtoApproval> {
     return this.ptoApprovalRepository.findOneOrFail({
-      where: { id: approvalId },
-      relations: ['approver', 'ptoRequest', 'ptoRequest.approvals', 'ptoRequest.user', 'ptoRequest.template'],
+      where: {id: approvalId},
+      relations: ['approver', 'ptoRequest', 'ptoRequest.approvals.approver', 'ptoRequest.approvals', 'ptoRequest.user', 'ptoRequest.template'],  // TODO: chlwhrghk
     });
   }
 
@@ -227,7 +227,7 @@ export class PtoService {
   async getPendingApprovalsToReview(approver: User): Promise<PtoApproval[]> {
     const approvals = await this.ptoApprovalRepository.find({
       where: {
-        approver: { id: approver.id },
+        approver: {id: approver.id},
         status: PtoRequestStatus.Pending,
       },
       relations: ['approver', 'ptoRequest', 'ptoRequest.user', 'ptoRequest.template'],
