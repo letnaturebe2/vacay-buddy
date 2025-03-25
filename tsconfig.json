@@ -19,9 +19,9 @@
   },
   "include": [
     "*.ts",
-    "config/**/*",
+    "src/config/**/*",
     "entity/**/*",
-    "migration/**/*",
+    "src/migration/**/*"
   ],
   "exclude": [
     "node_modules",

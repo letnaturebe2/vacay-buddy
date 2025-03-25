@@ -1,5 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
-import { PtoRequestStatus } from '../config/constants';
+import { PtoRequestStatus } from '../src/config/constants';
 import { BaseEntity } from './base';
 import { PtoApproval } from './pto-approval.model';
 import { PtoTemplate } from './pto-template.model';

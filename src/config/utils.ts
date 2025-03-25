@@ -1,4 +1,4 @@
-import {User} from "../entity/user.model";
+import {User} from "../../entity/user.model";
 
 export function assert(condition: boolean, message: string): asserts condition {
   if (!condition) {

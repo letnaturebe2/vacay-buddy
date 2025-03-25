@@ -1,10 +1,10 @@
 import type { AllMiddlewareArgs, SlackViewMiddlewareArgs, ViewSubmitAction } from '@slack/bolt';
 import type { AnyBlock } from '@slack/types';
 import type { HomeView } from '@slack/types/dist/views';
-import type { AppContext } from '../../app';
-import { assert, isSameDay, showAdminSection } from '../../config/utils';
+import type { AppContext } from '../../src/app';
+import { assert, isSameDay, showAdminSection } from '../../src/config/utils';
 import type { User } from '../../entity/user.model';
-import { ptoService, teamService, userService } from '../../service';
+import { ptoService, teamService, userService } from '../../src/service';
 import { buildAppHome } from '../events/slack-ui/build-app-home';
 import { buildRequestDecisionBlocks } from './slack-ui/build-request-decision-blocks';
 

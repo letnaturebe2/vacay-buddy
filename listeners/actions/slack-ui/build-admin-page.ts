@@ -1,7 +1,7 @@
 import type { AnyBlock } from '@slack/types';
 import { RichTextInput } from '@slack/types/dist/block-kit/block-elements';
 import type { RichTextBlock } from '@slack/types/dist/block-kit/blocks';
-import { ActionId } from '../../../config/constants';
+import { ActionId } from '../../../src/config/constants';
 import type { PtoTemplate } from '../../../entity/pto-template.model';
 
 export const buildAdminPage = async (ptoTemplates: PtoTemplate[]): Promise<AnyBlock[]> => {

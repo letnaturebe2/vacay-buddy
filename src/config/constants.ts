@@ -1,4 +1,4 @@
-import {PtoTemplate} from "../entity/pto-template.model";
+import {PtoTemplate} from "../../entity/pto-template.model";
 
 export enum ActionId {
   // admin actions

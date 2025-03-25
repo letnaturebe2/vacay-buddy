@@ -2,10 +2,10 @@ import type { AllMiddlewareArgs, BlockAction, SlackActionMiddlewareArgs } from '
 import { assertNever } from '@slack/bolt/dist/helpers';
 import type { OverflowAction } from '@slack/bolt/dist/types/actions/block-action';
 import type { AnyBlock } from '@slack/types';
-import type { AppContext } from '../../app';
-import { ActionId, PtoTemplateManageType } from '../../config/constants';
-import { assert } from '../../config/utils';
-import { ptoService } from '../../service';
+import type { AppContext } from '../../src/app';
+import { ActionId, PtoTemplateManageType } from '../../src/config/constants';
+import { assert } from '../../src/config/utils';
+import { ptoService } from '../../src/service';
 import { buildPtoTemplateDeleteModal } from './slack-ui/build-pto-template-delete-modal';
 import { buildPtoTemplateModal } from './slack-ui/build-pto-template-modal';
 

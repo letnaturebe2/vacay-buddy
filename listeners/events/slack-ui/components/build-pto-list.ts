@@ -1,6 +1,6 @@
 import type { AnyBlock } from '@slack/types';
-import { ActionId } from '../../../../config/constants';
-import { formatToYYYYMMDD } from '../../../../config/utils';
+import { ActionId } from '../../../../src/config/constants';
+import { formatToYYYYMMDD } from '../../../../src/config/utils';
 import type { PtoRequest } from '../../../../entity/pto-request.model';
 
 export const buildPtoList = (request: PtoRequest, blockId: string): AnyBlock[] => {

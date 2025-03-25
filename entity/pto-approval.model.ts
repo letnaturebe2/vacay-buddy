@@ -1,5 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
-import { PtoRequestStatus } from '../config/constants';
+import { PtoRequestStatus } from '../src/config/constants';
 import { BaseEntity } from './base';
 import { PtoRequest } from './pto-request.model';
 import { User } from './user.model';

@@ -1,6 +1,6 @@
 import type { AnyBlock } from '@slack/types';
-import { PtoRequestStatus } from '../../../../config/constants';
-import { formatToYYYYMMDD } from '../../../../config/utils';
+import { PtoRequestStatus } from '../../../../src/config/constants';
+import { formatToYYYYMMDD } from '../../../../src/config/utils';
 import type { PtoRequest } from '../../../../entity/pto-request.model';
 
 export const buildDecisionSection = (request: PtoRequest): AnyBlock[] => {

@@ -1,7 +1,7 @@
 import type { AnyBlock } from '@slack/types';
-import type { AppContext } from '../../../app';
-import { ActionId } from '../../../config/constants';
-import { ptoService } from '../../../service';
+import type { AppContext } from '../../../src/app';
+import { ActionId } from '../../../src/config/constants';
+import { ptoService } from '../../../src/service';
 import { buildPtoList } from './components/build-pto-list';
 
 export const buildAppHome = async (context: AppContext, showAdminSection: boolean): Promise<AnyBlock[]> => {

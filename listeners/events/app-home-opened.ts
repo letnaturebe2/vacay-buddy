@@ -1,9 +1,9 @@
 import type { AllMiddlewareArgs, SlackEventMiddlewareArgs } from '@slack/bolt';
 import type { AnyBlock } from '@slack/types';
 import type { HomeView } from '@slack/types/dist/views';
-import type { AppContext } from '../../app';
-import { showAdminSection } from '../../config/utils';
-import { teamService } from '../../service';
+import type { AppContext } from '../../src/app';
+import { showAdminSection } from '../../src/config/utils';
+import { teamService } from '../../src/service';
 import { buildAppHome } from './slack-ui/build-app-home';
 
 const appHomeOpenedCallback = async ({

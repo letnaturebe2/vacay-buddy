@@ -1,9 +1,9 @@
-import { TeamService } from "../../service/team.service";
+import { TeamService } from "../../src/service/team.service";
 import { Team } from "../../entity/team.model";
 import { User } from "../../entity/user.model";
 import { Repository } from "typeorm";
 import { testDataSource } from "../config/test-db";
-import {UserService} from "../../service/user.service";
+import {UserService} from "../../src/service/user.service";
 
 describe("TeamService Tests", () => {
   let teamService: TeamService;

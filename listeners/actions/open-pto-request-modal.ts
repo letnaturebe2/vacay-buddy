@@ -1,8 +1,8 @@
 import type { AllMiddlewareArgs, BlockAction, SlackActionMiddlewareArgs } from '@slack/bolt';
-import type { AppContext } from '../../app';
-import { ActionId } from '../../config/constants';
-import { assert } from '../../config/utils';
-import { ptoService } from '../../service';
+import type { AppContext } from '../../src/app';
+import { ActionId } from '../../src/config/constants';
+import { assert } from '../../src/config/utils';
+import { ptoService } from '../../src/service';
 import { buildPtoRequestModal } from './slack-ui/build-pto-request-modal';
 
 export const openPtoRequestModal = async ({

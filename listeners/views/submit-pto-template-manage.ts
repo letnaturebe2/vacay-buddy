@@ -1,10 +1,10 @@
 import type { AllMiddlewareArgs, SlackViewMiddlewareArgs, ViewOutput, ViewSubmitAction } from '@slack/bolt';
 import type { HomeView } from '@slack/types/dist/views';
-import type { AppContext } from '../../app';
-import { PtoTemplateManageType } from '../../config/constants';
-import { assert } from '../../config/utils';
+import type { AppContext } from '../../src/app';
+import { PtoTemplateManageType } from '../../src/config/constants';
+import { assert } from '../../src/config/utils';
 import type { PtoTemplate } from '../../entity/pto-template.model';
-import { ptoService } from '../../service';
+import { ptoService } from '../../src/service';
 import { buildAdminPage } from '../actions/slack-ui/build-admin-page';
 
 const submitPtoTemplateManage = async ({

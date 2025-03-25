@@ -1,13 +1,13 @@
 import {Repository} from "typeorm";
 import {testDataSource} from "../config/test-db";
-import {PtoService} from "../../service/pto.service";
+import {PtoService} from "../../src/service/pto.service";
 import {PtoTemplate} from "../../entity/pto-template.model";
 import {PtoRequest} from "../../entity/pto-request.model";
 import {PtoApproval} from "../../entity/pto-approval.model";
 import {User} from "../../entity/user.model";
 import {Team} from "../../entity/team.model";
-import {DEFAULT_PTO_TEMPLATE_CONTENT, DEFAULT_TEMPLATE, PtoRequestStatus} from "../../config/constants";
-import {UserService} from "../../service/user.service";
+import {DEFAULT_PTO_TEMPLATE_CONTENT, DEFAULT_TEMPLATE, PtoRequestStatus} from "../../src/config/constants";
+import {UserService} from "../../src/service/user.service";
 
 describe("PtoService Tests", () => {
   let userService: UserService;

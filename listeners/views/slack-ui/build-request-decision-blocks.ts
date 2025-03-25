@@ -1,5 +1,5 @@
 import type { AnyBlock } from '@slack/types';
-import { ActionId } from '../../../config/constants';
+import { ActionId } from '../../../src/config/constants';
 import type { PtoRequest } from '../../../entity/pto-request.model';
 import { buildDecisionSection } from '../../actions/slack-ui/components/build-decision-section';
 

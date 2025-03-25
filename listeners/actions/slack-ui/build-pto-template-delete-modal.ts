@@ -1,6 +1,6 @@
 import type { AnyBlock } from '@slack/types';
 
-import { assert } from '../../../config/utils';
+import { assert } from '../../../src/config/utils';
 import type { PtoTemplate } from '../../../entity/pto-template.model';
 
 export const buildPtoTemplateDeleteModal = async (ptoTemplate: PtoTemplate): Promise<AnyBlock[]> => {

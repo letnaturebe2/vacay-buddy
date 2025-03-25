@@ -1,6 +1,6 @@
 import type { AllMiddlewareArgs, BlockAction, SlackActionMiddlewareArgs } from '@slack/bolt';
-import { ActionId } from '../../config/constants';
-import { teamService } from '../../service';
+import { ActionId } from '../../src/config/constants';
+import { teamService } from '../../src/service';
 import { buildAdminModal } from './slack-ui/build-admin-modal';
 
 export const openAdminModal = async ({

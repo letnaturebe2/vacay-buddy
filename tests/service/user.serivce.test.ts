@@ -1,4 +1,4 @@
-import { UserService } from "../../service/user.service";
+import { UserService } from "../../src/service/user.service";
 import { User } from "../../entity/user.model";
 import { Team } from "../../entity/team.model";
 import { Repository } from "typeorm";

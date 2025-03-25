@@ -1,5 +1,5 @@
 import type { App } from '@slack/bolt';
-import { ActionId } from '../../config/constants';
+import { ActionId } from '../../src/config/constants';
 import submitAdminManage from './submit-admin-manage';
 import submitDecisionRequest from './submit-decision-request';
 import submitPtoRequest from './submit-pto-request';

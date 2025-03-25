@@ -1,6 +1,6 @@
 import type { AllMiddlewareArgs, SlackViewMiddlewareArgs, ViewSubmitAction } from '@slack/bolt';
-import type { AppContext } from '../../app';
-import { teamService, userService } from '../../service';
+import type { AppContext } from '../../src/app';
+import { teamService, userService } from '../../src/service';
 
 const submitAdminManage = async ({
   ack,

@@ -2,8 +2,8 @@ import type { AnyBlock } from '@slack/types';
 import type { User } from '../../../entity/user.model';
 
 import type { View } from '@slack/types';
-import { ActionId, DEFAULT_PTO_TEMPLATE_CONTENT, DEFAULT_PTO_TEMPLATE_TITLE } from '../../../config/constants';
-import { assert } from '../../../config/utils';
+import { ActionId, DEFAULT_PTO_TEMPLATE_CONTENT, DEFAULT_PTO_TEMPLATE_TITLE } from '../../../src/config/constants';
+import { assert } from '../../../src/config/utils';
 import type { PtoTemplate } from '../../../entity/pto-template.model';
 
 export const buildPtoRequestModal = async (

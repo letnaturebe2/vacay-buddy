@@ -1,5 +1,5 @@
 import type { App } from '@slack/bolt';
-import { ActionId } from '../../config/constants';
+import { ActionId } from '../../src/config/constants';
 import { openAdminModal } from './open-admin-modal';
 import { openPtoManageTemplateModal } from './open-pto-manage-template-modal';
 import { openPtoRequestModal } from './open-pto-request-modal';

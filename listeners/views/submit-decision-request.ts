@@ -1,9 +1,9 @@
 import type { AllMiddlewareArgs, SlackViewMiddlewareArgs, ViewSubmitAction } from '@slack/bolt';
 import type { AnyBlock } from '@slack/types';
 import type { HomeView } from '@slack/types/dist/views';
-import type { AppContext } from '../../app';
-import { assert, isSameDay, showAdminSection } from '../../config/utils';
-import { ptoService, teamService, userService } from '../../service';
+import type { AppContext } from '../../src/app';
+import { assert, isSameDay, showAdminSection } from '../../src/config/utils';
+import { ptoService, teamService, userService } from '../../src/service';
 import { buildAppHome } from '../events/slack-ui/build-app-home';
 
 const submitDecisionRequest = async ({
