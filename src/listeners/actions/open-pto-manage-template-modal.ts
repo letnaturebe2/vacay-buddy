@@ -69,7 +69,7 @@ export const openPtoManageTemplateModal = async ({
       blocks: blocks,
       submit: {
         type: 'plain_text',
-        text: 'Save Changes',
+        text: 'Submit',
       },
       close: { type: 'plain_text', text: 'Cancel' },
     },
