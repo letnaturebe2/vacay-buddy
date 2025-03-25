@@ -1,4 +1,4 @@
-import type { AllMiddlewareArgs, SlackViewMiddlewareArgs, ViewOutput, ViewSubmitAction } from '@slack/bolt';
+import type { AllMiddlewareArgs, SlackViewMiddlewareArgs, ViewSubmitAction } from '@slack/bolt';
 import type { HomeView } from '@slack/types/dist/views';
 import type { AppContext } from '../../app';
 import { PtoTemplateManageType } from '../../constants';

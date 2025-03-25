@@ -1,7 +1,5 @@
 import type { AnyBlock } from '@slack/types';
-import { ActionId, PtoRequestStatus } from '../../../constants';
 import type { PtoRequest } from '../../../entity/pto-request.model';
-import { formatToYYYYMMDD } from '../../../utils';
 import { buildDecisionSection } from './components/build-decision-section';
 
 export const buildRequestDecisionModal = async (request: PtoRequest, isApprover: boolean): Promise<AnyBlock[]> => {

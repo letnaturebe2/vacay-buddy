@@ -1,4 +1,4 @@
-import { Check, Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
+import { Check, Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { BaseEntity } from './base';
 import { Team } from './team.model';
 

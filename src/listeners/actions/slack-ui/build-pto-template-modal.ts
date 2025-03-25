@@ -1,7 +1,4 @@
 import type { AnyBlock } from '@slack/types';
-import type { User } from '../../../entity/user.model';
-
-import type { View } from '@slack/types';
 import { DEFAULT_PTO_TEMPLATE_CONTENT, DEFAULT_PTO_TEMPLATE_TITLE } from '../../../constants';
 import type { PtoTemplate } from '../../../entity/pto-template.model';
 
