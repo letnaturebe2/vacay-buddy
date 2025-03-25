@@ -8,7 +8,7 @@
     "start": "npm run build && node ./dist/app.js",
     "lint": "npx @biomejs/biome check src",
     "lint:fix": "npx @biomejs/biome check --write src",
-    "test": "npm run build && npm run lint",
+    "test": "npm run build && npm run lint && npm run test:jest",
     "dev": "nodemon --ext ts --exec ts-node src/app.ts",
     "typeorm": "typeorm-ts-node-commonjs",
     "test:jest": "jest",
