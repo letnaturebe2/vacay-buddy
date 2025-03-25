@@ -117,6 +117,13 @@ export class PtoService {
   async getApproval(id: number): Promise<PtoApproval> {
     return this.ptoApprovalRepository.findOneOrFail({
       where: { id },
+      relations: ['approver'],
+    });
+  }
+
+  async getApprovalWithRelations(id: number): Promise<PtoApproval> {
+    return this.ptoApprovalRepository.findOneOrFail({
+      where: { id },
       relations: ['approver', 'ptoRequest', 'ptoRequest.user', 'ptoRequest.approvals', 'ptoRequest.approvals.approver'],
     });
   }
@@ -155,7 +162,7 @@ export class PtoService {
    * @throws Error if the user is not authorized or the approval is not in pending status
    */
   async approve(approver: User, approvalId: number, comment: string): Promise<PtoApproval> {
-    const approval = await this.getApproval(approvalId);
+    const approval = await this.getApprovalWithRelations(approvalId);
     this.validatePendingApproval(approver, approval);
 
     const requestApprovals = approval.ptoRequest.approvals;
@@ -179,7 +186,7 @@ export class PtoService {
     approval.actionDate = new Date();
     await this.ptoApprovalRepository.save(approval);
 
-    return await this.getApproval(approvalId);
+    return await this.getApprovalWithRelations(approvalId);
   }
 
   /**
@@ -195,7 +202,7 @@ export class PtoService {
    * @throws Error if the user is not authorized or the approval is not in pending status
    */
   async reject(approver: User, approvalId: number, comment: string): Promise<PtoApproval> {
-    const approval = await this.getApproval(approvalId);
+    const approval = await this.getApprovalWithRelations(approvalId);
     this.validatePendingApproval(approver, approval);
 
     const ptoRequest = approval.ptoRequest;
@@ -207,7 +214,7 @@ export class PtoService {
     approval.actionDate = new Date();
     await this.ptoApprovalRepository.save(approval);
 
-    return await this.getApproval(approvalId);
+    return await this.getApprovalWithRelations(approvalId);
   }
 
   /**
