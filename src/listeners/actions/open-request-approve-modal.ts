@@ -44,10 +44,12 @@ export const openRequestApproveModal = async ({
       callback_id: ActionId.SUBMIT_DECISION_REQUEST,
       title: { type: 'plain_text', text: 'PTO Request Review' },
       blocks: blocks,
-      submit: {
-        type: 'plain_text',
-        text: 'Submit',
-      },
+      ...(isApprover && {
+        submit: {
+          type: 'plain_text',
+          text: 'Submit',
+        }
+      }),
     },
   });
 };
