@@ -40,7 +40,7 @@ export const buildDecisionSection = (request: PtoRequest): AnyBlock[] => {
     },
   };
 
-  const blocks: AnyBlock[] = [
+  return [
     approversSection,
     {
       type: 'divider',
@@ -74,6 +74,4 @@ export const buildDecisionSection = (request: PtoRequest): AnyBlock[] => {
       },
     },
   ];
-
-  return blocks;
 };

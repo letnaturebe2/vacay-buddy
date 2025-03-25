@@ -1,21 +1,20 @@
-import type {AllMiddlewareArgs, SlackViewMiddlewareArgs, ViewSubmitAction} from '@slack/bolt';
-import type {AnyBlock} from '@slack/types';
-import type {HomeView} from '@slack/types/dist/views';
-import type {AppContext} from '../../app';
-import {ptoService, teamService} from '../../service';
-import {assert, showAdminSection} from '../../utils';
-import {buildAppHome} from '../events/slack-ui/build-app-home';
-import {PtoApproval} from "../../entity/pto-approval.model";
-import {buildDecisionSection} from "../actions/slack-ui/components/build-decision-section";
+import type { AllMiddlewareArgs, SlackViewMiddlewareArgs, ViewSubmitAction } from '@slack/bolt';
+import type { AnyBlock } from '@slack/types';
+import type { HomeView } from '@slack/types/dist/views';
+import type { AppContext } from '../../app';
+import { PtoApproval } from '../../entity/pto-approval.model';
+import { ptoService, teamService } from '../../service';
+import { assert, showAdminSection } from '../../utils';
+import { buildDecisionSection } from '../actions/slack-ui/components/build-decision-section';
+import { buildAppHome } from '../events/slack-ui/build-app-home';
 
-const submitDecisionRequest = async (
-  {
-    ack,
-    body,
-    view,
-    client,
-    context,
-  }: AllMiddlewareArgs<AppContext> & SlackViewMiddlewareArgs<ViewSubmitAction>) => {
+const submitDecisionRequest = async ({
+  ack,
+  body,
+  view,
+  client,
+  context,
+}: AllMiddlewareArgs<AppContext> & SlackViewMiddlewareArgs<ViewSubmitAction>) => {
   // Get private metadata
   const privateMetadata = JSON.parse(view.private_metadata);
 
@@ -41,13 +40,12 @@ const submitDecisionRequest = async (
     //   channel: approver.userId,
     //   blocks: await buildPtoApproveBlocks(request, true),
     // });
-
   } else if (action === 'reject') {
     updatedApproval = await ptoService.reject(context.user, Number(approvalId), comment);
     await client.chat.postMessage({
       channel: updatedApproval.ptoRequest.user.userId,
       blocks: buildDecisionSection(updatedApproval.ptoRequest),
-    })
+    });
   }
 
   const admins = await teamService.getAdmins(context.team);
@@ -61,7 +59,8 @@ const submitDecisionRequest = async (
     response_action: 'clear',
   });
 
-  if (privateMetadata.viewId) {  // if the request is from home tab, else it's from message
+  if (privateMetadata.viewId) {
+    // if the request is from home tab, else it's from message
     await client.views.update({
       view_id: privateMetadata.viewId,
       hash: privateMetadata.viewHash,
