@@ -31,7 +31,7 @@
     "url": "https://github.com/slack-samples/bolt-ts-starter-template/issues"
   },
   "dependencies": {
-    "@slack/bolt": "^4.2.0",
+    "@slack/bolt": "^4.2.1",
     "@types/xlsx": "^0.0.35",
     "dotenv": "~16.4.7",
     "express": "^5.0.1",
