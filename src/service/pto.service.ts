@@ -135,23 +135,37 @@ export class PtoService {
     });
   }
 
-  private async getValidatedApproval(approver: User, approvalId: number): Promise<PtoApproval> {
-    const approval = await this.ptoApprovalRepository.findOneOrFail({
+  private async getApproval(approvalId: number): Promise<PtoApproval> {
+    return this.ptoApprovalRepository.findOneOrFail({
       where: { id: approvalId },
       relations: ['approver', 'ptoRequest', 'ptoRequest.approvals', 'ptoRequest.user', 'ptoRequest.template'],
     });
+  }
 
+  private validatePendingApproval(approver: User, approval: PtoApproval): void {
     if (!approver.isAdmin) {
       assert(approver.id === approval.approver.id, 'You are not the approver for this request');
     }
 
     assert(approval.status === PtoRequestStatus.Pending, 'This request has already been processed');
-
-    return approval;
   }
 
+  /**
+   * Approves a PTO request approval.
+   * The method validates that the user is the authorized approver and the approval is in pending status.
+   * If approved and there are more approvers in the chain, it updates the current approval ID to the next approver.
+   * If this is the final approval, it marks the request as approved and updates the user's PTO balance.
+   * Returns the refreshed approval entity after processing.
+   *
+   * @param approver The user attempting to approve the request
+   * @param approvalId The ID of the approval to process
+   * @param comment Comment provided by the approver
+   * @returns The updated approval entity with related data
+   * @throws Error if the user is not authorized or the approval is not in pending status
+   */
   async approve(approver: User, approvalId: number, comment: string): Promise<PtoApproval> {
-    const approval = await this.getValidatedApproval(approver, approvalId);
+    const approval = await this.getApproval(approvalId);
+    this.validatePendingApproval(approver, approval);
 
     const requestApprovals = approval.ptoRequest.approvals;
     const ptoRequest = approval.ptoRequest;
@@ -172,11 +186,26 @@ export class PtoService {
     approval.status = PtoRequestStatus.Approved;
     approval.comment = comment;
     approval.actionDate = new Date();
-    return this.ptoApprovalRepository.save(approval);
+    await this.ptoApprovalRepository.save(approval);
+
+    return await this.getApproval(approvalId);
   }
 
+  /**
+   * Rejects a PTO request approval.
+   * The method validates that the user is the authorized approver and the approval is in pending status.
+   * When rejected, the entire PTO request is marked as rejected.
+   * Returns the refreshed approval entity after processing.
+   *
+   * @param approver The user attempting to reject the request
+   * @param approvalId The ID of the approval to process
+   * @param comment Rejection reason provided by the approver
+   * @returns The updated approval entity with related data
+   * @throws Error if the user is not authorized or the approval is not in pending status
+   */
   async reject(approver: User, approvalId: number, comment: string): Promise<PtoApproval> {
-    const approval = await this.getValidatedApproval(approver, approvalId);
+    const approval = await this.getApproval(approvalId);
+    this.validatePendingApproval(approver, approval);
 
     const ptoRequest = approval.ptoRequest;
     ptoRequest.status = PtoRequestStatus.Rejected;
@@ -185,8 +214,9 @@ export class PtoService {
     approval.status = PtoRequestStatus.Rejected;
     approval.comment = comment;
     approval.actionDate = new Date();
+    await this.ptoApprovalRepository.save(approval);
 
-    return this.ptoApprovalRepository.save(approval);
+    return await this.getApproval(approvalId);
   }
 
   /**

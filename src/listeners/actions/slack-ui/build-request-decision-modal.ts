@@ -23,7 +23,7 @@ export const buildRequestDecisionModal = async (request: PtoRequest, isApprover:
                 text: 'Approve',
                 emoji: true,
               },
-              value: `approve_${request.id}`,
+              value: `approve_${request.currentApprovalId}`,
             },
             {
               text: {
@@ -31,7 +31,7 @@ export const buildRequestDecisionModal = async (request: PtoRequest, isApprover:
                 text: 'Reject',
                 emoji: true,
               },
-              value: `reject_${request.id}`,
+              value: `reject_${request.currentApprovalId}`,
             },
           ],
           initial_option: {
@@ -40,7 +40,7 @@ export const buildRequestDecisionModal = async (request: PtoRequest, isApprover:
               text: 'Approve',
               emoji: true,
             },
-            value: `approve_${request.id}`,
+            value: `approve_${request.currentApprovalId}`,
           },
         },
         label: {

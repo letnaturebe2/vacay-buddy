@@ -396,15 +396,8 @@ describe("PtoService Tests", () => {
         [approver1, approver2, approver3]
       );
 
-      // Simulate first approver approving the request
       const firstApproval = ptoRequest.approvals.find(a => a.approver.userId === "approver1")!;
-      firstApproval.status = PtoRequestStatus.Approved;
-      await ptoApprovalRepository.save(firstApproval);
-
-      // Update the current approver ID to the second approver
-      const secondApproval = ptoRequest.approvals.find(a => a.approver.userId === "approver2")!;
-      ptoRequest.currentApprovalId = secondApproval.id;
-      await ptoRequestRepository.save(ptoRequest);
+      await ptoService.approve(approver1, firstApproval.id, "Approved");
 
       // Act
       const approver1Requests = await ptoService.getPendingApprovalsToReview(approver1);
@@ -416,6 +409,16 @@ describe("PtoService Tests", () => {
       expect(approver2Requests).toHaveLength(1);
       expect(approver2Requests[0].approver.userId).toBe("approver2");
       expect(approver3Requests).toHaveLength(0);
+
+      // Act
+      const secondApproval = ptoRequest.approvals.find(a => a.approver.userId === "approver2")!;
+      await ptoService.approve(approver2, secondApproval.id, "Approved");
+
+      // Assert
+      const approver2RequestsAfterApproval = await ptoService.getPendingApprovalsToReview(approver2);
+      const approver3RequestsAfterSecondApproval = await ptoService.getPendingApprovalsToReview(approver3);
+      expect(approver2RequestsAfterApproval).toHaveLength(0);
+      expect(approver3RequestsAfterSecondApproval).toHaveLength(1);
     });
   });
 
@@ -441,23 +444,17 @@ describe("PtoService Tests", () => {
       const firstApproval = ptoRequest.approvals.find(a => a.approver.userId === "approver1")!;
 
       // Act
-      const result = await ptoService.approve(approver1, firstApproval.id, "Approved");
-
-      // Re-fetch the request
-      const updatedRequest = await ptoRequestRepository.findOne({
-        where: {id: ptoRequest.id},
-        relations: ['approvals']
-      });
+      const approval = await ptoService.approve(approver1, firstApproval.id, "Approved");
 
       // Assert
-      expect(result.status).toBe(PtoRequestStatus.Approved);
-      expect(result.comment).toBe("Approved");
-      expect(result.actionDate).toBeDefined();
+      expect(approval.status).toBe(PtoRequestStatus.Approved);
+      expect(approval.comment).toBe("Approved");
+      expect(approval.actionDate).toBeDefined();
 
       const secondApprovalId = ptoRequest.approvals
         .find(a => a.approver.userId === "approver2")!.id;
-      expect(updatedRequest!.currentApprovalId).toBe(secondApprovalId);
-      expect(updatedRequest!.status).toBe(PtoRequestStatus.Pending);
+      expect(approval.ptoRequest.currentApprovalId).toBe(secondApprovalId);
+      expect(approval.ptoRequest.status).toBe(PtoRequestStatus.Pending);
 
       user = await userRepository.findOneOrFail({where: {userId: user.userId}});
       expect(user.usedPtoDays).toBe(0);
@@ -483,15 +480,10 @@ describe("PtoService Tests", () => {
       const approval = ptoRequest.approvals[0];
 
       // Act
-      await ptoService.approve(approver, approval.id, "Final approval");
-
-      // Re-fetch the request
-      const updatedRequest = await ptoRequestRepository.findOne({
-        where: {id: ptoRequest.id}
-      });
+      const approved = await ptoService.approve(approver, approval.id, "Final approval");
 
       // Assert
-      expect(updatedRequest?.status).toBe(PtoRequestStatus.Approved);
+      expect(approved.ptoRequest.status).toBe(PtoRequestStatus.Approved);
       user = await userRepository.findOneOrFail({where: {userId: user.userId}});
       expect(user.usedPtoDays).toBe(template.daysConsumed);
     });
@@ -575,16 +567,11 @@ describe("PtoService Tests", () => {
       // Act
       const rejected = await ptoService.reject(approver1, firstApproval.id, "Rejected");
 
-      // Re-fetch the request
-      const updatedRequest = await ptoRequestRepository.findOne({
-        where: {id: ptoRequest.id}
-      });
-
       // Assert
       expect(rejected.status).toBe(PtoRequestStatus.Rejected);
       expect(rejected.comment).toBe("Rejected");
       expect(rejected.actionDate).toBeDefined();
-      expect(updatedRequest?.status).toBe(PtoRequestStatus.Rejected);
+      expect(rejected.ptoRequest.status).toBe(PtoRequestStatus.Rejected);
     });
 
     test("should throw error if non-approver tries to reject", async () => {
