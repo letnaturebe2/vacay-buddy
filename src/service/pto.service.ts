@@ -114,38 +114,22 @@ export class PtoService {
     return Promise.all(defaultTemplatePromises);
   }
 
-  async getPtoRequest(id: number): Promise<PtoRequest> {
-    return this.ptoRequestRepository.findOneOrFail({
+  async getApproval(id: number): Promise<PtoApproval> {
+    return this.ptoApprovalRepository.findOneOrFail({
       where: { id },
-      relations: ['user', 'template', 'approvals', 'approvals.approver'],
+      relations: ['approver', 'ptoRequest', 'ptoRequest.user', 'ptoRequest.approvals', 'ptoRequest.approvals.approver'],
     });
   }
 
   async getMyPendingPtoRequests(user: User): Promise<PtoRequest[]> {
     return this.ptoRequestRepository.find({
       where: { user: { id: user.id }, status: PtoRequestStatus.Pending },
-      relations: ['user', 'template', 'approvals', 'approvals.approver'],
     });
   }
 
   async getMyPtoRequests(user: User): Promise<PtoRequest[]> {
     return this.ptoRequestRepository.find({
       where: { user: { id: user.id } },
-      relations: ['user', 'template', 'approvals', 'approvals.approver'],
-    });
-  }
-
-  private async getApproval(approvalId: number): Promise<PtoApproval> {
-    return this.ptoApprovalRepository.findOneOrFail({
-      where: { id: approvalId },
-      relations: [
-        'approver',
-        'ptoRequest',
-        'ptoRequest.approvals.approver',
-        'ptoRequest.approvals',
-        'ptoRequest.user',
-        'ptoRequest.template',
-      ], // TODO: chlwhrghk
     });
   }
 

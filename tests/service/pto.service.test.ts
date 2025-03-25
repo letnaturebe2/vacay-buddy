@@ -307,9 +307,7 @@ describe("PtoService Tests", () => {
       // Assert
       expect(requests).toHaveLength(1);
       const ptoRequest = requests[0];
-      expect(ptoRequest.user.userId).toBe("test-user");
       expect(ptoRequest.status).toBe(PtoRequestStatus.Pending);
-      expect(ptoRequest.template.title).toBe("Vacation");
       expect(ptoRequest.currentApprovalId).not.toBeNull();
     });
 

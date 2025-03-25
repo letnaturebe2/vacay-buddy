@@ -1,7 +1,6 @@
 import type { AllMiddlewareArgs, BlockAction, SlackActionMiddlewareArgs } from '@slack/bolt';
 import type { AppContext } from '../../app';
 import { ActionId } from '../../constants';
-import type { PtoApproval } from '../../entity/pto-approval.model';
 import { ptoService } from '../../service';
 import { assert } from '../../utils';
 import { buildRequestDecisionModal } from './slack-ui/build-request-decision-modal';
@@ -18,13 +17,10 @@ export const openRequestApproveModal = async ({
 
   assert(action.type === 'button' && !!action.value, 'action type must be button and have value');
 
-  const requestId = Number(action.value);
-  const request = await ptoService.getPtoRequest(requestId);
-  const currentPtoApproval: PtoApproval | undefined = request.approvals.find(
-    (approve) => approve.id === request.currentApprovalId,
-  );
-  const isApprover = currentPtoApproval?.approverId === context.user.id;
-  const blocks = await buildRequestDecisionModal(request, isApprover);
+  const approvalId = Number(action.value);
+  const ptoApproval = await ptoService.getApproval(approvalId);
+  const isApprover = ptoApproval.approverId === context.user.id;
+  const blocks = await buildRequestDecisionModal(ptoApproval.ptoRequest, isApprover);
 
   let privateMetadata = '{}';
 

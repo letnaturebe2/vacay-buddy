@@ -2,6 +2,7 @@ import type { AnyBlock } from '@slack/types';
 import type { AppContext } from '../../../app';
 import { ActionId } from '../../../constants';
 import { ptoService } from '../../../service';
+import { assert } from '../../../utils';
 import { buildPtoList } from './components/build-pto-list';
 
 export const buildAppHome = async (context: AppContext, showAdminSection: boolean): Promise<AnyBlock[]> => {
@@ -161,7 +162,7 @@ export const buildAppHome = async (context: AppContext, showAdminSection: boolea
     });
   } else {
     for (const approval of ptoApprovals) {
-      const ptoListBlocks = buildPtoList(approval.ptoRequest, 'block_id_approval');
+      const ptoListBlocks = buildPtoList(approval.ptoRequest, approval.id);
       blocks.push(...ptoListBlocks);
     }
   }
@@ -201,7 +202,8 @@ export const buildAppHome = async (context: AppContext, showAdminSection: boolea
     });
   } else {
     for (const ptoRequest of pendingRequests) {
-      const ptoListBlocks = buildPtoList(ptoRequest, 'block_id_request');
+      assert(ptoRequest.currentApprovalId !== null, 'Pending PTO request must have a current approval ID');
+      const ptoListBlocks = buildPtoList(ptoRequest, ptoRequest.currentApprovalId);
       blocks.push(...ptoListBlocks);
     }
   }
