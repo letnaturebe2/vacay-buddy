@@ -18,9 +18,9 @@ export const openRequestApproveModal = async ({
   assert(action.type === 'button' && !!action.value, 'action type must be button and have value');
 
   const approvalId = Number(action.value);
-  const ptoApproval = await ptoService.getApproval(approvalId);
-  const isApprover = ptoApproval.approverId === context.user.id;
-  const blocks = await buildRequestDecisionModal(ptoApproval.ptoRequest, isApprover);
+  const approval = await ptoService.getApproval(approvalId);
+  const isApprover = approval.approverId === context.user.id && approval.actionDate === null;
+  const blocks = await buildRequestDecisionModal(approval.ptoRequest, isApprover);
 
   let privateMetadata = '{}';
 
