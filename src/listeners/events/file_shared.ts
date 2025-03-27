@@ -2,7 +2,6 @@ import type { AllMiddlewareArgs, SlackEventMiddlewareArgs } from '@slack/bolt';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
 import type { AppContext } from '../../app';
-import {userService} from "../../service";
 
 const file_shared = async ({
   client,
