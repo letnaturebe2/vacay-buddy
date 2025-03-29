@@ -3,7 +3,7 @@ import type { AnyBlock } from '@slack/types';
 import type { HomeView } from '@slack/types/dist/views';
 import type { AppContext } from '../../app';
 import type { User } from '../../entity/user.model';
-import { ptoService, organizationService, userService } from '../../service';
+import { organizationService, ptoService, userService } from '../../service';
 import { assert, isSameDay, showAdminSection } from '../../utils';
 import { buildAppHome } from '../events/slack-ui/build-app-home';
 import { buildRequestDecisionBlocks } from './slack-ui/build-request-decision-blocks';

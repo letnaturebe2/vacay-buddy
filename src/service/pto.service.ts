@@ -1,9 +1,9 @@
 import { DataSource, Repository } from 'typeorm';
 import { DEFAULT_TEMPLATE, PtoRequestStatus } from '../constants';
+import { Organization } from '../entity/organization.model';
 import { PtoApproval } from '../entity/pto-approval.model';
 import { PtoRequest } from '../entity/pto-request.model';
 import { PtoTemplate } from '../entity/pto-template.model';
-import { Organization } from '../entity/organization.model';
 import { User } from '../entity/user.model';
 import { assert, isSameDay } from '../utils';
 import { UserService } from './user.service';

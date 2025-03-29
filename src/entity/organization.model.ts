@@ -1,6 +1,6 @@
-import {Column, Entity, Index, OneToMany} from 'typeorm';
-import {BaseEntity} from './base';
-import {User} from './user.model';
+import { Column, Entity, Index, OneToMany } from 'typeorm';
+import { BaseEntity } from './base';
+import { User } from './user.model';
 
 @Entity()
 export class Organization extends BaseEntity {

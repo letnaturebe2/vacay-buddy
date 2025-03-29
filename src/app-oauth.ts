@@ -3,12 +3,10 @@ import { config } from 'dotenv';
 
 config();
 
-import {App, LogLevel} from '@slack/bolt';
+import { App, LogLevel } from '@slack/bolt';
 import { dataSource } from './db';
 import registerListeners from './listeners';
-import receiver from "./receiver";
-import registerMiddleware from "./middleware";
-
+import registerMiddleware from './middleware';
 
 const tempDB = new Map();
 
