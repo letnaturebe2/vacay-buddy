@@ -1,14 +1,14 @@
 export const TEST_INSTALLATION = {
   "team": {
-    "id": "aT0A0B0C0D0",
+    "id": "test-teamId",
     "name": "Test Team",
   },
   "user": {
-    "id": "U0777778HE3"
+    "id": "test-userId",
   },
   "tokenType": "bot",
   "isEnterpriseInstall": false,
-  "appId": "A085777746",
+  "appId": "test-appId",
   "authVersion": "v2",
   "bot": {
     "scopes": [
@@ -39,8 +39,8 @@ export const TEST_INSTALLATION = {
       "channels:write.invites",
       "team:read"
     ],
-    "token": "xoxb-7777771061078-8207931676467-G92LKUy4j1tz7VhEjCMMepP1",
-    "userId": "A085777746",
-    "id": "B01222L7D0"
+    "token": "xoxb-DUMMY-TOKEN-FOR-TESTS",
+    "userId": "test-userId",
+    "id": "test-id"
   }
 }
