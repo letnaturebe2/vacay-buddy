@@ -1,4 +1,5 @@
 import type { AllMiddlewareArgs, BlockAction, SlackActionMiddlewareArgs } from '@slack/bolt';
+import { AppContext } from '../../app';
 import { ActionId } from '../../constants';
 import { organizationService } from '../../service';
 import { buildAdminModal } from './slack-ui/build-admin-modal';
@@ -8,10 +9,10 @@ export const openAdminModal = async ({
   client,
   body,
   context,
-}: AllMiddlewareArgs & SlackActionMiddlewareArgs<BlockAction>) => {
+}: AllMiddlewareArgs<AppContext> & SlackActionMiddlewareArgs<BlockAction>) => {
   await ack();
 
-  const currentAdmins = await organizationService.getAdmins(context.team);
+  const currentAdmins = await organizationService.getAdmins(context.organization);
   const blocks = await buildAdminModal(currentAdmins);
 
   await client.views.open({

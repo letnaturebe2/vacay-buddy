@@ -1,5 +1,7 @@
 import { ExpressReceiver, LogLevel } from '@slack/bolt';
 import { Request, Response } from 'express';
+import { organizationService, ptoService } from './service';
+import { assert } from './utils';
 
 const tempDB = new Map();
 
@@ -12,31 +14,26 @@ const receiver = new ExpressReceiver({
   scopes: process.env.SLACK_SCOPES?.split(',') || [],
   installationStore: {
     storeInstallation: async (installation) => {
-      // Org-wide installation
-      if (installation.isEnterpriseInstall && installation.enterprise !== undefined) {
-        tempDB.set(installation.enterprise.id, installation);
-        return;
-      }
-      // Single team installation
-      if (installation.team !== undefined) {
-        tempDB.set(installation.team.id, installation);
-        return;
-      }
+      const organizationId = installation.enterprise?.id || installation.team?.id;
 
-      // installation.bot.token
+      assert(organizationId !== undefined, 'Organization ID is undefined');
+      assert(installation.bot !== undefined, 'Bot installation is undefined');
 
-      throw new Error('Failed saving installation data to installationStore');
+      const newOrganization = await organizationService.createOrganization(
+        organizationId,
+        installation.isEnterpriseInstall !== undefined,
+        installation.bot.token,
+        JSON.stringify(installation),
+      );
+
+      await ptoService.createDefaultPtoTemplates(newOrganization);
     },
     fetchInstallation: async (installQuery) => {
-      // Org-wide installation lookup
-      if (installQuery.isEnterpriseInstall && installQuery.enterpriseId !== undefined) {
-        return tempDB.get(installQuery.enterpriseId);
-      }
-      // Single team installation lookup
-      if (installQuery.teamId !== undefined) {
-        return tempDB.get(installQuery.teamId);
-      }
-      throw new Error('Failed fetching installation');
+      const organizationId = installQuery.enterpriseId || installQuery.teamId;
+      assert(organizationId !== undefined, 'Organization ID is undefined');
+      const organization = await organizationService.getOrganization(organizationId);
+      assert(organization !== null, 'Organization not found');
+      return JSON.parse(organization.installation);
     },
     deleteInstallation: async (installQuery) => {
       // Org-wide installation deletion

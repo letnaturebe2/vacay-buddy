@@ -8,8 +8,11 @@ import {User} from "../../src/entity/user.model";
 import {Organization} from "../../src/entity/organization.model";
 import {DEFAULT_PTO_TEMPLATE_CONTENT, DEFAULT_TEMPLATE, PtoRequestStatus} from "../../src/constants";
 import {UserService} from "../../src/service/user.service";
+import {OrganizationService} from "../../src/service/organization.service";
+import {TEST_INSTALLATION} from "../config/constants";
 
 describe("PtoService Tests", () => {
+  let organizationService: OrganizationService;
   let userService: UserService;
   let ptoService: PtoService;
   let ptoTemplateRepository: Repository<PtoTemplate>;
@@ -26,6 +29,7 @@ describe("PtoService Tests", () => {
     organizationRepository = testDataSource.getRepository(Organization);
 
     userService = new UserService(testDataSource);
+    organizationService = new OrganizationService(testDataSource, userService);
     ptoService = new PtoService(testDataSource, userService);
   });
 
@@ -39,9 +43,12 @@ describe("PtoService Tests", () => {
 
   // Helper functions to reduce code duplication
   const createOrganization = async (organizationId = "test-organization"): Promise<Organization> => {
-    const organization = new Organization();
-    organization.organizationId = organizationId;
-    return organizationRepository.save(organization);
+    return await organizationService.createOrganization(
+      organizationId,
+      false,
+      "test-token",
+      JSON.stringify(TEST_INSTALLATION)
+    )
   };
 
   const createUser = async (userId: string, organization?: Organization): Promise<User> => {

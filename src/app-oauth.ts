@@ -21,7 +21,6 @@ registerMiddleware(app);
 (async () => {
   try {
     await dataSource.initialize();
-
     await app.start(process.env.PORT || 3000);
     app.logger.info('⚡️ Bolt app is running! ⚡️');
   } catch (error) {

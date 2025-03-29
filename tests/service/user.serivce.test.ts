@@ -1,10 +1,13 @@
-import { UserService } from "../../src/service/user.service";
-import { User } from "../../src/entity/user.model";
-import { Organization } from "../../src/entity/organization.model";
-import { Repository } from "typeorm";
-import { testDataSource } from "../config/test-db";
+import {UserService} from "../../src/service/user.service";
+import {User} from "../../src/entity/user.model";
+import {Organization} from "../../src/entity/organization.model";
+import {Repository} from "typeorm";
+import {testDataSource} from "../config/test-db";
+import {OrganizationService} from "../../src/service/organization.service";
+import {TEST_INSTALLATION} from "../config/constants";
 
 describe("UserService Tests", () => {
+  let organizationService: OrganizationService;
   let userService: UserService;
   let userRepository: Repository<User>;
   let organizationRepository: Repository<Organization>;
@@ -14,15 +17,15 @@ describe("UserService Tests", () => {
     userRepository = testDataSource.getRepository(User);
     organizationRepository = testDataSource.getRepository(Organization);
     userService = new UserService(testDataSource);
+    organizationService = new OrganizationService(testDataSource, userService);
   });
 
   beforeEach(async () => {
     await userRepository.clear();
     await organizationRepository.clear();
 
-    testOrganization = new Organization();
-    testOrganization.organizationId = "test-organizationId";
-    testOrganization = await organizationRepository.save(testOrganization);
+    testOrganization = await organizationService.createOrganization(
+      "test-organization", false, "test-token", JSON.stringify(TEST_INSTALLATION));
   });
 
   describe("getOrCreateUser", () => {
@@ -55,8 +58,8 @@ describe("UserService Tests", () => {
 
       // Verify in DB
       const savedUser = await userRepository.findOne({
-        where: { userId: "new-user" },
-        relations: { organization: true }
+        where: {userId: "new-user"},
+        relations: {organization: true}
       });
 
       expect(savedUser).toBeDefined();

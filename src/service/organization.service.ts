@@ -16,15 +16,22 @@ export class OrganizationService {
     return await this.organizationRepository.findOne({ where: { organizationId } });
   }
 
-  public async createOrganization(organizationId: string, isEnterprise: boolean): Promise<Organization> {
+  public async createOrganization(
+    organizationId: string,
+    isEnterprise: boolean,
+    botToken: string,
+    installation: string,
+  ): Promise<Organization> {
     const organization = new Organization();
     organization.organizationId = organizationId;
     organization.isEnterprise = isEnterprise;
+    organization.botToken = botToken;
+    organization.installation = installation;
     return await this.organizationRepository.save(organization);
   }
 
-  public async getAdmins(organizationId: Organization): Promise<User[]> {
-    return await this.userService.getAdmins(organizationId);
+  public async getAdmins(organization: Organization): Promise<User[]> {
+    return await this.userService.getAdmins(organization);
   }
 
   public async updateAdmins(userIds: string[], organization: Organization) {

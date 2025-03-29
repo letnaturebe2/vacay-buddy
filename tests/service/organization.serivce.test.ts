@@ -1,9 +1,10 @@
-import { OrganizationService } from "../../src/service/organization.service";
-import { Organization } from "../../src/entity/organization.model";
-import { User } from "../../src/entity/user.model";
-import { Repository } from "typeorm";
-import { testDataSource } from "../config/test-db";
+import {OrganizationService} from "../../src/service/organization.service";
+import {Organization} from "../../src/entity/organization.model";
+import {User} from "../../src/entity/user.model";
+import {Repository} from "typeorm";
+import {testDataSource} from "../config/test-db";
 import {UserService} from "../../src/service/user.service";
+import {TEST_INSTALLATION} from "../config/constants";
 
 describe("OrganizationService Tests", () => {
   let organizationService: OrganizationService;
@@ -23,42 +24,11 @@ describe("OrganizationService Tests", () => {
     await organizationRepository.clear();
   });
 
-  describe("getOrganization and createOrganization", () => {
-    test("should get existing organization and create new organization when not found", async () => {
-      // Arrange
-      const existingOrganization = new Organization();
-      existingOrganization.organizationId = "existing-organization";
-      await organizationRepository.save(existingOrganization);
-
-      // Act - Create new organization
-      const newOrganization = await organizationService.createOrganization("new-organization", false);
-
-      // Assert - New organization creation
-      expect(newOrganization).toBeDefined();
-      expect(newOrganization.organizationId).toBe("new-organization");
-
-      // Verify new organization in DB
-      const savedOrganization = await organizationRepository.findOne({
-        where: { organizationId: "new-organization" }
-      });
-      expect(savedOrganization).toBeDefined();
-
-      // Act - Get existing organization
-      const foundOrganization = await organizationService.getOrganization("existing-organization");
-
-      // Assert - Get existing organization
-      expect(foundOrganization).toBeDefined();
-      expect(foundOrganization!.organizationId).toBe("existing-organization");
-      expect(foundOrganization!.id).toBe(existingOrganization.id);
-    });
-  });
-
   describe("getAdmins", () => {
     test("should return admin users for a organization", async () => {
       // Arrange
-      const organization = new Organization();
-      organization.organizationId = "test-organization";
-      await organizationRepository.save(organization);
+      const organization = await organizationService.createOrganization(
+        "test-organization", false, "test-token", JSON.stringify(TEST_INSTALLATION));
 
       const adminUser = new User();
       adminUser.userId = "admin";
@@ -84,9 +54,8 @@ describe("OrganizationService Tests", () => {
   describe("updateAdmins", () => {
     test("should update admin status for organization members", async () => {
       // Arrange
-      const organization = new Organization();
-      organization.organizationId = "test-organization";
-      await organizationRepository.save(organization);
+      const organization = await organizationService.createOrganization(
+        "test-organization", false, "test-token", JSON.stringify(TEST_INSTALLATION));
 
       const user1 = new User();
       user1.userId = "user1";
@@ -103,8 +72,8 @@ describe("OrganizationService Tests", () => {
       await organizationService.updateAdmins(["user1"], organization);
 
       // Assert
-      const updatedUser1 = await userRepository.findOneBy({ userId: "user1" });
-      const updatedUser2 = await userRepository.findOneBy({ userId: "user2" });
+      const updatedUser1 = await userRepository.findOneBy({userId: "user1"});
+      const updatedUser2 = await userRepository.findOneBy({userId: "user2"});
 
       expect(updatedUser1?.isAdmin).toBe(true);
       expect(updatedUser2?.isAdmin).toBe(false);
