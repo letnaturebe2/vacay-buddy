@@ -16,7 +16,7 @@ export const openPtoRequestModal = async ({
   await ack();
 
   assert(!!body.view, 'body.view.id is undefined');
-  const templates = await ptoService.getTemplates(context.team);
+  const templates = await ptoService.getTemplates(context.organization);
 
   if (templates.length === 0) {
     await client.views.open({

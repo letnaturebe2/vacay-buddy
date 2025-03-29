@@ -1,6 +1,6 @@
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
 import { BaseEntity } from './base';
-import { Team } from './team.model';
+import { Organization } from './organization.model';
 
 @Entity()
 export class User extends BaseEntity {
@@ -9,14 +9,14 @@ export class User extends BaseEntity {
   userId: string;
 
   @ManyToOne(
-    () => Team,
-    (team) => team.users,
+    () => Organization,
+    (organization) => organization.users,
     {
       onDelete: 'SET NULL',
     },
   )
-  @JoinColumn({ name: 'team_id' })
-  team: Team;
+  @JoinColumn({ name: 'organization_id' })
+  organization: Organization;
 
   @Column({ default: false })
   isAdmin: boolean;

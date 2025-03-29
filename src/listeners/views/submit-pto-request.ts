@@ -3,7 +3,7 @@ import type { AnyBlock } from '@slack/types';
 import type { HomeView } from '@slack/types/dist/views';
 import type { AppContext } from '../../app';
 import type { User } from '../../entity/user.model';
-import { ptoService, teamService, userService } from '../../service';
+import { ptoService, organizationService, userService } from '../../service';
 import { assert, isSameDay, showAdminSection } from '../../utils';
 import { buildAppHome } from '../events/slack-ui/build-app-home';
 import { buildRequestDecisionBlocks } from './slack-ui/build-request-decision-blocks';
@@ -63,7 +63,7 @@ const submitPtoRequest = async ({
   }
 
   const approvers: User[] = await Promise.all(
-    approverIds.map((userId) => userService.getOrCreateUser(userId, context.team)),
+    approverIds.map((userId) => userService.getOrCreateUser(userId, context.organization)),
   );
 
   const request = await ptoService.createPtoRequest(
@@ -89,7 +89,7 @@ const submitPtoRequest = async ({
     blocks: await buildRequestDecisionBlocks(request, false),
   });
 
-  const admins = await teamService.getAdmins(context.team);
+  const admins = await organizationService.getAdmins(context.organization);
   const blocks: AnyBlock[] = await buildAppHome(context, showAdminSection(context.user, admins));
   const homeView: HomeView = {
     type: 'home',

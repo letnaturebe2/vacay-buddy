@@ -1,10 +1,14 @@
+import 'reflect-metadata';
+import { config } from 'dotenv';
+
+config();
+
 import {App, LogLevel} from '@slack/bolt';
-import {config} from 'dotenv';
+import { dataSource } from './db';
 import registerListeners from './listeners';
 import receiver from "./receiver";
 import registerMiddleware from "./middleware";
 
-config();
 
 const tempDB = new Map();
 
@@ -27,6 +31,9 @@ const app = new App({
         tempDB.set(installation.team.id, installation);
         return;
       }
+
+      // installation.bot.token
+
       throw new Error('Failed saving installation data to installationStore');
     },
     fetchInstallation: async (installQuery) => {
@@ -70,6 +77,8 @@ registerMiddleware(app);
 /** Start Bolt App */
 (async () => {
   try {
+    await dataSource.initialize();
+
     await app.start(process.env.PORT || 3000);
     app.logger.info('⚡️ Bolt app is running! ⚡️');
   } catch (error) {

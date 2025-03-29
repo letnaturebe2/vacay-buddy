@@ -13,8 +13,8 @@
     "dev-http": "nodemon --ext ts --exec ts-node src/app-oauth.ts",
     "typeorm": "typeorm-ts-node-commonjs",
     "test:jest": "jest",
-    "migration:generate": "npm run typeorm migration:generate src/migration/migration/ -- -d src/db.ts",
-    "migration:run": "npm run typeorm migration:run -- -d src/db.ts"
+    "migration:generate": "ts-node --require dotenv/config ./node_modules/typeorm/cli.js migration:generate src/migration/migration/ -d src/db.ts",
+    "migration:run": "ts-node --require dotenv/config ./node_modules/typeorm/cli.js migration:run -d src/db.ts"
   },
   "author": "Slack Technologies, LLC",
   "license": "MIT",

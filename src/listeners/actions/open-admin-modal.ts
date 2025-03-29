@@ -1,6 +1,6 @@
 import type { AllMiddlewareArgs, BlockAction, SlackActionMiddlewareArgs } from '@slack/bolt';
 import { ActionId } from '../../constants';
-import { teamService } from '../../service';
+import { organizationService } from '../../service';
 import { buildAdminModal } from './slack-ui/build-admin-modal';
 
 export const openAdminModal = async ({
@@ -11,7 +11,7 @@ export const openAdminModal = async ({
 }: AllMiddlewareArgs & SlackActionMiddlewareArgs<BlockAction>) => {
   await ack();
 
-  const currentAdmins = await teamService.getAdmins(context.team);
+  const currentAdmins = await organizationService.getAdmins(context.team);
   const blocks = await buildAdminModal(currentAdmins);
 
   await client.views.open({

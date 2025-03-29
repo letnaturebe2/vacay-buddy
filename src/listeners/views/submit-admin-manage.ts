@@ -1,6 +1,6 @@
 import type { AllMiddlewareArgs, SlackViewMiddlewareArgs, ViewSubmitAction } from '@slack/bolt';
 import type { AppContext } from '../../app';
-import { teamService, userService } from '../../service';
+import { organizationService, userService } from '../../service';
 
 const submitAdminManage = async ({
   ack,
@@ -23,10 +23,10 @@ const submitAdminManage = async ({
 
   // ensure all selected users are in the team
   for (const userId of selectedUsers) {
-    await userService.getOrCreateUser(userId, context.team);
+    await userService.getOrCreateUser(userId, context.organization);
   }
 
-  await teamService.updateAdmins(selectedUsers, context.team);
+  await organizationService.updateAdmins(selectedUsers, context.organization);
 
   await ack({
     response_action: 'update',

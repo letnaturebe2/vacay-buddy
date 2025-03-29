@@ -4,7 +4,7 @@ import type { HomeView } from '@slack/types/dist/views';
 import type { AppContext } from '../../app';
 import { PtoRequestStatus } from '../../constants';
 import { PtoApproval } from '../../entity/pto-approval.model';
-import { ptoService, teamService } from '../../service';
+import { ptoService, organizationService } from '../../service';
 import { assert, showAdminSection } from '../../utils';
 import { buildDecisionSection } from '../actions/slack-ui/components/build-decision-section';
 import { buildAppHome } from '../events/slack-ui/build-app-home';
@@ -56,7 +56,7 @@ const submitDecisionRequest = async ({
     blocks: buildDecisionSection(approval.ptoRequest),
   });
 
-  const admins = await teamService.getAdmins(context.team);
+  const admins = await organizationService.getAdmins(context.organization);
   const blocks: AnyBlock[] = await buildAppHome(context, showAdminSection(context.user, admins));
   const homeView: HomeView = {
     type: 'home',

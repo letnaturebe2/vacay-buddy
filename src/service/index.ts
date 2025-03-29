@@ -1,8 +1,8 @@
 import { dataSource } from '../db';
 import { PtoService } from './pto.service';
-import { TeamService } from './team.service';
+import { OrganizationService } from './organization.service';
 import { UserService } from './user.service';
 
 export const userService = new UserService(dataSource);
-export const teamService = new TeamService(dataSource, userService);
+export const organizationService = new OrganizationService(dataSource, userService);
 export const ptoService = new PtoService(dataSource, userService);

@@ -2,7 +2,7 @@ import type { AllMiddlewareArgs, BlockAction, SlackActionMiddlewareArgs } from '
 import type { AnyBlock } from '@slack/types';
 import type { HomeView } from '@slack/types/dist/views';
 import type { AppContext } from '../../app';
-import { teamService } from '../../service';
+import { organizationService } from '../../service';
 import { assert, showAdminSection } from '../../utils';
 import { buildAppHome } from '../events/slack-ui/build-app-home';
 
@@ -16,7 +16,7 @@ export const updateBackToHome = async ({
 
   assert(body.view !== undefined, 'No view found in body');
 
-  const admins = await teamService.getAdmins(context.team);
+  const admins = await organizationService.getAdmins(context.organization);
   const blocks: AnyBlock[] = await buildAppHome(context, showAdminSection(context.user, admins));
   const view: HomeView = {
     type: 'home',

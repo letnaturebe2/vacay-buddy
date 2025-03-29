@@ -5,7 +5,7 @@ config();
 
 import { App, type Context, LogLevel } from '@slack/bolt';
 import { dataSource } from './db';
-import type { Team } from './entity/team.model';
+import type { Organization } from './entity/organization.model';
 import type { User } from './entity/user.model';
 import registerListeners from './listeners';
 import registerMiddleware from './middleware';
@@ -13,7 +13,7 @@ import receiver from './receiver';
 
 export interface AppContext extends Context {
   locale: string;
-  team: Team;
+  organization: Organization;
   user: User;
 }
 

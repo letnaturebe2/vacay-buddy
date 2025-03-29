@@ -5,7 +5,7 @@ import {PtoTemplate} from "../../src/entity/pto-template.model";
 import {PtoRequest} from "../../src/entity/pto-request.model";
 import {PtoApproval} from "../../src/entity/pto-approval.model";
 import {User} from "../../src/entity/user.model";
-import {Team} from "../../src/entity/team.model";
+import {Organization} from "../../src/entity/organization.model";
 import {DEFAULT_PTO_TEMPLATE_CONTENT, DEFAULT_TEMPLATE, PtoRequestStatus} from "../../src/constants";
 import {UserService} from "../../src/service/user.service";
 
@@ -16,14 +16,14 @@ describe("PtoService Tests", () => {
   let ptoRequestRepository: Repository<PtoRequest>;
   let ptoApprovalRepository: Repository<PtoApproval>;
   let userRepository: Repository<User>;
-  let teamRepository: Repository<Team>;
+  let organizationRepository: Repository<Organization>;
 
   beforeAll(async () => {
     ptoTemplateRepository = testDataSource.getRepository(PtoTemplate);
     ptoRequestRepository = testDataSource.getRepository(PtoRequest);
     ptoApprovalRepository = testDataSource.getRepository(PtoApproval);
     userRepository = testDataSource.getRepository(User);
-    teamRepository = testDataSource.getRepository(Team);
+    organizationRepository = testDataSource.getRepository(Organization);
 
     userService = new UserService(testDataSource);
     ptoService = new PtoService(testDataSource, userService);
@@ -34,25 +34,25 @@ describe("PtoService Tests", () => {
     await ptoRequestRepository.clear();
     await ptoTemplateRepository.clear();
     await userRepository.clear();
-    await teamRepository.clear();
+    await organizationRepository.clear();
   });
 
   // Helper functions to reduce code duplication
-  const createTeam = async (teamId = "test-team"): Promise<Team> => {
-    const team = new Team();
-    team.teamId = teamId;
-    return teamRepository.save(team);
+  const createOrganization = async (organizationId = "test-organization"): Promise<Organization> => {
+    const organization = new Organization();
+    organization.organizationId = organizationId;
+    return organizationRepository.save(organization);
   };
 
-  const createUser = async (userId: string, team?: Team): Promise<User> => {
+  const createUser = async (userId: string, organization?: Organization): Promise<User> => {
     const user = new User();
     user.userId = userId;
-    if (team) user.team = team;
+    if (organization) user.organization = organization;
     return userRepository.save(user);
   };
 
   const createPtoTemplate = async (
-    team: Team,
+    organization: Organization,
     data: Partial<PtoTemplate> = {}
   ): Promise<PtoTemplate> => {
     const template = new PtoTemplate();
@@ -61,14 +61,14 @@ describe("PtoService Tests", () => {
     template.content = data.content || DEFAULT_PTO_TEMPLATE_CONTENT;
     template.enabled = data.enabled ?? true;
     template.daysConsumed = data.daysConsumed ?? 1;
-    template.team = team;
+    template.organization = organization;
     return ptoTemplateRepository.save(template);
   };
 
   describe("createTemplate", () => {
     test("should create a new PTO template with all fields", async () => {
       // Arrange
-      const team = await createTeam();
+      const organization = await createOrganization();
       const templateData: Partial<PtoTemplate> = {
         title: "Vacation",
         description: "Annual vacation template",
@@ -77,7 +77,7 @@ describe("PtoService Tests", () => {
       };
 
       // Act
-      const result = await ptoService.upsertTemplate(templateData, team);
+      const result = await ptoService.upsertTemplate(templateData, organization);
 
       // Assert
       expect(result).toBeDefined();
@@ -85,22 +85,22 @@ describe("PtoService Tests", () => {
       expect(result.description).toBe(templateData.description);
       expect(result.content).toBe(templateData.content);
       expect(result.enabled).toBe(templateData.enabled);
-      expect(result.team.teamId).toBe("test-team");
+      expect(result.organization.organizationId).toBe("test-organization");
       expect(result.daysConsumed).toBe(1);
 
-      const savedTemplates = await ptoService.getTemplates(team);
+      const savedTemplates = await ptoService.getTemplates(organization);
       expect(savedTemplates).toHaveLength(1);
       expect(savedTemplates[0].title).toEqual(templateData.title);
     });
   });
 
   describe("createDefaultPtoTemplates", () => {
-    test("should create default PTO templates for a new team", async () => {
+    test("should create default PTO templates for a new organization", async () => {
       // Arrange
-      const team = await createTeam("new-team");
+      const organization = await createOrganization("new-organization");
 
       // Act
-      const templates = await ptoService.createDefaultPtoTemplates(team);
+      const templates = await ptoService.createDefaultPtoTemplates(organization);
 
       // Assert
       expect(templates).toBeDefined();
@@ -108,7 +108,7 @@ describe("PtoService Tests", () => {
       expect(templates.length).toBeGreaterThan(0);
 
       // Verify the templates were actually persisted
-      const savedTemplates = await ptoService.getTemplates(team);
+      const savedTemplates = await ptoService.getTemplates(organization);
       expect(savedTemplates.length).toBe(templates.length);
 
       // Check that default templates match the templates defined in DEFAULT_TEMPLATE
@@ -117,7 +117,7 @@ describe("PtoService Tests", () => {
       // Verify properties of the created templates
       templates.forEach((template, index) => {
         expect(template.id).toBeDefined();
-        expect(template.team.teamId).toBe("new-team");
+        expect(template.organization.organizationId).toBe("new-organization");
         expect(template.title).toBe(DEFAULT_TEMPLATE[index].title);
         expect(template.content).toBe(DEFAULT_TEMPLATE[index].content);
         expect(template.description).toBe(DEFAULT_TEMPLATE[index].description);
@@ -128,8 +128,8 @@ describe("PtoService Tests", () => {
   describe("updateTemplate", () => {
     test("should update an existing PTO template", async () => {
       // Arrange
-      const team = await createTeam();
-      const template = await createPtoTemplate(team);
+      const organization = await createOrganization();
+      const template = await createPtoTemplate(organization);
 
       const updateData: Partial<PtoTemplate> = {
         id: template.id,
@@ -141,7 +141,7 @@ describe("PtoService Tests", () => {
       };
 
       // Act
-      const result = await ptoService.upsertTemplate(updateData, team);
+      const result = await ptoService.upsertTemplate(updateData, organization);
 
       // Assert
       expect(result.title).toBe(updateData.title);
@@ -155,10 +155,10 @@ describe("PtoService Tests", () => {
   describe("createPtoRequest", () => {
     test("should create a PTO request with approvals", async () => {
       // Arrange
-      const team = await createTeam();
-      const user = await createUser("test-user", team);
-      const approver = await createUser("approver", team);
-      const template = await createPtoTemplate(team);
+      const organization = await createOrganization();
+      const user = await createUser("test-user", organization);
+      const approver = await createUser("approver", organization);
+      const template = await createPtoTemplate(organization);
       const startDate = new Date("2025-04-01");
       const endDate = new Date("2025-04-01");
 
@@ -190,10 +190,10 @@ describe("PtoService Tests", () => {
 
     test("should create PTO request with daysConsumed=0 template", async () => {
       // Arrange
-      const team = await createTeam();
-      const user = await createUser("test-user", team);
-      const approver = await createUser("approver", team);
-      const template = await createPtoTemplate(team, {daysConsumed: 0});
+      const organization = await createOrganization();
+      const user = await createUser("test-user", organization);
+      const approver = await createUser("approver", organization);
+      const template = await createPtoTemplate(organization, {daysConsumed: 0});
       const startDate = new Date("2025-04-01");
       const endDate = new Date("2025-04-10");
 
@@ -220,9 +220,9 @@ describe("PtoService Tests", () => {
 
     test("should throw error if no approvers provided", async () => {
       // Arrange
-      const team = await createTeam();
+      const organization = await createOrganization();
       const user = await createUser("test-user");
-      const template = await createPtoTemplate(team);
+      const template = await createPtoTemplate(organization);
 
       // Act & Assert
       await expect(
@@ -232,10 +232,10 @@ describe("PtoService Tests", () => {
 
     test("should throw error if startDate is after endDate", async () => {
       // Arrange
-      const team = await createTeam();
+      const organization = await createOrganization();
       const user = await createUser("test-user");
       const approver = await createUser("approver");
-      const template = await createPtoTemplate(team);
+      const template = await createPtoTemplate(organization);
 
       let startDate = new Date("2025-04-05");
       let endDate = new Date("2025-04-01");
@@ -260,10 +260,10 @@ describe("PtoService Tests", () => {
     });
 
     test("should throw error when using half-day template with different start and end dates", async () => {      // Arrange
-      const team = await createTeam();
+      const organization = await createOrganization();
       const user = await createUser("test-user");
       const approver = await createUser("approver");
-      const template = await createPtoTemplate(team, {daysConsumed: 0.5}); // Half-day template
+      const template = await createPtoTemplate(organization, {daysConsumed: 0.5}); // Half-day template
 
       const startDate = new Date("2025-04-01");
       const endDate = new Date("2025-04-02"); // Different date
@@ -284,10 +284,10 @@ describe("PtoService Tests", () => {
   describe("getPtoRequests", () => {
     test("should return PTO requests for a user", async () => {
       // Arrange
-      const team = await createTeam();
-      const user = await createUser("test-user", team);
-      const approver = await createUser("approver", team);
-      const template = await createPtoTemplate(team);
+      const organization = await createOrganization();
+      const user = await createUser("test-user", organization);
+      const approver = await createUser("approver", organization);
+      const template = await createPtoTemplate(organization);
       const startDate = new Date("2025-04-01");
       const endDate = new Date("2025-04-05");
 
@@ -316,10 +316,10 @@ describe("PtoService Tests", () => {
   describe("getPendingApprovalsToReview", () => {
     test("should return pending approvals for an approver", async () => {
       // Arrange
-      const team = await createTeam();
-      const user = await createUser("test-user", team);
-      const approver = await createUser("approver", team);
-      const template = await createPtoTemplate(team);
+      const organization = await createOrganization();
+      const user = await createUser("test-user", organization);
+      const approver = await createUser("approver", organization);
+      const template = await createPtoTemplate(organization);
       const startDate = new Date("2025-04-01");
       const endDate = new Date("2025-04-05");
 
@@ -343,12 +343,12 @@ describe("PtoService Tests", () => {
 
     test("should only show requests to the current approver in the sequence", async () => {
       // Arrange
-      const team = await createTeam();
-      const user = await createUser("requester", team);
-      const approver1 = await createUser("approver1", team);
-      const approver2 = await createUser("approver2", team);
-      const approver3 = await createUser("approver3", team);
-      const template = await createPtoTemplate(team);
+      const organization = await createOrganization();
+      const user = await createUser("requester", organization);
+      const approver1 = await createUser("approver1", organization);
+      const approver2 = await createUser("approver2", organization);
+      const approver3 = await createUser("approver3", organization);
+      const template = await createPtoTemplate(organization);
 
       const ptoRequest = await ptoService.createPtoRequest(
         user,
@@ -374,12 +374,12 @@ describe("PtoService Tests", () => {
 
     test("should show request to next approver after current approver approves", async () => {
       // Arrange
-      const team = await createTeam();
-      const user = await createUser("requester", team);
-      const approver1 = await createUser("approver1", team);
-      const approver2 = await createUser("approver2", team);
-      const approver3 = await createUser("approver3", team);
-      const template = await createPtoTemplate(team);
+      const organization = await createOrganization();
+      const user = await createUser("requester", organization);
+      const approver1 = await createUser("approver1", organization);
+      const approver2 = await createUser("approver2", organization);
+      const approver3 = await createUser("approver3", organization);
+      const template = await createPtoTemplate(organization);
 
       const ptoRequest = await ptoService.createPtoRequest(
         user,
@@ -419,11 +419,11 @@ describe("PtoService Tests", () => {
   describe("approve", () => {
     test("should approve a request and move to next approver", async () => {
       // Arrange
-      const team = await createTeam();
-      let user = await createUser("requester", team);
-      const approver1 = await createUser("approver1", team);
-      const approver2 = await createUser("approver2", team);
-      const template = await createPtoTemplate(team);
+      const organization = await createOrganization();
+      let user = await createUser("requester", organization);
+      const approver1 = await createUser("approver1", organization);
+      const approver2 = await createUser("approver2", organization);
+      const template = await createPtoTemplate(organization);
 
       const ptoRequest = await ptoService.createPtoRequest(
         user,
@@ -456,10 +456,10 @@ describe("PtoService Tests", () => {
 
     test("should approve final approval and mark request as approved", async () => {
       // Arrange
-      const team = await createTeam();
-      let user = await createUser("requester", team);
-      const approver = await createUser("approver", team);
-      const template = await createPtoTemplate(team);
+      const organization = await createOrganization();
+      let user = await createUser("requester", organization);
+      const approver = await createUser("approver", organization);
+      const template = await createPtoTemplate(organization);
 
       const ptoRequest = await ptoService.createPtoRequest(
         user,
@@ -484,11 +484,11 @@ describe("PtoService Tests", () => {
 
     test("should throw error if non-approver tries to approve", async () => {
       // Arrange
-      const team = await createTeam();
-      const user = await createUser("requester", team);
-      const correctApprover = await createUser("correct-approver", team);
-      const wrongApprover = await createUser("wrong-approver", team);
-      const template = await createPtoTemplate(team);
+      const organization = await createOrganization();
+      const user = await createUser("requester", organization);
+      const correctApprover = await createUser("correct-approver", organization);
+      const wrongApprover = await createUser("wrong-approver", organization);
+      const template = await createPtoTemplate(organization);
 
       const ptoRequest = await ptoService.createPtoRequest(
         user,
@@ -510,10 +510,10 @@ describe("PtoService Tests", () => {
 
     test("should throw error if attempting to approve non-pending approval", async () => {
       // Arrange
-      const team = await createTeam();
-      const user = await createUser("requester", team);
-      const approver = await createUser("approver", team);
-      const template = await createPtoTemplate(team);
+      const organization = await createOrganization();
+      const user = await createUser("requester", organization);
+      const approver = await createUser("approver", organization);
+      const template = await createPtoTemplate(organization);
 
       const ptoRequest = await ptoService.createPtoRequest(
         user,
@@ -540,11 +540,11 @@ describe("PtoService Tests", () => {
   describe("reject", () => {
     test("should reject a request and mark the entire request as rejected", async () => {
       // Arrange
-      const team = await createTeam();
-      const user = await createUser("requester", team);
-      const approver1 = await createUser("approver1", team);
-      const approver2 = await createUser("approver2", team);
-      const template = await createPtoTemplate(team);
+      const organization = await createOrganization();
+      const user = await createUser("requester", organization);
+      const approver1 = await createUser("approver1", organization);
+      const approver2 = await createUser("approver2", organization);
+      const template = await createPtoTemplate(organization);
 
       const ptoRequest = await ptoService.createPtoRequest(
         user,
@@ -570,11 +570,11 @@ describe("PtoService Tests", () => {
 
     test("should throw error if non-approver tries to reject", async () => {
       // Arrange
-      const team = await createTeam();
-      const user = await createUser("requester", team);
-      const correctApprover = await createUser("correct-approver", team);
-      const wrongApprover = await createUser("wrong-approver", team);
-      const template = await createPtoTemplate(team);
+      const organization = await createOrganization();
+      const user = await createUser("requester", organization);
+      const correctApprover = await createUser("correct-approver", organization);
+      const wrongApprover = await createUser("wrong-approver", organization);
+      const template = await createPtoTemplate(organization);
 
       const ptoRequest = await ptoService.createPtoRequest(
         user,
@@ -596,10 +596,10 @@ describe("PtoService Tests", () => {
 
     test("should throw error if attempting to reject non-pending approval", async () => {
       // Arrange
-      const team = await createTeam();
-      const user = await createUser("requester", team);
-      const approver = await createUser("approver", team);
-      const template = await createPtoTemplate(team);
+      const organization = await createOrganization();
+      const user = await createUser("requester", organization);
+      const approver = await createUser("approver", organization);
+      const template = await createPtoTemplate(organization);
 
       const ptoRequest = await ptoService.createPtoRequest(
         user,

@@ -1,18 +1,18 @@
 import { Check, Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { BaseEntity } from './base';
-import { Team } from './team.model';
+import { Organization } from './organization.model';
 
 @Entity()
 export class PtoTemplate extends BaseEntity {
   @ManyToOne(
-    () => Team,
-    (team) => team.users,
+    () => Organization,
+    (organization) => organization.users,
     {
       onDelete: 'SET NULL',
     },
   )
-  @JoinColumn({ name: 'team_id' })
-  team: Team;
+  @JoinColumn({ name: 'organization_id' })
+  organization: Organization;
 
   @Column()
   title: string;

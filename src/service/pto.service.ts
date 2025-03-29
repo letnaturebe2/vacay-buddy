@@ -3,7 +3,7 @@ import { DEFAULT_TEMPLATE, PtoRequestStatus } from '../constants';
 import { PtoApproval } from '../entity/pto-approval.model';
 import { PtoRequest } from '../entity/pto-request.model';
 import { PtoTemplate } from '../entity/pto-template.model';
-import { Team } from '../entity/team.model';
+import { Organization } from '../entity/organization.model';
 import { User } from '../entity/user.model';
 import { assert, isSameDay } from '../utils';
 import { UserService } from './user.service';
@@ -27,26 +27,26 @@ export class PtoService {
     return this.ptoTemplateRepository.findOneByOrFail({ id });
   }
 
-  async getTemplates(team: Team): Promise<PtoTemplate[]> {
-    return this.ptoTemplateRepository.find({ where: { team: { id: team.id } } });
+  async getTemplates(organization: Organization): Promise<PtoTemplate[]> {
+    return this.ptoTemplateRepository.find({ where: { organization: { id: organization.id } } });
   }
 
-  async upsertTemplate(template: Partial<PtoTemplate>, team: Team): Promise<PtoTemplate> {
+  async upsertTemplate(template: Partial<PtoTemplate>, organization: Organization): Promise<PtoTemplate> {
     if (template.id) {
       return this.updateTemplate(template.id, template);
     }
 
-    return this.createTemplate(template, team);
+    return this.createTemplate(template, organization);
   }
 
   async deleteTemplate(id: number): Promise<void> {
     await this.ptoTemplateRepository.delete(id);
   }
 
-  private async createTemplate(template: Partial<PtoTemplate>, team: Team): Promise<PtoTemplate> {
+  private async createTemplate(template: Partial<PtoTemplate>, organization: Organization): Promise<PtoTemplate> {
     const newTemplate = this.ptoTemplateRepository.create({
       ...template,
-      team,
+      organization,
     });
     return this.ptoTemplateRepository.save(newTemplate);
   }
@@ -103,12 +103,12 @@ export class PtoService {
   }
 
   /**
-   * Creates default PTO templates for a team when it's first created
-   * These default templates are provided automatically to every new team
+   * Creates default PTO templates for a organization when it's first created
+   * These default templates are provided automatically to every new organization
    */
-  async createDefaultPtoTemplates(team: Team): Promise<PtoTemplate[]> {
+  async createDefaultPtoTemplates(organization: Organization): Promise<PtoTemplate[]> {
     const defaultTemplatePromises = DEFAULT_TEMPLATE.map((template) => {
-      return this.createTemplate(template, team);
+      return this.createTemplate(template, organization);
     });
 
     return Promise.all(defaultTemplatePromises);

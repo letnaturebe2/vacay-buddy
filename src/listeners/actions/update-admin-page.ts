@@ -15,7 +15,7 @@ export const updateAdminPage = async ({
 
   assert(body.view !== undefined, 'body.view is undefined in callbackBackToHome function');
 
-  const templates = await ptoService.getTemplates(context.team);
+  const templates = await ptoService.getTemplates(context.organization);
 
   const blocks = await buildAdminPage(templates);
 

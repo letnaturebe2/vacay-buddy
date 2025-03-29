@@ -1,10 +1,13 @@
-import type { AllMiddlewareArgs, App } from '@slack/bolt';
-import type { AppContext } from './app';
-import type { Team } from './entity/team.model';
-import { ptoService, teamService, userService } from './service';
+import type {AllMiddlewareArgs, App} from '@slack/bolt';
+import type {AppContext} from './app';
+import type {Organization} from './entity/organization.model';
+import {ptoService, organizationService, userService} from './service';
 
-const loadAppContext = async ({ context, client, next }: AllMiddlewareArgs<AppContext>) => {
-  if (!context.teamId || !context.userId) {
+const loadAppContext = async (
+  {context, client, next}: AllMiddlewareArgs<AppContext>
+) => {
+  const organizationId = context.teamId || context.enterpriseId;
+  if (!organizationId || !context.userId) {
     return await next();
   }
 
@@ -15,16 +18,16 @@ const loadAppContext = async ({ context, client, next }: AllMiddlewareArgs<AppCo
 
   context.locale = result.user?.locale ?? 'en-US';
 
-  const team: Team | null = await teamService.getTeam(context.teamId);
-  if (team === null) {
+  const organization: Organization | null = await organizationService.getOrganization(organizationId);
+  if (organization === null) {
     // first attempt to access the app
-    context.team = await teamService.createTeam(context.teamId);
-    await ptoService.createDefaultPtoTemplates(context.team);
+    context.organization = await organizationService.createOrganization(organizationId, context.enterpriseId !== undefined);
+    await ptoService.createDefaultPtoTemplates(context.organization);
   } else {
-    context.team = team;
+    context.organization = organization;
   }
 
-  context.user = await userService.getOrCreateUser(context.userId, context.team);
+  context.user = await userService.getOrCreateUser(context.userId, context.organization);
 
   if (context.user.name !== result.user?.real_name) {
     context.user.name = result.user?.real_name ?? '';

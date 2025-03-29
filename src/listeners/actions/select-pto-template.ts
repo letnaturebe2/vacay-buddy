@@ -19,7 +19,7 @@ export const selectPtoTemplate = async ({
   assert(!!body.view, 'body.view.id is undefined');
 
   const selectedTemplateId = Number((action as StaticSelectAction).selected_option.value);
-  const ptoTemplates = await ptoService.getTemplates(context.team);
+  const ptoTemplates = await ptoService.getTemplates(context.organization);
   const selectedTemplate = ptoTemplates.find((template) => template.id === selectedTemplateId);
 
   assert(!!selectedTemplate, 'selected template not found');

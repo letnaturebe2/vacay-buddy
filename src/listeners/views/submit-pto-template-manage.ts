@@ -43,10 +43,10 @@ const submitPtoTemplateManage = async ({
       templateData.id = templateId;
     }
 
-    await ptoService.upsertTemplate(templateData, context.team);
+    await ptoService.upsertTemplate(templateData, context.organization);
   }
 
-  const templates = await ptoService.getTemplates(context.team);
+  const templates = await ptoService.getTemplates(context.organization);
   const blocks = await buildAdminPage(templates);
   const homeView: HomeView = {
     type: 'home',
