@@ -22,7 +22,6 @@ const receiver = new ExpressReceiver({
       const newOrganization = await organizationService.createOrganization(
         organizationId,
         installation.isEnterpriseInstall !== undefined,
-        installation.bot.token,
         JSON.stringify(installation),
       );
 

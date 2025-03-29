@@ -46,7 +46,6 @@ describe("PtoService Tests", () => {
     return await organizationService.createOrganization(
       organizationId,
       false,
-      "test-token",
       JSON.stringify(TEST_INSTALLATION)
     )
   };

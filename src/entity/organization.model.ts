@@ -17,9 +17,6 @@ export class Organization extends BaseEntity {
   )
   users: User[];
 
-  @Column({ nullable: false })
-  botToken: string;
-
-  @Column({ type: 'text', nullable: false })
+  @Column({ type: 'text', nullable: true })
   installation: string;
 }

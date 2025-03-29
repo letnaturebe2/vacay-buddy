@@ -25,7 +25,7 @@ describe("UserService Tests", () => {
     await organizationRepository.clear();
 
     testOrganization = await organizationService.createOrganization(
-      "test-organization", false, "test-token", JSON.stringify(TEST_INSTALLATION));
+      "test-organization", false, JSON.stringify(TEST_INSTALLATION));
   });
 
   describe("getOrCreateUser", () => {

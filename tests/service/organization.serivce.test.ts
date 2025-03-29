@@ -28,7 +28,7 @@ describe("OrganizationService Tests", () => {
     test("should return admin users for a organization", async () => {
       // Arrange
       const organization = await organizationService.createOrganization(
-        "test-organization", false, "test-token", JSON.stringify(TEST_INSTALLATION));
+        "test-organization", false, JSON.stringify(TEST_INSTALLATION));
 
       const adminUser = new User();
       adminUser.userId = "admin";
@@ -55,7 +55,7 @@ describe("OrganizationService Tests", () => {
     test("should update admin status for organization members", async () => {
       // Arrange
       const organization = await organizationService.createOrganization(
-        "test-organization", false, "test-token", JSON.stringify(TEST_INSTALLATION));
+        "test-organization", false, JSON.stringify(TEST_INSTALLATION));
 
       const user1 = new User();
       user1.userId = "user1";
