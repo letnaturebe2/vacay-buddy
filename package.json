@@ -10,7 +10,7 @@
     "lint:fix": "npx @biomejs/biome check --write src",
     "test": "npm run build && npm run lint && npm run test:jest",
     "dev-socket": "nodemon --ext ts --exec ts-node src/app.ts",
-    "dev-http": "nodemon --ext ts --exec ts-node src/app-oauth.ts",
+    "dev-http": "nodemon --ext ts --exec ts-node src/app-prod.ts",
     "typeorm": "typeorm-ts-node-commonjs",
     "test:jest": "jest",
     "migration:generate": "ts-node --require dotenv/config ./node_modules/typeorm/cli.js migration:generate src/migration/migration/ -d src/db.ts",

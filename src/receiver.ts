@@ -3,8 +3,6 @@ import { Request, Response } from 'express';
 import { organizationService, ptoService } from './service';
 import { assert } from './utils';
 
-const tempDB = new Map();
-
 const receiver = new ExpressReceiver({
   logLevel: LogLevel.INFO,
   signingSecret: process.env.SLACK_SIGNING_SECRET || '',
@@ -30,22 +28,16 @@ const receiver = new ExpressReceiver({
     fetchInstallation: async (installQuery) => {
       const organizationId = installQuery.enterpriseId || installQuery.teamId;
       assert(organizationId !== undefined, 'Organization ID is undefined');
+
       const organization = await organizationService.getOrganization(organizationId);
       assert(organization !== null, 'Organization not found');
+
       return JSON.parse(organization.installation);
     },
     deleteInstallation: async (installQuery) => {
-      // Org-wide installation deletion
-      if (installQuery.isEnterpriseInstall && installQuery.enterpriseId !== undefined) {
-        tempDB.delete(installQuery.enterpriseId);
-        return;
-      }
-      // Single team installation deletion
-      if (installQuery.teamId !== undefined) {
-        tempDB.delete(installQuery.teamId);
-        return;
-      }
-      throw new Error('Failed to delete installation');
+      const organizationId = installQuery.enterpriseId || installQuery.teamId;
+      assert(organizationId !== undefined, 'Organization ID is undefined');
+      await organizationService.deleteOrganization(organizationId);
     },
   },
   redirectUri: 'https://dolphin-living-cattle.ngrok-free.app/slack/oauth_redirect',

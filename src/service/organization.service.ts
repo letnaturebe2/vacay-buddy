@@ -25,6 +25,13 @@ export class OrganizationService {
     return await this.createOrganization(organizationId, isEnterprise, '{}');
   }
 
+  public async deleteOrganization(organizationId: string): Promise<void> {
+    const organization = await this.getOrganization(organizationId);
+    if (organization) {
+      await this.organizationRepository.remove(organization);
+    }
+  }
+
   public async createOrganization(
     organizationId: string,
     isEnterprise: boolean,
