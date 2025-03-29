@@ -9,7 +9,6 @@ import type { Organization } from './entity/organization.model';
 import type { User } from './entity/user.model';
 import registerListeners from './listeners';
 import registerMiddleware from './middleware';
-import receiver from './receiver';
 
 export interface AppContext extends Context {
   locale: string;
@@ -19,7 +18,6 @@ export interface AppContext extends Context {
 
 const app = new App({
   token: process.env.SLACK_BOT_TOKEN,
-  receiver,
   appToken: process.env.SLACK_APP_TOKEN,
   signingSecret: process.env.SLACK_SIGNING_SECRET,
   socketMode: false,
