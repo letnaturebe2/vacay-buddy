@@ -1,10 +1,11 @@
-import { App, LogLevel } from '@slack/bolt';
-import { config } from 'dotenv';
+import {App, LogLevel} from '@slack/bolt';
+import {config} from 'dotenv';
 import registerListeners from './listeners';
+import receiver from "./receiver";
+import registerMiddleware from "./middleware";
 
 config();
 
-// For development purposes only
 const tempDB = new Map();
 
 const app = new App({
@@ -12,8 +13,8 @@ const app = new App({
   signingSecret: process.env.SLACK_SIGNING_SECRET,
   clientId: process.env.SLACK_CLIENT_ID,
   clientSecret: process.env.SLACK_CLIENT_SECRET,
-  stateSecret: 'my-state-secret',
-  scopes: ['channels:history', 'chat:write', 'commands'],
+  stateSecret: process.env.SLACK_STATE_SECRET,
+  scopes: process.env.SLACK_SCOPES?.split(',') || [],
   installationStore: {
     storeInstallation: async (installation) => {
       // Org-wide installation
@@ -53,15 +54,18 @@ const app = new App({
       throw new Error('Failed to delete installation');
     },
   },
+  redirectUri: 'https://dolphin-living-cattle.ngrok-free.app/slack/oauth_redirect',
   installerOptions: {
     // If true, /slack/install redirects installers to the Slack Authorize URL
     // without rendering the web page with "Add to Slack" button
     directInstall: false,
+    redirectUriPath: '/slack/oauth_redirect',
   },
 });
 
 /** Register Listeners */
 registerListeners(app);
+registerMiddleware(app);
 
 /** Start Bolt App */
 (async () => {
