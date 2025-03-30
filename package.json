@@ -36,6 +36,7 @@
     "@types/xlsx": "^0.0.35",
     "dotenv": "~16.4.7",
     "express": "^5.0.1",
+    "i18next": "^24.2.3",
     "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.14.0",
     "openai": "^4.85.2",

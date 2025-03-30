@@ -25,7 +25,7 @@ export enum PtoRequestStatus {
 }
 
 // noinspection JSUnusedGlobalSymbols
-export const LOCALE_TO_LANG: Record<string, string> = {
+export const LOCALE_TO_LANG: Readonly<Record<string, string>> = {
   'en-US': 'English',
   'en-GB': 'English',
   'de-DE': 'German',

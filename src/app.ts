@@ -7,6 +7,7 @@ import { App, type Context, LogLevel } from '@slack/bolt';
 import { dataSource } from './db';
 import type { Organization } from './entity/organization.model';
 import type { User } from './entity/user.model';
+import { i18nInitPromise } from './i18n';
 import registerListeners from './listeners';
 import registerMiddleware from './middleware';
 
@@ -31,10 +32,9 @@ registerMiddleware(app);
 /** Start Bolt App */
 (async () => {
   try {
+    await i18nInitPromise;
     await dataSource.initialize();
-
     await app.start(process.env.PORT || 3000);
-
     app.logger.info('⚡️ Bolt app is running! ⚡️');
   } catch (error) {
     app.logger.error('Unable to start App', error);
