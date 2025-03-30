@@ -16,13 +16,17 @@ export class OrganizationService {
     return await this.organizationRepository.findOne({ where: { organizationId } });
   }
 
-  public async getOrCreateOrganization(organizationId: string, isEnterprise: boolean): Promise<Organization> {
+  public async getOrCreateOrganization(
+    organizationId: string,
+    isEnterprise: boolean,
+    installation = '{}',
+  ): Promise<Organization> {
     const existingOrganization = await this.getOrganization(organizationId);
     if (existingOrganization) {
       return existingOrganization;
     }
 
-    return await this.createOrganization(organizationId, isEnterprise, '{}');
+    return await this.createOrganization(organizationId, isEnterprise, installation);
   }
 
   public async deleteOrganization(organizationId: string): Promise<void> {

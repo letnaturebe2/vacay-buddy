@@ -1,6 +1,7 @@
 import { ExpressReceiver, LogLevel } from '@slack/bolt';
+import { WebClient } from '@slack/web-api';
 import { Request, Response } from 'express';
-import { organizationService, ptoService } from './service';
+import { organizationService, ptoService, userService } from './service';
 import { assert } from './utils';
 
 const receiver = new ExpressReceiver({
@@ -17,14 +18,23 @@ const receiver = new ExpressReceiver({
       assert(organizationId !== undefined, 'Organization ID is undefined');
       assert(installation.bot !== undefined, 'Bot installation is undefined');
 
-      const newOrganization = await organizationService.createOrganization(
+      // create organization, user, and default pto templates
+      const newOrganization = await organizationService.getOrCreateOrganization(
         organizationId,
         installation.isEnterpriseInstall !== undefined,
         JSON.stringify(installation),
       );
-
       await ptoService.createDefaultPtoTemplates(newOrganization);
+      const installer = await userService.getOrCreateUser(installation.user.id, newOrganization, true);
+
+      // send welcome message to the installer
+      const webClient = new WebClient(installation.bot.token);
+      await webClient.chat.postMessage({
+        channel: installer.userId,
+        text: `Hello <@${installer.userId}>! Thanks for installing the app!`,
+      });
     },
+
     fetchInstallation: async (installQuery) => {
       const organizationId = installQuery.enterpriseId || installQuery.teamId;
       assert(organizationId !== undefined, 'Organization ID is undefined');
@@ -42,23 +52,23 @@ const receiver = new ExpressReceiver({
   },
   redirectUri: 'https://dolphin-living-cattle.ngrok-free.app/slack/oauth_redirect',
   installerOptions: {
-    // If true, /slack/install redirects installers to the Slack Authorize URL
-    // without rendering the web page with "Add to Slack" button
-    directInstall: false,
+    directInstall: true,
     redirectUriPath: '/slack/oauth_redirect',
   },
 });
 
 // Simple HTML endpoint example
-receiver.app.get('/', (req: Request, res: Response) => {
+receiver.app.get('/', async (req: Request, res: Response) => {
   const html = `
     <!DOCTYPE html>
     <html lang="en">
       <head><title>Hello Slack App!!!</title></head>
-      <body><h1>Hello from Slack App@@@</h1></body>
+      <body>
+        <h1>Hello from Slack App</h1>
+        <button onclick="window.location.href='/slack/install'">Install</button>
+      </body>
     </html>
   `;
-
   res.set('Content-Type', 'text/html');
   res.send(html);
 });
