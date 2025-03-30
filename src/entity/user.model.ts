@@ -12,7 +12,7 @@ export class User extends BaseEntity {
     () => Organization,
     (organization) => organization.users,
     {
-      onDelete: 'SET NULL',
+      onDelete: 'CASCADE',
     },
   )
   @JoinColumn({ name: 'organization_id' })

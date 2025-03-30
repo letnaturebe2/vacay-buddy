@@ -1,6 +1,7 @@
 import { ExpressReceiver, LogLevel } from '@slack/bolt';
 import { WebClient } from '@slack/web-api';
 import { Request, Response } from 'express';
+import { buildInstallMessage } from './listeners/events/slack-ui/build-install-message';
 import { organizationService, ptoService, userService } from './service';
 import { assert } from './utils';
 
@@ -17,9 +18,15 @@ const receiver = new ExpressReceiver({
 
       assert(organizationId !== undefined, 'Organization ID is undefined');
       assert(installation.bot !== undefined, 'Bot installation is undefined');
+      assert(installation.appId !== undefined, 'App ID is undefined');
+
+      const organization = await organizationService.getOrganization(organizationId);
+      if (organization) {
+        await organizationService.deleteOrganization(organizationId);
+      }
 
       // create organization, user, and default pto templates
-      const newOrganization = await organizationService.getOrCreateOrganization(
+      const newOrganization = await organizationService.createOrganization(
         organizationId,
         installation.isEnterpriseInstall !== undefined,
         JSON.stringify(installation),
@@ -32,6 +39,7 @@ const receiver = new ExpressReceiver({
       await webClient.chat.postMessage({
         channel: installer.userId,
         text: `Hello <@${installer.userId}>! Thanks for installing the app!`,
+        blocks: buildInstallMessage(newOrganization.organizationId, installation.appId),
       });
     },
 
@@ -50,7 +58,6 @@ const receiver = new ExpressReceiver({
       await organizationService.deleteOrganization(organizationId);
     },
   },
-  redirectUri: 'https://dolphin-living-cattle.ngrok-free.app/slack/oauth_redirect',
   installerOptions: {
     directInstall: true,
     redirectUriPath: '/slack/oauth_redirect',
