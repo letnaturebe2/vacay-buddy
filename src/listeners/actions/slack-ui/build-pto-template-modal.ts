@@ -1,12 +1,11 @@
 import type { AnyBlock } from '@slack/types';
 import { AppContext } from '../../../app';
-import { DEFAULT_PTO_TEMPLATE_CONTENT, DEFAULT_PTO_TEMPLATE_TITLE } from '../../../constants';
 import type { PtoTemplate } from '../../../entity/pto-template.model';
 import { t } from '../../../i18n';
 
 export const buildPtoTemplateModal = async (context: AppContext, ptoTemplate?: PtoTemplate): Promise<AnyBlock[]> => {
-  const initialTitle = ptoTemplate?.title || DEFAULT_PTO_TEMPLATE_TITLE;
-  const initialContent = ptoTemplate?.content || DEFAULT_PTO_TEMPLATE_CONTENT;
+  const initialTitle = ptoTemplate?.title || t(context.locale, 'default_pto_template_title');
+  const initialContent = ptoTemplate?.content || t(context.locale, 'default_pto_template_content');
   const initialStatus =
     ptoTemplate?.enabled === false ? t(context.locale, 'template_disabled') : t(context.locale, 'template_enabled');
   const initialDescription = ptoTemplate?.description || '';

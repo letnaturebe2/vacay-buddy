@@ -4,6 +4,7 @@ import { ActionId } from '../../constants';
 import { ptoService } from '../../service';
 import { assert } from '../../utils';
 import { buildRequestDecisionModal } from './slack-ui/build-request-decision-modal';
+import {t} from "../../i18n";
 
 export const openRequestApproveModal = async ({
   ack,
@@ -38,12 +39,12 @@ export const openRequestApproveModal = async ({
       type: 'modal',
       private_metadata: privateMetadata,
       callback_id: ActionId.SUBMIT_DECISION_REQUEST,
-      title: { type: 'plain_text', text: 'PTO Request Review' },
+      title: { type: 'plain_text', text: t(context.locale, 'pto_request_review') },
       blocks: blocks,
       ...(isApprover && {
         submit: {
           type: 'plain_text',
-          text: 'Submit',
+          text:  t(context.locale, 'submit'),
         },
       }),
     },

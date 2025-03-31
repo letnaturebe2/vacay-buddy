@@ -160,18 +160,14 @@ export default {
   install_connect:
     'But before you can do all these amazing things, we need you to connect your calendar to App. Simply click the button below:',
 
-  // Error Messages
-  error_general: 'Something went wrong. Please try again later.',
-  error_permission: 'You do not have permission to perform this action.',
-  error_invalid_date: 'Invalid date format.',
-  error_required_field: 'This field is required.',
-  error_max_length: 'Maximum length exceeded.',
-  error_date_in_past: 'Date cannot be in the past.',
-  error_end_before_start: 'End date cannot be before start date.',
-  error_same_day_required: 'This template requires the start and end date to be the same day.',
-  error_invalid_action: 'Invalid action.',
-  error_missing_approval: 'Pending PTO request must have a current approval ID',
-  error_missing_template: 'Template is required',
-  error_missing_date: 'Start and end dates are required',
-  error_missing_decision: 'Decision is required',
+  // Template defaults
+  default_pto_template_title: 'PTO',
+  default_pto_template_content: '📋 Leave Request Details: \n - Reason: \n',
+  template_full_day_title: 'Full-day Leave',
+  template_morning_half_day_title: 'Morning Half-day Leave',
+  template_afternoon_half_day_title: 'Afternoon Half-day Leave',
+  template_sick_leave_title: 'Sick Leave',
+  template_sick_leave_desc: 'Leave due to illness',
+  template_reward_leave_title: 'Reward Leave',
+  template_reward_leave_desc: 'Special leave granted as a reward',
 };

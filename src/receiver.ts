@@ -20,6 +20,14 @@ const receiver = new ExpressReceiver({
       assert(installation.bot !== undefined, 'Bot installation is undefined');
       assert(installation.appId !== undefined, 'App ID is undefined');
 
+      const client = new WebClient(installation.bot.token);
+      const result = await client.users.info({
+        user: installation.user.id,
+        include_locale: true,
+      });
+
+      const locale = result.user?.locale || 'en-US';
+
       const organization = await organizationService.getOrganization(organizationId);
       if (organization) {
         await organizationService.deleteOrganization(organizationId);
@@ -31,20 +39,15 @@ const receiver = new ExpressReceiver({
         installation.isEnterpriseInstall !== undefined,
         JSON.stringify(installation),
       );
-      await ptoService.createDefaultPtoTemplates(newOrganization);
+
+      await ptoService.createDefaultPtoTemplates(locale, newOrganization);
       const installer = await userService.getOrCreateUser(installation.user.id, newOrganization, true);
 
       // send welcome message to the installer
-      const client = new WebClient(installation.bot.token);
-      const result = await client.users.info({
-        user: installer.userId,
-        include_locale: true,
-      });
-
       await client.chat.postMessage({
         channel: installer.userId,
         text: `Hello <@${installer.userId}>! Thanks for installing the app!`,
-        blocks: buildInstallMessage(result.user?.locale ?? 'en-US', newOrganization.organizationId, installation.appId),
+        blocks: buildInstallMessage(locale, newOrganization.organizationId, installation.appId),
       });
     },
 

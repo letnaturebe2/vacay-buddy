@@ -1,11 +1,11 @@
 import { DataSource, Repository } from 'typeorm';
-import { DEFAULT_TEMPLATE, PtoRequestStatus } from '../constants';
+import { PtoRequestStatus } from '../constants';
 import { Organization } from '../entity/organization.model';
 import { PtoApproval } from '../entity/pto-approval.model';
 import { PtoRequest } from '../entity/pto-request.model';
 import { PtoTemplate } from '../entity/pto-template.model';
 import { User } from '../entity/user.model';
-import { assert, isSameDay } from '../utils';
+import { assert, getDefaultTemplates, isSameDay } from '../utils';
 import { UserService } from './user.service';
 
 export class PtoService {
@@ -106,8 +106,9 @@ export class PtoService {
    * Creates default PTO templates for a organization when it's first created
    * These default templates are provided automatically to every new organization
    */
-  async createDefaultPtoTemplates(organization: Organization): Promise<PtoTemplate[]> {
-    const defaultTemplatePromises = DEFAULT_TEMPLATE.map((template) => {
+  async createDefaultPtoTemplates(locale: string, organization: Organization): Promise<PtoTemplate[]> {
+    const templates = getDefaultTemplates(locale);
+    const defaultTemplatePromises = templates.map((template) => {
       return this.createTemplate(template, organization);
     });
 

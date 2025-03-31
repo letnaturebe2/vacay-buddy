@@ -6,10 +6,11 @@ import {PtoRequest} from "../../src/entity/pto-request.model";
 import {PtoApproval} from "../../src/entity/pto-approval.model";
 import {User} from "../../src/entity/user.model";
 import {Organization} from "../../src/entity/organization.model";
-import {DEFAULT_PTO_TEMPLATE_CONTENT, DEFAULT_TEMPLATE, PtoRequestStatus} from "../../src/constants";
+import {PtoRequestStatus} from "../../src/constants";
 import {UserService} from "../../src/service/user.service";
 import {OrganizationService} from "../../src/service/organization.service";
 import {TEST_INSTALLATION} from "../config/constants";
+import {getDefaultTemplates} from "../../src/utils";
 
 describe("PtoService Tests", () => {
   let organizationService: OrganizationService;
@@ -64,7 +65,7 @@ describe("PtoService Tests", () => {
     const template = new PtoTemplate();
     template.title = data.title || "Vacation";
     template.description = data.description || "Vacation template";
-    template.content = data.content || DEFAULT_PTO_TEMPLATE_CONTENT;
+    template.content = data.content || "📋 Leave Request Details: \n - Reason:";
     template.enabled = data.enabled ?? true;
     template.daysConsumed = data.daysConsumed ?? 1;
     template.organization = organization;
@@ -78,7 +79,7 @@ describe("PtoService Tests", () => {
       const templateData: Partial<PtoTemplate> = {
         title: "Vacation",
         description: "Annual vacation template",
-        content: DEFAULT_PTO_TEMPLATE_CONTENT,
+        content: "📋 Leave Request Details: \n - Reason:",
         enabled: true,
       };
 
@@ -104,9 +105,10 @@ describe("PtoService Tests", () => {
     test("should create default PTO templates for a new organization", async () => {
       // Arrange
       const organization = await createOrganization("new-organization");
+      const defaultTemplates = getDefaultTemplates("en-US");
 
       // Act
-      const templates = await ptoService.createDefaultPtoTemplates(organization);
+      const templates = await ptoService.createDefaultPtoTemplates('en-US', organization);
 
       // Assert
       expect(templates).toBeDefined();
@@ -118,15 +120,15 @@ describe("PtoService Tests", () => {
       expect(savedTemplates.length).toBe(templates.length);
 
       // Check that default templates match the templates defined in DEFAULT_TEMPLATE
-      expect(templates.length).toBe(DEFAULT_TEMPLATE.length);
+      expect(templates.length).toBe(defaultTemplates.length);
 
       // Verify properties of the created templates
       templates.forEach((template, index) => {
         expect(template.id).toBeDefined();
         expect(template.organization.organizationId).toBe("new-organization");
-        expect(template.title).toBe(DEFAULT_TEMPLATE[index].title);
-        expect(template.content).toBe(DEFAULT_TEMPLATE[index].content);
-        expect(template.description).toBe(DEFAULT_TEMPLATE[index].description);
+        expect(template.title).toBe(defaultTemplates[index].title);
+        expect(template.content).toBe(defaultTemplates[index].content);
+        expect(template.description).toBe(defaultTemplates[index].description);
       });
     });
   });

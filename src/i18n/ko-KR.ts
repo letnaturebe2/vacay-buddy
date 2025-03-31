@@ -159,18 +159,14 @@ export default {
   install_connect:
     '하지만 이러한 놀라운 기능을 사용하기 전에 먼저 앱에 캘린더를 연결해야 합니다. 아래 버튼을 클릭하세요:',
 
-  // Error Messages
-  error_general: '문제가 발생했습니다. 나중에 다시 시도하세요.',
-  error_permission: '이 작업을 수행할 권한이 없습니다.',
-  error_invalid_date: '유효하지 않은 날짜 형식입니다.',
-  error_required_field: '이 필드는 필수입니다.',
-  error_max_length: '최대 길이를 초과했습니다.',
-  error_date_in_past: '날짜는 과거일 수 없습니다.',
-  error_end_before_start: '종료 날짜는 시작 날짜보다 앞설 수 없습니다.',
-  error_same_day_required: '이 템플릿은 시작 및 종료 날짜가 같은 날이어야 합니다.',
-  error_invalid_action: '유효하지 않은 작업입니다.',
-  error_missing_approval: '대기 중인 연차 요청에는 현재 승인 ID가 있어야 합니다',
-  error_missing_template: '템플릿이 필요합니다',
-  error_missing_date: '시작 및 종료 날짜가 필요합니다',
-  error_missing_decision: '결정이 필요합니다',
+  // Template defaults
+  default_pto_template_title: '연차',
+  default_pto_template_content: '📋 휴가 신청 상세: \n - 사유: \n',
+  template_full_day_title: '연차',
+  template_morning_half_day_title: '오전 반차',
+  template_afternoon_half_day_title: '오후 반차',
+  template_sick_leave_title: '병가',
+  template_sick_leave_desc: '질병으로 인한 휴가',
+  template_reward_leave_title: '포상 휴가',
+  template_reward_leave_desc: '보상으로 주어진 특별 휴가',
 };
