@@ -35,11 +35,16 @@ const receiver = new ExpressReceiver({
       const installer = await userService.getOrCreateUser(installation.user.id, newOrganization, true);
 
       // send welcome message to the installer
-      const webClient = new WebClient(installation.bot.token);
-      await webClient.chat.postMessage({
+      const client = new WebClient(installation.bot.token);
+      const result = await client.users.info({
+        user: installer.userId,
+        include_locale: true,
+      });
+
+      await client.chat.postMessage({
         channel: installer.userId,
         text: `Hello <@${installer.userId}>! Thanks for installing the app!`,
-        blocks: buildInstallMessage(newOrganization.organizationId, installation.appId),
+        blocks: buildInstallMessage(result.user?.locale ?? 'en-US', newOrganization.organizationId, installation.appId),
       });
     },
 

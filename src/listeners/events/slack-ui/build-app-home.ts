@@ -1,6 +1,7 @@
 import type { AnyBlock } from '@slack/types';
 import type { AppContext } from '../../../app';
 import { ActionId } from '../../../constants';
+import { t } from '../../../i18n';
 import { ptoService } from '../../../service';
 import { assert } from '../../../utils';
 import { buildPtoList } from './components/build-pto-list';
@@ -14,7 +15,7 @@ export const buildAppHome = async (context: AppContext, showAdminSection: boolea
       type: 'header',
       text: {
         type: 'plain_text',
-        text: ':chart_with_upwards_trend: My PTO Summary',
+        text: `:chart_with_upwards_trend: ${t(context.locale, 'my_pto_summary')}`,
         emoji: true,
       },
     },
@@ -22,13 +23,18 @@ export const buildAppHome = async (context: AppContext, showAdminSection: boolea
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: `*Used PTO*: ${context.user.usedPtoDays}/${context.user.annualPtoDays} days\n*Remaining*: ${(context.user.annualPtoDays - context.user.usedPtoDays).toFixed(1)} days`,
+        text: `${t(context.locale, 'used_pto', {
+          used: context.user.usedPtoDays.toString(),
+          total: context.user.annualPtoDays.toString(),
+        })}\n${t(context.locale, 'remaining_pto', {
+          remaining: (context.user.annualPtoDays - context.user.usedPtoDays).toFixed(1),
+        })}`,
       },
       accessory: {
         type: 'button',
         text: {
           type: 'plain_text',
-          text: 'View',
+          text: t(context.locale, 'view'),
         },
         value: `${context.user.userId}`,
         action_id: ActionId.OPEN_MY_REQUEST_STATUS_MODAL,
@@ -46,7 +52,7 @@ export const buildAppHome = async (context: AppContext, showAdminSection: boolea
         type: 'header',
         text: {
           type: 'plain_text',
-          text: ':gear: Admin Settings',
+          text: `:gear: ${t(context.locale, 'admin_settings')}`,
           emoji: true,
         },
       },
@@ -55,7 +61,7 @@ export const buildAppHome = async (context: AppContext, showAdminSection: boolea
         elements: [
           {
             type: 'plain_text',
-            text: 'This section is only visible to you because you are an admin.',
+            text: t(context.locale, 'admin_section_notice'),
             emoji: true,
           },
         ],
@@ -68,7 +74,7 @@ export const buildAppHome = async (context: AppContext, showAdminSection: boolea
             action_id: ActionId.UPDATE_ADMIN_PAGE,
             text: {
               type: 'plain_text',
-              text: ':gear:Settings',
+              text: `:gear:${t(context.locale, 'settings')}`,
               emoji: true,
             },
             style: 'primary',
@@ -88,7 +94,7 @@ export const buildAppHome = async (context: AppContext, showAdminSection: boolea
       type: 'header',
       text: {
         type: 'plain_text',
-        text: ':memo: Create PTO Request',
+        text: `:memo: ${t(context.locale, 'create_pto_request')}`,
         emoji: true,
       },
     },
@@ -97,7 +103,7 @@ export const buildAppHome = async (context: AppContext, showAdminSection: boolea
       elements: [
         {
           type: 'plain_text',
-          text: 'Create a new time off request that will be sent to your manager for approval.',
+          text: t(context.locale, 'create_request_description'),
           emoji: true,
         },
       ],
@@ -110,7 +116,7 @@ export const buildAppHome = async (context: AppContext, showAdminSection: boolea
           action_id: ActionId.OPEN_PTO_REQUEST_MODAL,
           text: {
             type: 'plain_text',
-            text: ':memo: Start Request',
+            text: `:memo: ${t(context.locale, 'start_request')}`,
             emoji: true,
           },
           style: 'primary',
@@ -129,7 +135,7 @@ export const buildAppHome = async (context: AppContext, showAdminSection: boolea
       type: 'header',
       text: {
         type: 'plain_text',
-        text: ':clipboard: Assigned to Me',
+        text: `:clipboard: ${t(context.locale, 'assigned_to_me')}`,
         emoji: true,
       },
     },
@@ -139,8 +145,8 @@ export const buildAppHome = async (context: AppContext, showAdminSection: boolea
         {
           type: 'mrkdwn',
           text: context.user.isAdmin
-            ? 'Approve or reject PTO requests assigned to you. \n As an admin, you can approve or reject any pending PTO request, even those assigned to other approvers.'
-            : 'Approve or reject PTO requests assigned to you.',
+            ? `${t(context.locale, 'approve_reject_description')} \n ${t(context.locale, 'admin_approve_description')}`
+            : t(context.locale, 'approve_reject_description'),
         },
       ],
     },
@@ -157,12 +163,12 @@ export const buildAppHome = async (context: AppContext, showAdminSection: boolea
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: 'No pending PTO requests assigned to you.',
+        text: t(context.locale, 'no_pending_assigned'),
       },
     });
   } else {
     for (const approval of ptoApprovals) {
-      const ptoListBlocks = buildPtoList(approval.ptoRequest, approval.id);
+      const ptoListBlocks = buildPtoList(context, approval.ptoRequest, approval.id);
       blocks.push(...ptoListBlocks);
     }
   }
@@ -173,7 +179,7 @@ export const buildAppHome = async (context: AppContext, showAdminSection: boolea
       type: 'header',
       text: {
         type: 'plain_text',
-        text: ':calendar: My Pending PTO Request',
+        text: `:calendar: ${t(context.locale, 'my_pending_pto')}`,
         emoji: true,
       },
     },
@@ -182,7 +188,7 @@ export const buildAppHome = async (context: AppContext, showAdminSection: boolea
       elements: [
         {
           type: 'mrkdwn',
-          text: 'Your submitted PTO requests and their current status.',
+          text: t(context.locale, 'my_requests_description'),
         },
       ],
     },
@@ -197,13 +203,13 @@ export const buildAppHome = async (context: AppContext, showAdminSection: boolea
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: 'You have no pending PTO requests.',
+        text: t(context.locale, 'no_pending_personal'),
       },
     });
   } else {
     for (const ptoRequest of pendingRequests) {
       assert(ptoRequest.currentApprovalId !== null, 'Pending PTO request must have a current approval ID');
-      const ptoListBlocks = buildPtoList(ptoRequest, ptoRequest.currentApprovalId);
+      const ptoListBlocks = buildPtoList(context, ptoRequest, ptoRequest.currentApprovalId);
       blocks.push(...ptoListBlocks);
     }
   }
@@ -215,7 +221,7 @@ export const buildAppHome = async (context: AppContext, showAdminSection: boolea
     elements: [
       {
         type: 'mrkdwn',
-        text: 'Need help? Contact <mailto:hr@example.com|HR Team> for any PTO-related inquiries. :love_letter:',
+        text: t(context.locale, 'help_contact'),
       },
     ],
   });

@@ -1,33 +1,27 @@
 import type { AnyBlock } from '@slack/types';
+import { t } from '../../../i18n';
 
-export const buildInstallMessage = (organizationId: string, appId: string): AnyBlock[] => {
+export const buildInstallMessage = (locale: string, organizationId: string, appId: string): AnyBlock[] => {
   return [
     {
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: 'Hi David :wave:',
+        text: t(locale, 'install_intro'),
       },
     },
     {
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: 'Great to see you here! App helps you to stay up-to-date with your meetings and events right here within Slack. These are just a few things which you will be able to do:',
+        text: t(locale, 'install_features'),
       },
     },
     {
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: '• Schedule meetings \n • Manage and update attendees \n • Get notified about changes of your meetings',
-      },
-    },
-    {
-      type: 'section',
-      text: {
-        type: 'mrkdwn',
-        text: 'But before you can do all these amazing things, we need you to connect your calendar to App. Simply click the button below:',
+        text: t(locale, 'install_connect'),
       },
     },
     {
@@ -37,7 +31,7 @@ export const buildInstallMessage = (organizationId: string, appId: string): AnyB
           type: 'button',
           text: {
             type: 'plain_text',
-            text: 'Home',
+            text: t(locale, 'home'),
           },
           url: `slack://app?team=${organizationId}&id=${appId}`,
         },

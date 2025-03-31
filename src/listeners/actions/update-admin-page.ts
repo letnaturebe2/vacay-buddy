@@ -17,7 +17,7 @@ export const updateAdminPage = async ({
 
   const templates = await ptoService.getTemplates(context.organization);
 
-  const blocks = await buildAdminPage(templates);
+  const blocks = await buildAdminPage(context, templates);
 
   const view: HomeView = {
     type: 'home',

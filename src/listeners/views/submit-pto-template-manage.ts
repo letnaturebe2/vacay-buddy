@@ -47,7 +47,7 @@ const submitPtoTemplateManage = async ({
   }
 
   const templates = await ptoService.getTemplates(context.organization);
-  const blocks = await buildAdminPage(templates);
+  const blocks = await buildAdminPage(context, templates);
   const homeView: HomeView = {
     type: 'home',
     blocks: blocks,

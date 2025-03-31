@@ -1,9 +1,13 @@
 import type { AnyBlock } from '@slack/types';
-
+import { AppContext } from '../../../app';
 import type { PtoTemplate } from '../../../entity/pto-template.model';
+import { t } from '../../../i18n';
 import { assert } from '../../../utils';
 
-export const buildPtoTemplateDeleteModal = async (ptoTemplate: PtoTemplate): Promise<AnyBlock[]> => {
+export const buildPtoTemplateDeleteModal = async (
+  context: AppContext,
+  ptoTemplate: PtoTemplate,
+): Promise<AnyBlock[]> => {
   assert(!!ptoTemplate.id, 'Template information is required for deletion');
 
   return [
@@ -11,14 +15,14 @@ export const buildPtoTemplateDeleteModal = async (ptoTemplate: PtoTemplate): Pro
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: '*Delete Template Confirmation*',
+        text: `*${t(context.locale, 'delete_template_confirmation')}*`,
       },
     },
     {
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: `:warning: Are you sure you want to delete the template *${ptoTemplate.title}*?`,
+        text: t(context.locale, 'delete_template_warning', { title: ptoTemplate.title }),
       },
     },
     {
@@ -26,7 +30,7 @@ export const buildPtoTemplateDeleteModal = async (ptoTemplate: PtoTemplate): Pro
       elements: [
         {
           type: 'mrkdwn',
-          text: ':exclamation: This action cannot be undone.',
+          text: `:exclamation: ${t(context.locale, 'delete_template_irreversible')}`,
         },
       ],
     },
@@ -37,7 +41,7 @@ export const buildPtoTemplateDeleteModal = async (ptoTemplate: PtoTemplate): Pro
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: `*Content:*\n\n${ptoTemplate.content}`,
+        text: `*${t(context.locale, 'template_content_label')}:*\n\n${ptoTemplate.content}`,
       },
     },
   ];

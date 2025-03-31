@@ -1,9 +1,11 @@
 import type { AnyBlock } from '@slack/types';
+import type { AppContext } from '../../../../app';
 import { PtoRequestStatus } from '../../../../constants';
 import type { PtoRequest } from '../../../../entity/pto-request.model';
+import { t } from '../../../../i18n';
 import { formatToYYYYMMDD } from '../../../../utils';
 
-export const buildDecisionSection = (request: PtoRequest): AnyBlock[] => {
+export const buildDecisionSection = (context: AppContext, request: PtoRequest): AnyBlock[] => {
   const startDate = request.startDate;
   const endDate = request.endDate;
 
@@ -36,7 +38,7 @@ export const buildDecisionSection = (request: PtoRequest): AnyBlock[] => {
     type: 'section',
     text: {
       type: 'mrkdwn',
-      text: `*Approvers:* \n ${formattedApprovers}`,
+      text: `*${t(context.locale, 'approvers')}* \n ${formattedApprovers}`,
     },
   };
 
@@ -50,19 +52,21 @@ export const buildDecisionSection = (request: PtoRequest): AnyBlock[] => {
       fields: [
         {
           type: 'mrkdwn',
-          text: `*Title:*\n${request.title}`,
+          text: `*${t(context.locale, 'title')}*\n${request.title}`,
         },
         {
           type: 'mrkdwn',
-          text: `*Requester:*\n${request.user.name}`,
+          text: `*${t(context.locale, 'requester')}*\n${request.user.name}`,
         },
         {
           type: 'mrkdwn',
-          text: `*When:*\n${formattedStartDate} - ${formattedEndDate}`,
+          text: `*${t(context.locale, 'when')}*\n${formattedStartDate} - ${formattedEndDate}`,
         },
         {
           type: 'mrkdwn',
-          text: `*Days Requested:*\n${request.consumedDays} ${request.consumedDays > 1 ? 'days' : 'day'}`,
+          text: `*${t(context.locale, 'days_requested')}*\n${request.consumedDays} ${
+            request.consumedDays > 1 ? t(context.locale, 'days_multiple') : t(context.locale, 'days_single')
+          }`,
         },
       ],
     },
@@ -70,7 +74,7 @@ export const buildDecisionSection = (request: PtoRequest): AnyBlock[] => {
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: `*Reason:*\n${request.reason}`,
+        text: `*${t(context.locale, 'reason')}*\n${request.reason}`,
       },
     },
   ];

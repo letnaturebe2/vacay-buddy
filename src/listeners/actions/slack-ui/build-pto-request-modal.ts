@@ -1,10 +1,13 @@
 import type { AnyBlock } from '@slack/types';
+import { AppContext } from '../../../app';
 import { ActionId } from '../../../constants';
 import type { PtoTemplate } from '../../../entity/pto-template.model';
 import type { User } from '../../../entity/user.model';
+import { t } from '../../../i18n';
 import { assert } from '../../../utils';
 
 export const buildPtoRequestModal = async (
+  context: AppContext,
   templates: PtoTemplate[],
   selected: PtoTemplate,
   user: User,
@@ -28,13 +31,13 @@ export const buildPtoRequestModal = async (
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: `*:calendar: Select PTO Template* \n_This template consumes: *${selected.daysConsumed}* day(s)_`,
+        text: `*:calendar: ${t(context.locale, 'select_pto_template')}* \n${t(context.locale, 'template_consumes_days', { days: selected.daysConsumed.toString() })}`,
       },
       accessory: {
         type: 'static_select',
         placeholder: {
           type: 'plain_text',
-          text: 'Select a template',
+          text: t(context.locale, 'select_template'),
         },
         initial_option: {
           text: {
@@ -58,12 +61,12 @@ export const buildPtoRequestModal = async (
         type: 'plain_text_input',
         placeholder: {
           type: 'plain_text',
-          text: 'Enter title',
+          text: t(context.locale, 'enter_title'),
         },
       },
       label: {
         type: 'plain_text',
-        text: 'Title',
+        text: t(context.locale, 'title'),
       },
     },
     {
@@ -77,7 +80,7 @@ export const buildPtoRequestModal = async (
       },
       label: {
         type: 'plain_text',
-        text: 'Content',
+        text: t(context.locale, 'template_content'),
       },
     },
     {
@@ -89,12 +92,12 @@ export const buildPtoRequestModal = async (
         initial_date: today,
         placeholder: {
           type: 'plain_text',
-          text: 'Select start date',
+          text: t(context.locale, 'select_start_date'),
         },
       },
       label: {
         type: 'plain_text',
-        text: 'Start Date',
+        text: t(context.locale, 'start_date'),
       },
     },
     {
@@ -106,22 +109,28 @@ export const buildPtoRequestModal = async (
         initial_date: today,
         placeholder: {
           type: 'plain_text',
-          text: 'Select end date',
+          text: t(context.locale, 'select_end_date'),
         },
       },
       label: {
         type: 'plain_text',
-        text: 'End Date',
+        text: t(context.locale, 'end_date'),
       },
     },
     {
       type: 'input',
       block_id: 'block_id_approvers',
-      label: { type: 'plain_text', text: 'Assign Approvers' },
+      label: {
+        type: 'plain_text',
+        text: t(context.locale, 'assign_approvers'),
+      },
       element: {
         type: 'multi_users_select',
         action_id: 'action_id_approvers',
-        placeholder: { type: 'plain_text', text: 'Search and select approvers' },
+        placeholder: {
+          type: 'plain_text',
+          text: t(context.locale, 'search_approvers'),
+        },
         // initial_users: admins.map((admin) => admin.userId),  // TODO: get default user's template approvers
       },
     },

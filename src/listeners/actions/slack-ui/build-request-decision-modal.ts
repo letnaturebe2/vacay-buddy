@@ -1,9 +1,15 @@
 import type { AnyBlock } from '@slack/types';
+import { AppContext } from '../../../app';
 import type { PtoRequest } from '../../../entity/pto-request.model';
+import { t } from '../../../i18n';
 import { buildDecisionSection } from './components/build-decision-section';
 
-export const buildRequestDecisionModal = async (request: PtoRequest, isApprover: boolean): Promise<AnyBlock[]> => {
-  const blocks = buildDecisionSection(request);
+export const buildRequestDecisionModal = async (
+  context: AppContext,
+  request: PtoRequest,
+  isApprover: boolean,
+): Promise<AnyBlock[]> => {
+  const blocks = buildDecisionSection(context, request);
 
   if (isApprover) {
     blocks.push(
@@ -20,7 +26,7 @@ export const buildRequestDecisionModal = async (request: PtoRequest, isApprover:
             {
               text: {
                 type: 'plain_text',
-                text: 'Approve',
+                text: t(context.locale, 'approve'),
                 emoji: true,
               },
               value: `approve_${request.currentApprovalId}`,
@@ -28,7 +34,7 @@ export const buildRequestDecisionModal = async (request: PtoRequest, isApprover:
             {
               text: {
                 type: 'plain_text',
-                text: 'Reject',
+                text: t(context.locale, 'reject'),
                 emoji: true,
               },
               value: `reject_${request.currentApprovalId}`,
@@ -37,7 +43,7 @@ export const buildRequestDecisionModal = async (request: PtoRequest, isApprover:
           initial_option: {
             text: {
               type: 'plain_text',
-              text: 'Approve',
+              text: t(context.locale, 'approve'),
               emoji: true,
             },
             value: `approve_${request.currentApprovalId}`,
@@ -45,7 +51,7 @@ export const buildRequestDecisionModal = async (request: PtoRequest, isApprover:
         },
         label: {
           type: 'plain_text',
-          text: 'Decision',
+          text: t(context.locale, 'decision'),
           emoji: true,
         },
       },
@@ -59,12 +65,12 @@ export const buildRequestDecisionModal = async (request: PtoRequest, isApprover:
           multiline: true,
           placeholder: {
             type: 'plain_text',
-            text: 'Add a comment...',
+            text: t(context.locale, 'add_comment'),
           },
         },
         label: {
           type: 'plain_text',
-          text: 'Comment',
+          text: t(context.locale, 'comment'),
         },
       },
     );

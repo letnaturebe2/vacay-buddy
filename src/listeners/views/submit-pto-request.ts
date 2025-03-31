@@ -16,7 +16,6 @@ const submitPtoRequest = async ({
   client,
   context,
 }: AllMiddlewareArgs<AppContext> & SlackViewMiddlewareArgs<ViewSubmitAction>) => {
-  // Get private metadata
   const privateMetadata = JSON.parse(view.private_metadata);
 
   const values = view.state.values;
@@ -81,13 +80,13 @@ const submitPtoRequest = async ({
   const approver = approvers[0];
   await client.chat.postMessage({
     channel: approver.userId,
-    blocks: await buildRequestDecisionBlocks(request, true),
+    blocks: await buildRequestDecisionBlocks(context, request, true),
   });
 
   // Notify requester
   await client.chat.postMessage({
     channel: context.user.userId,
-    blocks: await buildRequestDecisionBlocks(request, false),
+    blocks: await buildRequestDecisionBlocks(context, request, false),
   });
 
   const admins = await organizationService.getAdmins(context.organization);

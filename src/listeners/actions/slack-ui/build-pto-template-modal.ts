@@ -1,11 +1,14 @@
 import type { AnyBlock } from '@slack/types';
+import { AppContext } from '../../../app';
 import { DEFAULT_PTO_TEMPLATE_CONTENT, DEFAULT_PTO_TEMPLATE_TITLE } from '../../../constants';
 import type { PtoTemplate } from '../../../entity/pto-template.model';
+import { t } from '../../../i18n';
 
-export const buildPtoTemplateModal = async (ptoTemplate?: PtoTemplate): Promise<AnyBlock[]> => {
+export const buildPtoTemplateModal = async (context: AppContext, ptoTemplate?: PtoTemplate): Promise<AnyBlock[]> => {
   const initialTitle = ptoTemplate?.title || DEFAULT_PTO_TEMPLATE_TITLE;
   const initialContent = ptoTemplate?.content || DEFAULT_PTO_TEMPLATE_CONTENT;
-  const initialStatus = ptoTemplate?.enabled === false ? 'disabled' : 'enabled';
+  const initialStatus =
+    ptoTemplate?.enabled === false ? t(context.locale, 'template_disabled') : t(context.locale, 'template_enabled');
   const initialDescription = ptoTemplate?.description || '';
   const initialDaysConsumed = ptoTemplate?.daysConsumed || 1;
 
@@ -20,7 +23,7 @@ export const buildPtoTemplateModal = async (ptoTemplate?: PtoTemplate): Promise<
       },
       label: {
         type: 'plain_text',
-        text: 'Title',
+        text: t(context.locale, 'template_title'),
       },
     },
     {
@@ -34,7 +37,7 @@ export const buildPtoTemplateModal = async (ptoTemplate?: PtoTemplate): Promise<
       },
       label: {
         type: 'plain_text',
-        text: 'Content',
+        text: t(context.locale, 'template_content'),
       },
     },
     {
@@ -45,22 +48,22 @@ export const buildPtoTemplateModal = async (ptoTemplate?: PtoTemplate): Promise<
         action_id: 'action_id_status',
         initial_option: {
           text: { type: 'plain_text', text: initialStatus },
-          value: initialStatus,
+          value: ptoTemplate?.enabled === false ? 'disabled' : 'enabled',
         },
         options: [
           {
-            text: { type: 'plain_text', text: 'enabled' },
+            text: { type: 'plain_text', text: t(context.locale, 'template_enabled') },
             value: 'enabled',
           },
           {
-            text: { type: 'plain_text', text: 'disabled' },
+            text: { type: 'plain_text', text: t(context.locale, 'template_disabled') },
             value: 'disabled',
           },
         ],
       },
       label: {
         type: 'plain_text',
-        text: 'Status',
+        text: t(context.locale, 'template_status'),
       },
     },
     {
@@ -76,7 +79,7 @@ export const buildPtoTemplateModal = async (ptoTemplate?: PtoTemplate): Promise<
       },
       label: {
         type: 'plain_text',
-        text: 'Days Consumed',
+        text: t(context.locale, 'template_days_consumed'),
       },
     },
     {
@@ -91,7 +94,7 @@ export const buildPtoTemplateModal = async (ptoTemplate?: PtoTemplate): Promise<
       },
       label: {
         type: 'plain_text',
-        text: 'Description',
+        text: t(context.locale, 'template_description'),
       },
     },
   ];

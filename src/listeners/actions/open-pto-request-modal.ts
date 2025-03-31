@@ -1,6 +1,7 @@
 import type { AllMiddlewareArgs, BlockAction, SlackActionMiddlewareArgs } from '@slack/bolt';
 import type { AppContext } from '../../app';
 import { ActionId } from '../../constants';
+import { t } from '../../i18n';
 import { ptoService } from '../../service';
 import { assert } from '../../utils';
 import { buildPtoRequestModal } from './slack-ui/build-pto-request-modal';
@@ -23,20 +24,20 @@ export const openPtoRequestModal = async ({
       trigger_id: body.trigger_id,
       view: {
         type: 'modal',
-        title: { type: 'plain_text', text: 'Request PTO' },
+        title: { type: 'plain_text', text: t(context.locale, 'request_pto') },
         blocks: [
           {
             type: 'section',
             text: {
               type: 'mrkdwn',
               text:
-                '*No PTO templates found* :warning:\n\n' +
-                'You need to create a PTO template before you can submit a request.\n\n' +
-                '*Please contact an administrator to create PTO templates.*',
+                `*${t(context.locale, 'no_templates_found')}* :warning:\n\n` +
+                `${t(context.locale, 'no_templates_warning')}\n\n` +
+                `*${t(context.locale, 'no_templates_contact_admin')}*`,
             },
           },
         ],
-        close: { type: 'plain_text', text: 'Cancel' },
+        close: { type: 'plain_text', text: t(context.locale, 'close') },
       },
     });
 
@@ -44,7 +45,7 @@ export const openPtoRequestModal = async ({
   }
 
   // TODO : set user's default template
-  const blocks = await buildPtoRequestModal(templates, templates[0], context.user);
+  const blocks = await buildPtoRequestModal(context, templates, templates[0], context.user);
 
   const private_metadata = JSON.stringify({
     viewId: body.view.id,
@@ -57,13 +58,13 @@ export const openPtoRequestModal = async ({
       type: 'modal',
       private_metadata: private_metadata,
       callback_id: ActionId.SUBMIT_PTO_REQUEST,
-      title: { type: 'plain_text', text: 'Request PTO' },
+      title: { type: 'plain_text', text: t(context.locale, 'request_pto') },
       blocks: blocks,
       submit: {
         type: 'plain_text',
-        text: 'Save Changes',
+        text: t(context.locale, 'save_changes'),
       },
-      close: { type: 'plain_text', text: 'Cancel' },
+      close: { type: 'plain_text', text: t(context.locale, 'cancel') },
     },
   });
 };

@@ -2,6 +2,7 @@ import type { AllMiddlewareArgs, BlockAction, SlackActionMiddlewareArgs } from '
 import type { StaticSelectAction } from '@slack/bolt/dist/types/actions/block-action';
 import type { AppContext } from '../../app';
 import { ActionId } from '../../constants';
+import { t } from '../../i18n';
 import { ptoService } from '../../service';
 import { assert } from '../../utils';
 import { buildPtoRequestModal } from './slack-ui/build-pto-request-modal';
@@ -24,7 +25,7 @@ export const selectPtoTemplate = async ({
 
   assert(!!selectedTemplate, 'selected template not found');
 
-  const blocks = await buildPtoRequestModal(ptoTemplates, selectedTemplate, context.user);
+  const blocks = await buildPtoRequestModal(context, ptoTemplates, selectedTemplate, context.user);
 
   await client.views.update({
     view_id: body.view.id,
@@ -32,13 +33,13 @@ export const selectPtoTemplate = async ({
       type: 'modal',
       private_metadata: body.view.private_metadata,
       callback_id: ActionId.SUBMIT_PTO_REQUEST,
-      title: { type: 'plain_text', text: 'Request PTO' },
+      title: { type: 'plain_text', text: t(context.locale, 'request_pto') },
       blocks: blocks,
       submit: {
         type: 'plain_text',
-        text: 'Save Changes',
+        text: t(context.locale, 'save_changes'),
       },
-      close: { type: 'plain_text', text: 'Cancel' },
+      close: { type: 'plain_text', text: t(context.locale, 'cancel') },
     },
   });
 };

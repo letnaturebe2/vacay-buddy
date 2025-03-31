@@ -20,7 +20,7 @@ export const openRequestApproveModal = async ({
   const approvalId = Number(action.value);
   const approval = await ptoService.getApprovalWithRelations(approvalId);
   const isApprover = approval.approverId === context.user.id && approval.actionDate === null;
-  const blocks = await buildRequestDecisionModal(approval.ptoRequest, isApprover);
+  const blocks = await buildRequestDecisionModal(context, approval.ptoRequest, isApprover);
 
   let privateMetadata = '{}';
 

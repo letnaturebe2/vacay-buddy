@@ -43,7 +43,7 @@ const submitDecisionRequest = async ({
       // Notify next approver
       await client.chat.postMessage({
         channel: nextApproval.approver.userId,
-        blocks: await buildRequestDecisionBlocks(request, true),
+        blocks: await buildRequestDecisionBlocks(context, request, true),
       });
     }
   } else {
@@ -53,7 +53,7 @@ const submitDecisionRequest = async ({
   // Notify requester of the decision
   await client.chat.postMessage({
     channel: approval.ptoRequest.user.userId,
-    blocks: buildDecisionSection(approval.ptoRequest),
+    blocks: buildDecisionSection(context, approval.ptoRequest),
   });
 
   const admins = await organizationService.getAdmins(context.organization);
