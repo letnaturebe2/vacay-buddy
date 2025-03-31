@@ -1,5 +1,6 @@
 import type { AllMiddlewareArgs, SlackViewMiddlewareArgs, ViewSubmitAction } from '@slack/bolt';
 import type { AppContext } from '../../app';
+import { t } from '../../i18n';
 import { organizationService, userService } from '../../service';
 
 const submitAdminManage = async ({
@@ -15,7 +16,7 @@ const submitAdminManage = async ({
     await ack({
       response_action: 'errors',
       errors: {
-        select_admins_block: 'You must select at least one admin.',
+        select_admins_block: t(context.locale, 'admin_selection_required'),
       },
     });
     return;
@@ -28,6 +29,8 @@ const submitAdminManage = async ({
 
   await organizationService.updateAdmins(selectedUsers, context.organization);
 
+  const adminList = selectedUsers.map((user) => `<@${user}>`).join(', ');
+
   await ack({
     response_action: 'update',
     view: {
@@ -35,18 +38,18 @@ const submitAdminManage = async ({
       callback_id: body.view.callback_id,
       title: {
         type: 'plain_text',
-        text: 'Manage Admins',
+        text: t(context.locale, 'manage_admins_title'),
       },
       close: {
         type: 'plain_text',
-        text: 'Close',
+        text: t(context.locale, 'close'),
       },
       blocks: [
         {
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: `:white_check_mark: Admins updated successfully!\nNew Admins: ${selectedUsers.map((user) => `<@${user}>`).join(', ')}`,
+            text: `:white_check_mark: ${t(context.locale, 'admins_updated_success')}\n${t(context.locale, 'admins_updated_message', { adminList })}`,
           },
         },
       ],
@@ -55,7 +58,7 @@ const submitAdminManage = async ({
 
   await client.chat.postMessage({
     channel: body.user.id,
-    text: '✅ Admins updated successfully!', // TODO : add more details
+    text: `✅ ${t(context.locale, 'admins_updated_success')}`,
   });
 };
 

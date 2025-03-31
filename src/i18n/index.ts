@@ -16,10 +16,9 @@ export const i18nInitPromise = i18next.init({
   },
 });
 
-export function t(key: string, params?: Record<string, string>, locale = 'en-US') {
-  const finalLocale = locale in LOCALE_TO_LANG ? locale : 'en-US';
+export function t(locale: keyof typeof LOCALE_TO_LANG, key: string, params?: Record<string, string>) {
   return i18next.t(key, {
-    lng: finalLocale,
+    lng: locale,
     ...params,
   });
 }

@@ -3,6 +3,7 @@ import type { AnyBlock } from '@slack/types';
 import type { HomeView } from '@slack/types/dist/views';
 import type { AppContext } from '../../app';
 import type { User } from '../../entity/user.model';
+import { t } from '../../i18n';
 import { organizationService, ptoService, userService } from '../../service';
 import { assert, isSameDay, showAdminSection } from '../../utils';
 import { buildAppHome } from '../events/slack-ui/build-app-home';
@@ -34,7 +35,7 @@ const submitPtoRequest = async ({
   const content = contentBlock[Object.keys(contentBlock)[0]].value; // because of Date timestamp
   const approverIds = values.block_id_approvers.action_id_approvers.selected_users ?? [];
 
-  assert(!!startDate && !!endDate && !!title && !!content, 'Start and end dates are required');
+  assert(!!startDate && !!endDate && !!title && !!content, 'All fields are required');
 
   const start = new Date(startDate);
   const end = new Date(endDate);
@@ -43,8 +44,8 @@ const submitPtoRequest = async ({
     await ack({
       response_action: 'errors',
       errors: {
-        block_id_start_date: 'Start date must be before end date',
-        block_id_end_date: 'End date must be after start date',
+        block_id_start_date: t(context.locale, 'start_date_before_end_date'),
+        block_id_end_date: t(context.locale, 'end_date_after_start_date'),
       },
     });
     return;
@@ -56,7 +57,7 @@ const submitPtoRequest = async ({
     await ack({
       response_action: 'errors',
       errors: {
-        block_id_end_date: 'This template type requires same start and end dates',
+        block_id_end_date: t(context.locale, 'same_day_required'),
       },
     });
     return;
