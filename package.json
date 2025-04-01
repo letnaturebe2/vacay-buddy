@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "@slack/bolt": "^4.2.0",
-    "@types/xlsx": "^0.0.35",
+    "@types/xlsx": "^0.0.36",
     "dotenv": "~16.4.7",
     "express": "^5.0.1",
     "i18next": "^24.2.3",
