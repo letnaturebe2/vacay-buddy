@@ -1,7 +1,7 @@
 {
-  "name": "bolt-ts-starter-template",
+  "name": "vacaybuddy",
   "version": "1.0.0",
-  "description": "A scaffold template for Slack apps",
+  "description": "A Slack app for easily requesting, approving, and managing PTO directly within Slack",
   "main": "dist/app.js",
   "scripts": {
     "build": "tsc",
@@ -16,20 +16,23 @@
     "migration:generate": "ts-node --require dotenv/config ./node_modules/typeorm/cli.js migration:generate src/migration/migration/ -d src/db.ts",
     "migration:run": "ts-node --require dotenv/config ./node_modules/typeorm/cli.js migration:run -d src/db.ts"
   },
-  "author": "Slack Technologies, LLC",
+  "author": "letnaturebe2",
   "license": "MIT",
   "keywords": [
     "slack",
     "bolt",
-    "slackapi",
-    "typescript"
+    "pto",
+    "vacation",
+    "timeoff",
+    "typescript",
+    "slackapp"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/slack-samples/bolt-ts-starter-template.git"
+    "url": "https://github.com/letnaturebe2/vacay-buddy.git"
   },
   "bugs": {
-    "url": "https://github.com/slack-samples/bolt-ts-starter-template/issues"
+    "url": "https://github.com/letnaturebe2/vacay-buddy/issues"
   },
   "dependencies": {
     "@slack/bolt": "^4.2.0",

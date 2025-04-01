@@ -4,7 +4,7 @@
         "minor_version": 1
     },
     "display_information": {
-        "name": "Bolt Template App"
+        "name": "VacayBuddy"
     },
     "features": {
         "app_home": {
@@ -13,40 +13,27 @@
             "messages_tab_read_only_enabled": true
         },
         "bot_user": {
-            "display_name": "Bolt Template App",
+            "display_name": "VacayBuddy",
             "always_online": false
-        },
-        "shortcuts": [
-            {
-                "name": "Run sample shortcut",
-                "type": "global",
-                "callback_id": "sample_shortcut_id",
-                "description": "Runs a sample shortcut"
-            }
-        ],
-        "slash_commands": [
-            {
-                "command": "/sample-command",
-                "description": "Runs a sample command",
-                "should_escape": false
-            }
-        ]
+        }
     },
     "oauth_config": {
         "scopes": {
             "bot": [
-                "channels:history",
                 "app_mentions:read",
+                "channels:history",
                 "chat:write",
+                "chat:write.public",
                 "commands",
+                "files:read",
+                "files:write",
                 "groups:history",
                 "im:history",
                 "im:write",
                 "mpim:history",
+                "reactions:read",
                 "users:read",
-                "files:read",
-                "files:write",
-                "chat:write.public"
+                "chat:write.customize"
             ]
         }
     },

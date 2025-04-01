@@ -1,10 +1,10 @@
 import type { AllMiddlewareArgs, BlockAction, SlackActionMiddlewareArgs } from '@slack/bolt';
 import type { AppContext } from '../../app';
 import { ActionId } from '../../constants';
+import { t } from '../../i18n';
 import { ptoService } from '../../service';
 import { assert } from '../../utils';
 import { buildRequestDecisionModal } from './slack-ui/build-request-decision-modal';
-import {t} from "../../i18n";
 
 export const openRequestApproveModal = async ({
   ack,
@@ -44,7 +44,7 @@ export const openRequestApproveModal = async ({
       ...(isApprover && {
         submit: {
           type: 'plain_text',
-          text:  t(context.locale, 'submit'),
+          text: t(context.locale, 'submit'),
         },
       }),
     },
