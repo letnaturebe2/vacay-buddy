@@ -39,9 +39,11 @@ const receiver = new ExpressReceiver({
         installation.isEnterpriseInstall !== undefined,
         JSON.stringify(installation),
       );
-
       await ptoService.createDefaultPtoTemplates(locale, newOrganization);
       const installer = await userService.getOrCreateUser(installation.user.id, newOrganization, true);
+
+      // Create users for all team members
+      await organizationService.importTeamMembers(installation.bot.token, newOrganization);
 
       // send welcome message to the installer
       await client.chat.postMessage({

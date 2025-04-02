@@ -16,7 +16,7 @@
     "migration:generate": "ts-node --require dotenv/config ./node_modules/typeorm/cli.js migration:generate src/migration/migration/ -d src/db.ts",
     "migration:run": "ts-node --require dotenv/config ./node_modules/typeorm/cli.js migration:run -d src/db.ts"
   },
-  "author": "letnaturebe2",
+  "author": "letnaturebe",
   "license": "MIT",
   "keywords": [
     "slack",
@@ -40,7 +40,6 @@
     "dotenv": "~16.4.7",
     "express": "^5.0.1",
     "i18next": "^24.2.3",
-    "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.14.0",
     "openai": "^4.85.2",
     "reflect-metadata": "^0.2.2",

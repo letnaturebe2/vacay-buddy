@@ -28,6 +28,17 @@ export class UserService {
     return user;
   }
 
+  public async createBulkUsers(usersData: { id: string, name: string }[], organization: Organization) {
+    const users = usersData.map((obj) => {
+      const user = new User();
+      user.userId = obj.id;
+      user.name = obj.name;
+      user.organization = organization;
+      return user;
+    })
+    return await this.userRepository.insert(users);
+  }
+
   public async createUser(userId: string, organization: Organization, isAdmin = false): Promise<User> {
     const user = new User();
     user.userId = userId;

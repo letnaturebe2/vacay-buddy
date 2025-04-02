@@ -10,22 +10,6 @@ const file_shared = async ({
   context,
 }: AllMiddlewareArgs<AppContext> & SlackEventMiddlewareArgs<'file_shared'>) => {
   try {
-    // // Fetch all users in the workspace
-    // const userListResponse = await client.users.list({
-    //   team_id: context.teamId,
-    //   limit: 999
-    // });
-    //
-    // // Create users for all team members
-    // if (userListResponse.ok && userListResponse.members) {
-    //   for (const member of userListResponse.members) {
-    //     // Skip bots, deleted users, etc.
-    //     if (!member.is_bot && !member.deleted && member.id) {
-    //       await userService.getOrCreateUser(member.id, context.team);
-    //     }
-    //   }
-    // }
-
     const fileId = event.file_id;
     const fileInfo = await client.files.info({ file: fileId });
 

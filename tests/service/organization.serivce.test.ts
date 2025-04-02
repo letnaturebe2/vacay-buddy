@@ -1,10 +1,13 @@
 import {OrganizationService} from "../../src/service/organization.service";
 import {Organization} from "../../src/entity/organization.model";
 import {User} from "../../src/entity/user.model";
-import {Repository} from "typeorm";
+import {In, Repository} from "typeorm";
 import {testDataSource} from "../config/test-db";
 import {UserService} from "../../src/service/user.service";
 import {TEST_INSTALLATION} from "../config/constants";
+import {WebClient} from "@slack/web-api";
+
+jest.mock("@slack/web-api");
 
 describe("OrganizationService Tests", () => {
   let organizationService: OrganizationService;
@@ -12,16 +15,26 @@ describe("OrganizationService Tests", () => {
   let organizationRepository: Repository<Organization>;
   let userRepository: Repository<User>;
 
+  const mockWebClient = {
+    users: {
+      list: jest.fn()
+    }
+  };
+
   beforeAll(async () => {
     organizationRepository = testDataSource.getRepository(Organization);
     userRepository = testDataSource.getRepository(User);
     userService = new UserService(testDataSource);
     organizationService = new OrganizationService(testDataSource, userService);
+
+    (WebClient as unknown as jest.Mock).mockImplementation(() => mockWebClient);
   });
 
   beforeEach(async () => {
     await userRepository.clear();
     await organizationRepository.clear();
+
+    jest.clearAllMocks();
   });
 
   describe("getAdmins", () => {
@@ -77,6 +90,86 @@ describe("OrganizationService Tests", () => {
 
       expect(updatedUser1?.isAdmin).toBe(true);
       expect(updatedUser2?.isAdmin).toBe(false);
+    });
+  });
+
+  describe("importTeamMembers", () => {
+    test("should import valid team members from Slack", async () => {
+      // Arrange
+      const organization = await organizationService.createOrganization(
+        "test-org-id", false, JSON.stringify(TEST_INSTALLATION));
+
+      const mockSlackUsers = {
+        ok: true,
+        members: [
+          {id: "slack-user-1", is_bot: false, deleted: false},
+          {id: "slack-user-2", is_bot: false, deleted: false},
+          {id: "bot-user", is_bot: true, deleted: false},
+          {id: "deleted-user", is_bot: false, deleted: true}
+        ]
+      };
+
+      mockWebClient.users.list.mockResolvedValue(mockSlackUsers);
+
+      // Act
+      await organizationService.importTeamMembers("fake-token", organization);
+
+      // Assert
+      expect(WebClient).toHaveBeenCalledWith("fake-token");
+      expect(mockWebClient.users.list).toHaveBeenCalledWith({
+        team_id: "test-org-id",
+        limit: 500
+      });
+
+
+      // Verify users are saved in DB
+      const savedUsers = await userRepository.find({
+        where: {userId: In(["slack-user-1", "slack-user-2"])},
+        relations: {organization: true}
+      });
+
+      expect(savedUsers.length).toBe(2);
+      savedUsers.forEach(user => {
+        expect(user.organization.id).toBe(organization.id);
+      });
+    });
+
+    test("should handle empty members list", async () => {
+      // Arrange
+      const organization = await organizationService.createOrganization(
+        "test-org-id", false, JSON.stringify(TEST_INSTALLATION));
+
+      mockWebClient.users.list.mockResolvedValue({
+        ok: true,
+        members: []
+      });
+
+      const createBulkUsersSpy = jest.spyOn(userService, "createBulkUsers");
+
+      // Act
+      await organizationService.importTeamMembers("fake-token", organization);
+
+      // Assert
+      expect(createBulkUsersSpy).toHaveBeenCalledWith([], organization);
+    });
+
+    test("should handle API error", async () => {
+      // Arrange
+      const organization = await organizationService.createOrganization(
+        "test-org-id", false, JSON.stringify(TEST_INSTALLATION));
+
+      mockWebClient.users.list.mockResolvedValue({
+        ok: false,
+        error: "some_error"
+      });
+
+      const createBulkUsersSpy = jest.spyOn(userService, "createBulkUsers");
+
+      // Act
+      await organizationService.importTeamMembers("fake-token", organization);
+
+      // Assert
+      expect(createBulkUsersSpy).not.toHaveBeenCalled();
     });
   });
 });

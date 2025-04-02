@@ -1,3 +1,4 @@
+import { WebClient } from '@slack/web-api';
 import { DataSource, Repository } from 'typeorm';
 import { Organization } from '../entity/organization.model';
 import { User } from '../entity/user.model';
@@ -54,5 +55,28 @@ export class OrganizationService {
 
   public async updateAdmins(userIds: string[], organization: Organization) {
     await this.userService.updateAdmins(userIds, organization);
+  }
+
+  public async importTeamMembers(botToken: string, organization: Organization): Promise<void> {
+    const client = new WebClient(botToken);
+
+    const userListResponse = await client.users.list({
+      team_id: organization.organizationId,
+      limit: 500, // TODO : Handle pagination if needed
+    });
+
+    if (userListResponse.ok && userListResponse.members) {
+      const validMembers = userListResponse.members.filter((member) => !member.is_bot && !member.deleted && member.id);
+      const usersData = validMembers.map((member) => {
+        return {
+          id: member.id as string,
+          name: member.real_name || member.name || '',
+        }
+      })
+      await this.userService.createBulkUsers(
+        usersData,
+        organization,
+      );
+    }
   }
 }
