@@ -135,6 +135,15 @@ export class PtoService {
     });
   }
 
+  async getOrganizationPtoRequests(organizationId: string): Promise<PtoRequest[]> {
+    return this.ptoRequestRepository.find({
+      where: {
+        user: { organization: { organizationId: organizationId } },
+      },
+      relations: ['user', 'template'],
+    });
+  }
+
   async getMyPtoRequests(user: User): Promise<PtoRequest[]> {
     return this.ptoRequestRepository.find({
       where: { user: { id: user.id } },
@@ -177,7 +186,7 @@ export class PtoService {
       ptoRequest.status = PtoRequestStatus.Approved;
       // update user's used PTO days
       await this.userService.updateUser(ptoRequest.user.userId, {
-        usedPtoDays: ptoRequest.user.usedPtoDays + ptoRequest.template.daysConsumed,
+        usedPtoDays: ptoRequest.user.usedPtoDays + ptoRequest.consumedDays,
       });
     }
 

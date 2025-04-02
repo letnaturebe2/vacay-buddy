@@ -36,6 +36,10 @@ export class UserService {
     return user;
   }
 
+  public async getUser(userId: string): Promise<User> {
+    return await this.userRepository.findOneOrFail({ where: { userId } });
+  }
+
   public async createBulkUsers(usersData: { id: string; name: string }[], organization: Organization) {
     // exclude users that already exist
     const existingUsers = await this.userRepository.find({
@@ -58,7 +62,19 @@ export class UserService {
     return await this.userRepository.insert(users);
   }
 
-  public async createUser(userId: string, organization: Organization, isAdmin = false): Promise<User> {
+  public async upsertUser(userId: string, userData: Partial<User>): Promise<User> {
+    let user = await this.userRepository.findOne({ where: { userId } });
+
+    if (user === null) {
+      user = new User();
+      user.userId = userId;
+    }
+
+    Object.assign(user, userData);
+    return await this.userRepository.save(user);
+  }
+
+  private async createUser(userId: string, organization: Organization, isAdmin = false): Promise<User> {
     const user = new User();
     user.userId = userId;
     user.organization = organization;

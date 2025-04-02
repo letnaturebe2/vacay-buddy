@@ -1,3 +1,4 @@
+import { differenceInCalendarDays, startOfDay } from 'date-fns';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { PtoRequestStatus } from '../constants';
 import { BaseEntity } from './base';
@@ -61,8 +62,12 @@ export class PtoRequest extends BaseEntity {
   currentApprovalId: number | null;
 
   get consumedDays(): number {
-    const daysDifference = Math.floor((this.endDate.getTime() - this.startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-
+    const daysDifference = differenceInCalendarDays(this.endDate, this.startDate) + 1;
     return daysDifference * this.template.daysConsumed;
+  }
+
+  get onGoing(): boolean {
+    const today = startOfDay(new Date());
+    return startOfDay(this.startDate) <= today && startOfDay(this.endDate) >= today;
   }
 }

@@ -120,4 +120,107 @@ describe("UserService Tests", () => {
     });
   });
 
+  describe("upsertUser", () => {
+    test("should update existing user when found", async () => {
+      // Arrange
+      const user = new User();
+      user.userId = "existing-user";
+      user.name = "Original Name";
+      user.organization = testOrganization;
+      user.annualPtoDays = 15;
+      user.usedPtoDays = 0;
+      await userRepository.save(user);
+
+      const updateData = {
+        name: "Updated Name",
+        annualPtoDays: 20,
+        usedPtoDays: 5,
+        organization: testOrganization
+      };
+
+      // Act
+      const result = await userService.upsertUser("existing-user", updateData);
+
+      // Assert
+      expect(result).toBeDefined();
+      expect(result.userId).toBe("existing-user");
+      expect(result.name).toBe("Updated Name");
+      expect(result.annualPtoDays).toBe(20);
+      expect(result.usedPtoDays).toBe(5);
+      expect(result.organization).toBe(testOrganization);
+
+      // Verify in DB
+      const updatedUser = await userRepository.findOne({
+        where: { userId: "existing-user" },
+        relations: { organization: true }
+      });
+
+      expect(updatedUser).toBeDefined();
+      expect(updatedUser!.name).toBe("Updated Name");
+      expect(updatedUser!.annualPtoDays).toBe(20);
+      expect(updatedUser!.usedPtoDays).toBe(5);
+      expect(updatedUser!.organization.id).toBe(testOrganization.id);
+    });
+
+    test("should create new user when not found", async () => {
+      // Arrange
+      const userData = {
+        name: "New User",
+        annualPtoDays: 25,
+        usedPtoDays: 3,
+        organization: testOrganization
+      };
+
+      // Act
+      const result = await userService.upsertUser("new-upserted-user", userData);
+
+      // Assert
+      expect(result).toBeDefined();
+      expect(result.userId).toBe("new-upserted-user");
+      expect(result.name).toBe("New User");
+      expect(result.annualPtoDays).toBe(25);
+      expect(result.usedPtoDays).toBe(3);
+      expect(result.organization.id).toBe(testOrganization.id);
+
+      // Verify in DB
+      const savedUser = await userRepository.findOne({
+        where: { userId: "new-upserted-user" },
+        relations: { organization: true }
+      });
+
+      expect(savedUser).toBeDefined();
+      expect(savedUser!.name).toBe("New User");
+      expect(savedUser!.annualPtoDays).toBe(25);
+      expect(savedUser!.usedPtoDays).toBe(3);
+      expect(savedUser!.organization.id).toBe(testOrganization.id);
+    });
+
+    test("should maintain other fields when partially updating user", async () => {
+      // Arrange
+      const user = new User();
+      user.userId = "partial-update-user";
+      user.name = "Original User";
+      user.organization = testOrganization;
+      user.annualPtoDays = 15;
+      user.usedPtoDays = 2;
+      user.isAdmin = true;
+      await userRepository.save(user);
+
+      const partialUpdateData = {
+        name: "Partially Updated User",
+        usedPtoDays: 5
+      };
+
+      // Act
+      const result = await userService.upsertUser("partial-update-user", partialUpdateData);
+
+      // Assert
+      expect(result).toBeDefined();
+      expect(result.name).toBe("Partially Updated User");
+      expect(result.usedPtoDays).toBe(5);
+      expect(result.annualPtoDays).toBe(15); // unchanged
+      expect(result.isAdmin).toBe(true); // unchanged
+    });
+  });
+
 });

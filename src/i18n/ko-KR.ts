@@ -152,10 +152,16 @@ export default {
   default_approvers: '기본 승인자',
 
   // Install Message
-  install_intro: '여기서 만나 반갑습니다! VacayBuddy는 슬랙 내에서 직원 휴가(PTO)를 쉽게 관리할 수 있도록 도와줍니다.',
+  install_intro: 'VacayBuddy는 슬랙 내에서 직원 휴가(PTO)를 쉽게 관리할 수 있도록 도와줍니다.',
   install_features: '• 휴가 요청 생성\n• 휴가 요청 검토 및 승인\n• 휴가 잔여일수 확인\n• 팀원 휴가 관리',
-  install_connect: '시작하려면 아래 사용자 정보 엑셀 다운로드 버튼을 클릭하여 엑셀 파일을 다운로드하고 팀원들의 연차를 관리하세요:',
+  install_connect:
+    '시작하려면 아래 사용자 정보 엑셀 다운로드 버튼을 클릭하여 엑셀 파일을 다운로드하고 팀원들의 연차를 관리하세요:',
   download_user_template: '📊 사용자 정보 엑셀 다운로드',
+  view_team_vacation: '📅 팀 휴가 현황 보기',
+
+  // excel file
+  users_updated_success: '{{count}}명의 사용자가 업데이트 되었습니다.',
+  file_shared_error: '파일 공유 처리 중 오류가 발생했습니다: {{error}}',
 
   // Template defaults
   default_pto_template_title: '연차',

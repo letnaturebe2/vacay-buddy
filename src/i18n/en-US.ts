@@ -152,10 +152,16 @@ export default {
   default_approvers: 'Default Approvers',
 
   // Install Message
-  install_intro: 'Great to see you here! VacayBuddy helps you manage Paid Time Off (PTO) directly within Slack.',
+  install_intro: 'VacayBuddy helps you manage Paid Time Off (PTO) directly within Slack.',
   install_features: '• Create PTO requests\n• Review and approve PTO requests\n• Track your PTO balance',
-  install_connect: 'To get started, click the Download User Template button below to download and upload the Excel file to manage PTO for your team:',
+  install_connect:
+    'To get started, click the Download User Template button below to download and upload the Excel file to manage PTO for your team:',
   download_user_template: '📊 Download User Template',
+  view_team_vacation: '📅 View Team Vacation',
+
+  // excel file
+  users_updated_success: '{{count}} users have been updated.',
+  file_shared_error: 'Error in file_shared handler: {{message}}',
 
   // Template defaults
   default_pto_template_title: 'PTO',
