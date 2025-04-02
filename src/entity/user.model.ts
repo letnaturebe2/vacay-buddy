@@ -1,12 +1,11 @@
-import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { BaseEntity } from './base';
 import { Organization } from './organization.model';
 
 @Entity()
 export class User extends BaseEntity {
-  @Index()
   @Column()
-  userId: string;
+  userId: string; // TODO : set unique
 
   @ManyToOne(
     () => Organization,

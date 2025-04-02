@@ -159,6 +159,7 @@ export default {
     '• Schedule meetings \n • Manage and update attendees \n • Get notified about changes of your meetings',
   install_connect:
     'But before you can do all these amazing things, we need you to connect your calendar to App. Simply click the button below:',
+  download_user_template: '📊 Download User Template',
 
   // Template defaults
   default_pto_template_title: 'PTO',

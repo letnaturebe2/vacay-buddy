@@ -1,5 +1,6 @@
 import { WebClient } from '@slack/web-api';
 import { DataSource, Repository } from 'typeorm';
+import { INVALID_USER_IDS } from '../constants';
 import { Organization } from '../entity/organization.model';
 import { User } from '../entity/user.model';
 import { UserService } from './user.service';
@@ -15,6 +16,10 @@ export class OrganizationService {
 
   public async getOrganization(organizationId: string): Promise<Organization | null> {
     return await this.organizationRepository.findOne({ where: { organizationId } });
+  }
+
+  public async getUsers(organizationId: string): Promise<User[]> {
+    return await this.userService.getUsers(organizationId);
   }
 
   public async getOrCreateOrganization(
@@ -66,17 +71,28 @@ export class OrganizationService {
     });
 
     if (userListResponse.ok && userListResponse.members) {
-      const validMembers = userListResponse.members.filter((member) => !member.is_bot && !member.deleted && member.id);
+      const validMembers = userListResponse.members.filter((member) => {
+        const userId = member.id ?? '';
+
+        if (userId === '' || INVALID_USER_IDS.includes(userId)) {
+          return false;
+        }
+
+        if (member.deleted) {
+          return false;
+        }
+
+        return !member.is_bot;
+      });
+
       const usersData = validMembers.map((member) => {
         return {
           id: member.id as string,
           name: member.real_name || member.name || '',
-        }
-      })
-      await this.userService.createBulkUsers(
-        usersData,
-        organization,
-      );
+        };
+      });
+
+      await this.userService.createBulkUsers(usersData, organization);
     }
   }
 }

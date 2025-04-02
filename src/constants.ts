@@ -49,41 +49,10 @@ export enum PTO_TEMPLATE_KEY {
   REWARD_LEAVE_DESC = 'template_reward_leave_desc',
 }
 
-// export const DEFAULT_TEMPLATE: Partial<PtoTemplate>[] = [
-//   {
-//     title: 'Full-day Leave',
-//     description: 'Take a full day off',
-//     daysConsumed: 1.0,
-//     content: DEFAULT_PTO_TEMPLATE_CONTENT,
-//   },
-//   {
-//     title: 'Morning Half-day Leave',
-//     description: 'Take the morning off',
-//     daysConsumed: 0.5,
-//     content: DEFAULT_PTO_TEMPLATE_CONTENT,
-//   },
-//   {
-//     title: 'Afternoon Half-day Leave',
-//     description: 'Take the afternoon off',
-//     daysConsumed: 0.5,
-//     content: DEFAULT_PTO_TEMPLATE_CONTENT,
-//   },
-//   {
-//     title: 'Sick Leave',
-//     description: 'Leave due to illness',
-//     daysConsumed: 1.0,
-//     content: DEFAULT_PTO_TEMPLATE_CONTENT,
-//   },
-//   {
-//     title: 'Reward Leave',
-//     description: 'Special leave granted as a reward',
-//     daysConsumed: 0.0,
-//     content: DEFAULT_PTO_TEMPLATE_CONTENT,
-//   },
-// ];
-
 export enum PtoTemplateManageType {
   CREATE = 'create',
   EDIT = 'edit',
   DELETE = 'delete',
 }
+
+export const INVALID_USER_IDS = ['USLACKBOT'];
