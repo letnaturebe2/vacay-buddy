@@ -3,7 +3,6 @@ import { LOCALE_TO_LANG } from '../constants';
 import enUS from './en-US';
 import koKR from './ko-KR';
 
-// Create a promise for initialization
 export const i18nInitPromise = i18next.init({
   lng: 'en-US',
   fallbackLng: 'en-US',
@@ -23,5 +22,4 @@ export function t(locale: keyof typeof LOCALE_TO_LANG, key: string, params?: Rec
   });
 }
 
-// Export i18next for direct access if needed
 export { i18next };

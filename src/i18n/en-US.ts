@@ -152,13 +152,9 @@ export default {
   default_approvers: 'Default Approvers',
 
   // Install Message
-  install_greeting: 'Hi {{name}} :wave:',
-  install_intro:
-    'Great to see you here! App helps you to stay up-to-date with your meetings and events right here within Slack. These are just a few things which you will be able to do:',
-  install_features:
-    '• Schedule meetings \n • Manage and update attendees \n • Get notified about changes of your meetings',
-  install_connect:
-    'But before you can do all these amazing things, we need you to connect your calendar to App. Simply click the button below:',
+  install_intro: 'Great to see you here! VacayBuddy helps you manage Paid Time Off (PTO) directly within Slack.',
+  install_features: '• Create PTO requests\n• Review and approve PTO requests\n• Track your PTO balance',
+  install_connect: 'To get started, click the Download User Template button below to download and upload the Excel file to manage PTO for your team:',
   download_user_template: '📊 Download User Template',
 
   // Template defaults

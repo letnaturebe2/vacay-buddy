@@ -152,12 +152,9 @@ export default {
   default_approvers: '기본 승인자',
 
   // Install Message
-  install_greeting: '안녕하세요 {{name}}님 :wave:',
-  install_intro:
-    '여기서 만나 반갑습니다! 이 앱은 슬랙 내에서 미팅과 이벤트를 최신 상태로 유지할 수 있도록 도와줍니다. 다음과 같은 기능을 사용할 수 있습니다:',
-  install_features: '• 미팅 일정 잡기 \n • 참석자 관리 및 업데이트 \n • 미팅 변경 사항에 대한 알림 받기',
-  install_connect:
-    '하지만 이러한 놀라운 기능을 사용하기 전에 먼저 앱에 캘린더를 연결해야 합니다. 아래 버튼을 클릭하세요:',
+  install_intro: '여기서 만나 반갑습니다! VacayBuddy는 슬랙 내에서 직원 휴가(PTO)를 쉽게 관리할 수 있도록 도와줍니다.',
+  install_features: '• 휴가 요청 생성\n• 휴가 요청 검토 및 승인\n• 휴가 잔여일수 확인\n• 팀원 휴가 관리',
+  install_connect: '시작하려면 아래 사용자 정보 엑셀 다운로드 버튼을 클릭하여 엑셀 파일을 다운로드하고 팀원들의 연차를 관리하세요:',
   download_user_template: '📊 사용자 정보 엑셀 다운로드',
 
   // Template defaults
