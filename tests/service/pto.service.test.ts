@@ -630,4 +630,191 @@ describe("PtoService Tests", () => {
       ).rejects.toThrow("This request has already been processed");
     });
   });
+
+  describe("getOrganizationPtoRequestsMonthly", () => {
+    test("should retrieve PTO requests that start within the month", async () => {
+      // Arrange
+      const organization = await createOrganization();
+      const user = await createUser("test-user", organization);
+      const approver = await createUser("approver", organization);
+      const template = await createPtoTemplate(organization);
+
+      // May 15th - May 20th
+      const mayPto = await ptoService.createPtoRequest(
+        user,
+        template,
+        new Date("2025-05-15"),
+        new Date("2025-05-20"),
+        "May vacation",
+        "Vacation starting in May",
+        [approver]
+      );
+
+      // Act
+      const mayRequests = await ptoService.getOrganizationPtoRequestsMonthly(
+        organization.organizationId,
+        2025,
+        4 // May (0-based index)
+      );
+
+      // Assert
+      expect(mayRequests).toHaveLength(1);
+      expect(mayRequests[0].id).toBe(mayPto.id);
+    });
+
+    test("should retrieve PTO requests that end within the month", async () => {
+      // Arrange
+      const organization = await createOrganization();
+      const user = await createUser("test-user", organization);
+      const approver = await createUser("approver", organization);
+      const template = await createPtoTemplate(organization);
+
+      // April 25th - May 5th
+      const crossMonthPto = await ptoService.createPtoRequest(
+        user,
+        template,
+        new Date("2025-04-25"),
+        new Date("2025-05-05"),
+        "Cross-month vacation",
+        "Vacation starting in April, ending in May",
+        [approver]
+      );
+
+      // Act
+      const mayRequests = await ptoService.getOrganizationPtoRequestsMonthly(
+        organization.organizationId,
+        2025,
+        4 // May (0-based index)
+      );
+
+      // Assert
+      expect(mayRequests).toHaveLength(1);
+      expect(mayRequests[0].id).toBe(crossMonthPto.id);
+
+      // Act
+      const aprilRequests = await ptoService.getOrganizationPtoRequestsMonthly(
+        organization.organizationId,
+        2025,
+        3 // April (0-based index)
+      );
+
+      // Assert
+      expect(aprilRequests).toHaveLength(1);
+      expect(aprilRequests[0].id).toBe(crossMonthPto.id);
+
+      // Act
+      const februaryRequests = await ptoService.getOrganizationPtoRequestsMonthly(
+        organization.organizationId,
+        2025,
+        1 // February (0-based index)
+      );
+
+      // Assert
+      expect(februaryRequests).toHaveLength(0);
+    });
+
+    test("should return multiple requests sorted by start date", async () => {
+      // Arrange
+      const organization = await createOrganization();
+      const user = await createUser("test-user", organization);
+      const approver = await createUser("approver", organization);
+      const template = await createPtoTemplate(organization);
+
+      // May 20th - May 25th
+      const latePto = await ptoService.createPtoRequest(
+        user,
+        template,
+        new Date("2025-05-20"),
+        new Date("2025-05-25"),
+        "Late May vacation",
+        "Vacation in late May",
+        [approver]
+      );
+
+      // May 5th - May 10th
+      const earlyPto = await ptoService.createPtoRequest(
+        user,
+        template,
+        new Date("2025-05-05"),
+        new Date("2025-05-10"),
+        "Early May vacation",
+        "Vacation in early May",
+        [approver]
+      );
+
+      // April 25th - May 15th
+      const crossMonthPto = await ptoService.createPtoRequest(
+        user,
+        template,
+        new Date("2025-04-25"),
+        new Date("2025-05-15"),
+        "Cross-month vacation",
+        "Vacation starting in April, ending in May",
+        [approver]
+      );
+
+      // Act
+      const mayRequests = await ptoService.getOrganizationPtoRequestsMonthly(
+        organization.organizationId,
+        2025,
+        4 // May (0-based index)
+      );
+
+      // Assert
+      expect(mayRequests).toHaveLength(3);
+      expect(mayRequests[0].id).toBe(crossMonthPto.id); // Earliest start date
+      expect(mayRequests[1].id).toBe(earlyPto.id);      // Second earliest
+      expect(mayRequests[2].id).toBe(latePto.id);       // Latest start date
+    });
+
+    test("should return empty array when no PTO requests exist for the month", async () => {
+      // Arrange
+      const organization = await createOrganization();
+
+      // Act
+      const juneRequests = await ptoService.getOrganizationPtoRequestsMonthly(
+        organization.organizationId,
+        2025,
+        5 // June (0-based index)
+      );
+
+      // Assert
+      expect(juneRequests).toHaveLength(0);
+    });
+
+    test("should default to current month when year and month are not provided", async () => {
+      // Arrange
+      const organization = await createOrganization();
+      const user = await createUser("test-user", organization);
+      const approver = await createUser("approver", organization);
+      const template = await createPtoTemplate(organization);
+
+      // Calculate current month dates
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const currentMonth = now.getMonth();
+
+      // Current month's 15th day
+      const midMonthDate = new Date(currentYear, currentMonth, 15);
+
+      const currentMonthPto = await ptoService.createPtoRequest(
+        user,
+        template,
+        midMonthDate,
+        new Date(midMonthDate.getTime() + 86400000 * 2), // 2 days later
+        "Current month vacation",
+        "Vacation in current month",
+        [approver]
+      );
+
+      // Act - not passing year and month parameters
+      const currentMonthRequests = await ptoService.getOrganizationPtoRequestsMonthly(
+        organization.organizationId
+      );
+
+      // Assert
+      expect(currentMonthRequests).toHaveLength(1);
+      expect(currentMonthRequests[0].id).toBe(currentMonthPto.id);
+    });
+  });
 });

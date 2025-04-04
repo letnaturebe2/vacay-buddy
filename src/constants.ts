@@ -14,6 +14,10 @@ export enum ActionId {
   OPEN_DECISION_MODAL = 'open-decision-modal',
   OPEN_MY_REQUEST_STATUS_MODAL = 'open-my-request-status-modal',
   SUBMIT_DECISION_REQUEST = 'submit-decision-request',
+
+  // ack
+  ACKNOWLEDGE1 = 'acknowledge1',
+  ACKNOWLEDGE2 = 'acknowledge2',
 }
 
 export enum PtoRequestStatus {

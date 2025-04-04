@@ -1,9 +1,10 @@
 import type { AnyBlock } from '@slack/types';
 import jwt from 'jsonwebtoken';
+import { ActionId } from '../../../constants';
 import { t } from '../../../i18n';
 
 export const buildInstallMessage = (locale: string, organizationId: string, appId: string): AnyBlock[] => {
-  const token = jwt.sign({ organizationId }, process.env.JWT_SECRET || 'default-secret-key');
+  const token = jwt.sign({ organizationId }, process.env.JWT_SECRET || 'default-secret-key', { expiresIn: '1h' });
 
   return [
     {
@@ -46,6 +47,7 @@ export const buildInstallMessage = (locale: string, organizationId: string, appI
             emoji: true,
           },
           url: `${process.env.APP_URL || 'http://localhost:3000'}/download-excel-template?token=${token}`,
+          action_id: ActionId.ACKNOWLEDGE1, // this action is used to acknowledge for direct link
         },
         {
           type: 'button',
@@ -55,6 +57,7 @@ export const buildInstallMessage = (locale: string, organizationId: string, appI
             emoji: true,
           },
           url: `${process.env.APP_URL || 'http://localhost:3000'}/team-vacation-html?token=${token}`,
+          action_id: ActionId.ACKNOWLEDGE2, // this action is used to acknowledge for direct link
         },
       ],
     },

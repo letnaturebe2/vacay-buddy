@@ -38,12 +38,12 @@ export default (app: Application) => {
 
     const wb = XLSX.utils.book_new();
 
-    // 데이터로 시트 생성
+    // create worksheet
     const ws = XLSX.utils.json_to_sheet(data, {
       header: ['slack_id', 'name', 'annual_pto_days', 'remaining_pto_days'],
     });
 
-    // 워크시트 스타일 조정
+    // worksheet styles
     ws['!cols'] = [
       { wch: 20 }, // slack_id
       { wch: 20 }, // name
@@ -51,10 +51,8 @@ export default (app: Application) => {
       { wch: 20 }, // remaining_pto_days
     ];
 
-    // 워크시트 추가
     XLSX.utils.book_append_sheet(wb, ws, 'User Information');
 
-    // 버퍼로 변환
     const buf = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
 
     // 응답 헤더 설정

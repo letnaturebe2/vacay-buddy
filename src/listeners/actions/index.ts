@@ -16,6 +16,9 @@ const register = (app: App) => {
   app.action(ActionId.OPEN_PTO_REQUEST_MODAL, openPtoRequestModal);
   app.action(ActionId.SELECT_PTO_TEMPLATE, selectPtoTemplate);
   app.action(ActionId.OPEN_DECISION_MODAL, openRequestApproveModal);
+  // this action is used to acknowledge for direct link
+  app.action(ActionId.ACKNOWLEDGE1, async ({ ack }) => await ack());
+  app.action(ActionId.ACKNOWLEDGE2, async ({ ack }) => await ack());
 };
 
 export default { register };

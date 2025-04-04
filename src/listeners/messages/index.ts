@@ -1,8 +1,8 @@
 import type { App } from '@slack/bolt';
-import sampleMessageCallback from './sample-message';
+import sendWelcomeMessage from './send-welcome-message';
 
 const register = (app: App) => {
-  app.message(/^(hi|hello|hey).*/, sampleMessageCallback);
+  app.message(/.*/, sendWelcomeMessage);
 };
 
 export default { register };

@@ -1,4 +1,4 @@
-import { differenceInCalendarDays, startOfDay } from 'date-fns';
+import { differenceInCalendarDays, endOfDay, startOfDay } from 'date-fns';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { PtoRequestStatus } from '../constants';
 import { BaseEntity } from './base';
@@ -68,6 +68,6 @@ export class PtoRequest extends BaseEntity {
 
   get onGoing(): boolean {
     const today = startOfDay(new Date());
-    return startOfDay(this.startDate) <= today && startOfDay(this.endDate) >= today;
+    return startOfDay(this.startDate) <= today && endOfDay(this.endDate) >= today;
   }
 }

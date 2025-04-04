@@ -1,4 +1,6 @@
+import { Installation } from '@slack/bolt';
 import { Column, Entity, Index, OneToMany } from 'typeorm';
+import { assert } from '../utils';
 import { BaseEntity } from './base';
 import { User } from './user.model';
 
@@ -19,4 +21,10 @@ export class Organization extends BaseEntity {
 
   @Column({ type: 'text', nullable: true })
   installation: string;
+
+  get appId(): string {
+    const installation: Installation = JSON.parse(this.installation);
+    assert(installation.appId !== undefined, 'App ID is undefined');
+    return installation.appId;
+  }
 }

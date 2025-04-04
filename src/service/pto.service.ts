@@ -1,4 +1,5 @@
-import { DataSource, Repository } from 'typeorm';
+import { endOfMonth, startOfMonth } from 'date-fns';
+import { DataSource, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { PtoRequestStatus } from '../constants';
 import { Organization } from '../entity/organization.model';
 import { PtoApproval } from '../entity/pto-approval.model';
@@ -135,12 +136,28 @@ export class PtoService {
     });
   }
 
-  async getOrganizationPtoRequests(organizationId: string): Promise<PtoRequest[]> {
+  async getOrganizationPtoRequestsMonthly(
+    organizationId: string,
+    year?: number,
+    month?: number,
+  ): Promise<PtoRequest[]> {
+    const now = new Date();
+    const targetYear = year ?? now.getFullYear();
+    const targetMonth = month ?? now.getMonth();
+
+    const startMonth = startOfMonth(new Date(targetYear, targetMonth));
+    const endMonth = endOfMonth(new Date(targetYear, targetMonth));
+
     return this.ptoRequestRepository.find({
       where: {
-        user: { organization: { organizationId: organizationId } },
+        user: { organization: { organizationId } },
+        startDate: LessThanOrEqual(endMonth),
+        endDate: MoreThanOrEqual(startMonth),
       },
       relations: ['user', 'template'],
+      order: {
+        startDate: 'ASC',
+      },
     });
   }
 
