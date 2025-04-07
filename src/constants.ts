@@ -10,14 +10,13 @@ export enum ActionId {
   OPEN_PTO_REQUEST_MODAL = 'open-pto-request-modal',
   SELECT_PTO_TEMPLATE = 'select-pto-template',
   SUBMIT_PTO_REQUEST = 'submit-pto-request',
-  OPEN_PTO_APPROVAL_MODAL = 'open-pto-approval-modal',
   OPEN_DECISION_MODAL = 'open-decision-modal',
   OPEN_MY_REQUEST_STATUS_MODAL = 'open-my-request-status-modal',
   SUBMIT_DECISION_REQUEST = 'submit-decision-request',
 
-  // ack
-  ACKNOWLEDGE1 = 'acknowledge1',
-  ACKNOWLEDGE2 = 'acknowledge2',
+  // message
+  OPEN_EXCEL_INFO_MODAL = 'open-excel-info-modal',
+  ACKNOWLEDGE = 'acknowledge',
 }
 
 export enum PtoRequestStatus {

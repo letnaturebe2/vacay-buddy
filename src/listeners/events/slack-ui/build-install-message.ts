@@ -47,17 +47,7 @@ export const buildInstallMessage = (locale: string, organizationId: string, appI
             emoji: true,
           },
           url: `${process.env.APP_URL || 'http://localhost:3000'}/download-excel-template?token=${token}`,
-          action_id: ActionId.ACKNOWLEDGE1, // this action is used to acknowledge for direct link
-        },
-        {
-          type: 'button',
-          text: {
-            type: 'plain_text',
-            text: t(locale, 'view_team_vacation'),
-            emoji: true,
-          },
-          url: `${process.env.APP_URL || 'http://localhost:3000'}/team-vacation-html?token=${token}`,
-          action_id: ActionId.ACKNOWLEDGE2, // this action is used to acknowledge for direct link
+          action_id: ActionId.OPEN_EXCEL_INFO_MODAL,
         },
       ],
     },

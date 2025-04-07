@@ -162,7 +162,9 @@ export default {
   // excel file
   users_updated_success: '{{count}} users have been updated.',
   file_shared_error: 'Error in file_shared handler: {{message}}',
-
+  excel_info_title: 'Excel Usage Guide',
+  excel_info_content:
+    'Download the Excel template, fill it out, and upload it as a Slack message. Employee vacation data will be automatically updated with the information entered in the Excel file.',
   // Template defaults
   default_pto_template_title: 'PTO',
   default_pto_template_content: '📋 Leave Request Details: \n - Reason: \n',

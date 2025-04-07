@@ -1,10 +1,19 @@
 import type { AnyBlock } from '@slack/types';
+import jwt from 'jsonwebtoken';
 import { AppContext } from '../../../app';
 import { ActionId } from '../../../constants';
 import type { PtoTemplate } from '../../../entity/pto-template.model';
 import { t } from '../../../i18n';
 
 export const buildAdminPage = async (context: AppContext, ptoTemplates: PtoTemplate[]): Promise<AnyBlock[]> => {
+  const token = jwt.sign(
+    {
+      organizationId: context.organization.organizationId,
+    },
+    process.env.JWT_SECRET || 'default-secret-key',
+    { expiresIn: '1h' },
+  );
+
   const blocks: AnyBlock[] = [
     {
       type: 'actions',
@@ -17,6 +26,16 @@ export const buildAdminPage = async (context: AppContext, ptoTemplates: PtoTempl
             emoji: true,
           },
           action_id: ActionId.UPDATE_BACK_TO_HOME,
+        },
+        {
+          type: 'button',
+          text: {
+            type: 'plain_text',
+            text: t(context.locale, 'view_team_vacation'),
+            emoji: true,
+          },
+          url: `${process.env.APP_URL || 'http://localhost:3000'}/team-vacation-html?token=${token}`,
+          action_id: ActionId.ACKNOWLEDGE, // this action is used to acknowledge for direct link
         },
       ],
     },

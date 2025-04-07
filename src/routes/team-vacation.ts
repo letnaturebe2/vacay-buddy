@@ -61,7 +61,7 @@ export default (app: Application) => {
         <h1>접근 시간이 만료되었습니다</h1>
         <div class="message">
           <p>보안상의 이유로 접근 링크가 1시간 후에 만료됩니다.</p>
-          <p>슬랙에서 앱 설치 메시지의 버튼을 통해 다시 접근해 주세요.</p>
+          <p>슬랙 "팀 연차 현황 보기 버튼"을 통해 다시 접근해 주세요.</p>
         </div>
       </div>
     </body>
@@ -77,7 +77,7 @@ export default (app: Application) => {
       return;
     }
 
-    const { organizationId, userId } = decoded;
+    const { organizationId } = decoded;
 
     if (!organizationId) {
       res.status(400).send('Invalid token');
@@ -94,7 +94,7 @@ export default (app: Application) => {
     <html lang="ko">
     <head>
       <meta charset="UTF-8">
-      <title>팀 휴가 현황</title>
+      <title>팀 연차 현황</title>
       <style>
         body {
           font-family: Arial, sans-serif;
@@ -137,22 +137,22 @@ export default (app: Application) => {
       </style>
     </head>
     <body>
-      <h1>팀 휴가 현황</h1>
+      <h1>팀 연차 현황</h1>
       
       <div class="summary">
         <h2>요약 정보</h2>
         <p>총 팀원 수: ${users.length}명</p>
-        <p>현재 휴가 중인 팀원: ${onVacationUsers.size}명</p>
+        <p>현재 연차 중인 팀원: ${onVacationUsers.size}명</p>
       </div>
       
-      <h2>팀원 휴가 현황</h2>
+      <h2>팀원 연차 현황</h2>
       <table>
         <thead>
           <tr>
             <th>이름</th>
-            <th>연간 휴가 일수</th>
-            <th>사용한 휴가 일수</th>
-            <th>남은 휴가 일수</th>
+            <th>연간 연차 일수</th>
+            <th>사용한 연차 일수</th>
+            <th>남은 연차 일수</th>
             <th>현재 상태</th>
           </tr>
         </thead>
@@ -168,7 +168,7 @@ export default (app: Application) => {
                 <td>${user.annualPtoDays}</td>
                 <td>${user.usedPtoDays}</td>
                 <td>${user.annualPtoDays - user.usedPtoDays}</td>
-                <td>${isOnVacation ? '🏖️ 휴가 중' : '🏢 근무 중'}</td>
+                <td>${isOnVacation ? '🏖️ 연차 중' : '🏢 근무 중'}</td>
               </tr>
             `;
             })
@@ -176,15 +176,15 @@ export default (app: Application) => {
         </tbody>
       </table>
       
-    <h2>이달의 휴가</h2>
+    <h2>이달의 연차</h2>
     <table>
       <thead>
         <tr>
           <th>이름</th>
-          <th>휴가 시작일</th>
-          <th>휴가 종료일</th>
-          <th>휴가 일수</th>
-          <th>휴가 유형</th>
+          <th>시작일</th>
+          <th>종료일</th>
+          <th>소모 일수</th>
+          <th>유형</th>
           <th>상태</th>
         </tr>
       </thead>
