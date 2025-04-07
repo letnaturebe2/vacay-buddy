@@ -35,7 +35,7 @@
     "url": "https://github.com/letnaturebe2/vacay-buddy/issues"
   },
   "dependencies": {
-    "@slack/bolt": "^4.2.0",
+    "@slack/bolt": "^4.2.1",
     "@types/xlsx": "^0.0.35",
     "date-fns": "^4.1.0",
     "dotenv": "~16.4.7",
