@@ -164,6 +164,9 @@ export class PtoService {
   async getMyPtoRequests(user: User): Promise<PtoRequest[]> {
     return this.ptoRequestRepository.find({
       where: { user: { id: user.id } },
+      order: {
+        startDate: 'DESC',
+      },
     });
   }
 

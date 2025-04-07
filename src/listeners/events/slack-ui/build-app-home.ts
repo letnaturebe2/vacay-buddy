@@ -1,4 +1,5 @@
 import type { AnyBlock } from '@slack/types';
+import jwt from 'jsonwebtoken';
 import type { AppContext } from '../../../app';
 import { ActionId } from '../../../constants';
 import { t } from '../../../i18n';
@@ -7,6 +8,15 @@ import { assert } from '../../../utils';
 import { buildPtoList } from './components/build-pto-list';
 
 export const buildAppHome = async (context: AppContext, showAdminSection: boolean): Promise<AnyBlock[]> => {
+  const token = jwt.sign(
+    {
+      organizationId: context.organization.organizationId,
+      userId: context.user.userId,
+    },
+    process.env.JWT_SECRET || 'default-secret-key',
+    { expiresIn: '1h' },
+  );
+
   const blocks: AnyBlock[] = [];
 
   // pto status summary
@@ -37,7 +47,8 @@ export const buildAppHome = async (context: AppContext, showAdminSection: boolea
           text: t(context.locale, 'view'),
         },
         value: `${context.user.userId}`,
-        action_id: ActionId.OPEN_MY_REQUEST_STATUS_MODAL,
+        action_id: ActionId.ACKNOWLEDGE,
+        url: `${process.env.APP_URL || 'http://localhost:3000'}/user-vacation-html?token=${token}`,
       },
     },
     {
