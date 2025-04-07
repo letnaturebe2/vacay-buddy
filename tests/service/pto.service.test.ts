@@ -488,6 +488,9 @@ describe("PtoService Tests", () => {
       expect(approved.ptoRequest.status).toBe(PtoRequestStatus.Approved);
       user = await userRepository.findOneOrFail({where: {userId: user.userId}});
       expect(user.usedPtoDays).toBe(ptoRequest.consumedDays);
+
+      const updatedPtoRequest = await ptoRequestRepository.findOneOrFail({where: {id: ptoRequest.id}});
+      expect(updatedPtoRequest.status).toBe(PtoRequestStatus.Approved);
     });
 
     test("should throw error if non-approver tries to approve", async () => {

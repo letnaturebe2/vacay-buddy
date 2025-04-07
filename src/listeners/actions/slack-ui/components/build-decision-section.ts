@@ -12,6 +12,7 @@ export const buildDecisionSection = (context: AppContext, request: PtoRequest): 
   const formattedStartDate = formatToYYYYMMDD(startDate);
   const formattedEndDate = formatToYYYYMMDD(endDate);
   const approvers: string[][] = [[]];
+  const commentSection: AnyBlock[] = [];
 
   for (const approval of request.approvals) {
     let statusEmoji = '🔄';
@@ -30,10 +31,24 @@ export const buildDecisionSection = (context: AppContext, request: PtoRequest): 
     } else {
       approvers[approvers.length - 1].push(`<@${approval.approver.userId}>${statusEmoji}`);
     }
+
+    if (approval.comment) {
+      commentSection.push(
+        {
+          type: 'divider',
+        },
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: `*${t(context.locale, 'comment')}* \n ${approval.comment}`,
+          },
+        },
+      );
+    }
   }
 
   const formattedApprovers = approvers.map((approver) => approver.join('  ')).join('\n');
-
   const approversSection = {
     type: 'section',
     text: {
@@ -77,5 +92,6 @@ export const buildDecisionSection = (context: AppContext, request: PtoRequest): 
         text: `*${t(context.locale, 'reason')}*\n${request.reason}`,
       },
     },
+    ...commentSection,
   ];
 };
