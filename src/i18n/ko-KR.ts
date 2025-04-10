@@ -143,7 +143,7 @@ export default {
   my_pending_pto: '내 대기 중인 연차 요청',
   my_requests_description: '제출한 연차 요청 및 현재 상태를 확인합니다.',
   no_pending_personal: '대기 중인 연차 요청이 없습니다.',
-  help_contact: '도움이 필요하신가요? 연차 관련 문의는 HR 팀에 문의하세요.',
+  help_contact: '도움이 필요하신가요? <mailto:letnaturebe2@gmail.com|letnaturebe2@gmail.com>으로 메일주세요.',
 
   // Settings
   notification_settings: '알림 설정',

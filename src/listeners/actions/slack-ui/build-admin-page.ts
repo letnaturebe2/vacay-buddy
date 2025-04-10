@@ -37,6 +37,16 @@ export const buildAdminPage = async (context: AppContext, ptoTemplates: PtoTempl
           url: `${process.env.APP_URL || 'http://localhost:3000'}/team-vacation-html?token=${token}`,
           action_id: ActionId.ACKNOWLEDGE, // this action is used to acknowledge for direct link
         },
+        {
+          type: 'button',
+          text: {
+            type: 'plain_text',
+            text: t(context.locale, 'download_user_template'),
+            emoji: true,
+          },
+          url: `${process.env.APP_URL || 'http://localhost:3000'}/download-excel-template?token=${token}`,
+          action_id: ActionId.OPEN_EXCEL_INFO_MODAL,
+        },
       ],
     },
     {

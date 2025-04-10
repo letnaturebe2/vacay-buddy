@@ -10,7 +10,7 @@
         "app_home": {
             "home_tab_enabled": true,
             "messages_tab_enabled": true,
-            "messages_tab_read_only_enabled": true
+            "messages_tab_read_only_enabled": false
         },
         "bot_user": {
             "display_name": "VacayBuddy",
@@ -20,7 +20,6 @@
     "oauth_config": {
         "scopes": {
             "bot": [
-                "app_mentions:read",
                 "channels:history",
                 "chat:write",
                 "chat:write.public",
@@ -31,7 +30,6 @@
                 "im:history",
                 "im:write",
                 "mpim:history",
-                "reactions:read",
                 "users:read",
                 "chat:write.customize"
             ]
@@ -42,10 +40,10 @@
             "bot_events": [
                 "app_home_opened",
                 "message.channels",
-                "app_mention",
                 "message.groups",
                 "message.im",
-                "message.mpim"
+                "message.mpim",
+                "file_shared"
             ]
         },
         "interactivity": {

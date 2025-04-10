@@ -225,17 +225,5 @@ export const buildAppHome = async (context: AppContext, showAdminSection: boolea
     }
   }
 
-  // bottom help info
-  blocks.push({
-    type: 'context',
-    block_id: 'help_info',
-    elements: [
-      {
-        type: 'mrkdwn',
-        text: t(context.locale, 'help_contact'),
-      },
-    ],
-  });
-
   return blocks;
 };
