@@ -165,6 +165,9 @@ export default {
   excel_info_title: 'Excel Usage Guide',
   excel_info_content:
     'Download the Excel template, fill it out, and upload it as a Slack message. Employee vacation data will be automatically updated with the information entered in the Excel file.',
+  annual_pto_days_error:
+    'Annual PTO days ({{annual}}) cannot be less than remaining PTO days ({{remaining}}) for {{name}}.',
+
   // Template defaults
   default_pto_template_title: 'PTO',
   default_pto_template_content: '📋 Leave Request Details: \n - Reason: \n',

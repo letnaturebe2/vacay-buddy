@@ -5,6 +5,7 @@ import type { AppContext } from '../../app';
 import { User } from '../../entity/user.model';
 import { t } from '../../i18n';
 import { userService } from '../../service';
+import { assert } from '../../utils';
 
 const fileShared = async ({
   client,
@@ -55,6 +56,19 @@ const fileShared = async ({
     let updatedCount = 0;
     for (const user of users) {
       const { slack_id, name, annual_pto_days, remaining_pto_days } = user;
+
+      if (annual_pto_days < remaining_pto_days) {
+        assert(
+          false,
+          t('ko-KR', 'annual_pto_days_error', {
+            // TODO: hardcode ko-KR
+            annual: annual_pto_days.toString(),
+            remaining: remaining_pto_days.toString(),
+            name: name,
+          }),
+        );
+      }
+
       const userData = {
         userId: slack_id,
         name,

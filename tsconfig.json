@@ -6,7 +6,7 @@
       "es6"
     ],
     "outDir": "./dist",
-    "rootDir": ".",
+    "rootDir": "./src",
     "strict": true,
     "strictPropertyInitialization": false,
     "experimentalDecorators": true,
@@ -15,13 +15,11 @@
     "moduleResolution": "node",
     "sourceMap": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
+    "forceConsistentCasingInFileNames": true
   },
   "include": [
     "*.ts",
-    "src/config/**/*",
-    "src/entity/**/*",
-    "src/migration/**/*"
+    "src/**/*"
   ],
   "exclude": [
     "node_modules",

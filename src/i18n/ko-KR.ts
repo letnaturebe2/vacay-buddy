@@ -165,6 +165,8 @@ export default {
   excel_info_title: '엑셀 사용 안내',
   excel_info_content:
     '다운로드된 엑셀 파일을 작성하여 Slack 메시지로 업로드해주세요. 직원들의 연차 정보가 엑셀에 입력된 내용으로 자동 업데이트됩니다.',
+  annual_pto_days_error: '{{name}}의 총 연차 일수({{annual}})는 남은 연차 일수({{remaining}})보다 적을 수 없습니다.',
+
   // Template defaults
   default_pto_template_title: '연차',
   default_pto_template_content: '📋 휴가 신청 상세: \n - 사유: \n',
