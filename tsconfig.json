@@ -6,7 +6,7 @@
       "es6"
     ],
     "outDir": "./dist",
-    "rootDir": "./src",
+    "rootDir": ".",
     "strict": true,
     "strictPropertyInitialization": false,
     "experimentalDecorators": true,
