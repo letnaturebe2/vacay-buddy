@@ -40,16 +40,21 @@ export const buildAppHome = async (context: AppContext, showAdminSection: boolea
           remaining: (context.user.annualPtoDays - context.user.usedPtoDays).toFixed(1),
         })}`,
       },
-      accessory: {
-        type: 'button',
-        text: {
-          type: 'plain_text',
-          text: t(context.locale, 'view'),
+    },
+    {
+      type: 'actions',
+      elements: [
+        {
+          type: 'button',
+          text: {
+            type: 'plain_text',
+            text: t(context.locale, 'view_user_vacation'),
+            emoji: true,
+          },
+          action_id: ActionId.ACKNOWLEDGE,
+          url: `${process.env.APP_URL || 'http://localhost:3000'}/user-vacation-html?token=${token}`,
         },
-        value: `${context.user.userId}`,
-        action_id: ActionId.ACKNOWLEDGE,
-        url: `${process.env.APP_URL || 'http://localhost:3000'}/user-vacation-html?token=${token}`,
-      },
+      ],
     },
     {
       type: 'divider',

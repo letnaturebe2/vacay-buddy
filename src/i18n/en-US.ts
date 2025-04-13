@@ -130,6 +130,7 @@ export default {
   no_pending_requests: 'No pending requests',
   no_recent_activity: 'No recent activity',
   my_pto_summary: 'My PTO Summary',
+  view_user_vacation: 'View My Vacation',
   used_pto: 'Used PTO: {{used}}/{{total}} days',
   remaining_pto: 'Remaining: {{remaining}} days',
   admin_settings: 'Admin Settings',

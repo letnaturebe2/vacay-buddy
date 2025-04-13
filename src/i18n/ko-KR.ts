@@ -130,6 +130,7 @@ export default {
   no_pending_requests: '대기 중인 요청이 없습니다',
   no_recent_activity: '최근 활동이 없습니다',
   my_pto_summary: '내 연차 요약',
+  view_user_vacation: '내 연차 보기',
   used_pto: '사용한 연차: {{used}}/{{total}} 일',
   remaining_pto: '남은 일수: {{remaining}} 일',
   admin_settings: '관리자 설정',
