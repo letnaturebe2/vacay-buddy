@@ -8,6 +8,7 @@ import { organizationService, ptoService, userService } from '../../service';
 import { assert, isSameDay, showAdminSection } from '../../utils';
 import { buildAppHome } from '../events/slack-ui/build-app-home';
 import { buildRequestDecisionBlocks } from './slack-ui/build-request-decision-blocks';
+import {INVALID_USER_IDS} from "../../constants";
 
 const submitPtoRequest = async ({
   ack,
@@ -75,7 +76,7 @@ const submitPtoRequest = async ({
 
   // Check if any of the users are bots
   for (const result of userResults) {
-    if (result.user?.is_bot === true) {
+    if (result.user?.is_bot === true || (result.user?.id && INVALID_USER_IDS.includes(result.user.id))) {
       await ack({
         response_action: 'errors',
         errors: {
@@ -85,6 +86,24 @@ const submitPtoRequest = async ({
       return;
     }
   }
+
+  // render home page first
+  const admins = await organizationService.getAdmins(context.organization);
+  const blocks: AnyBlock[] = await buildAppHome(context, showAdminSection(context.user, admins));
+  const homeView: HomeView = {
+    type: 'home',
+    blocks: blocks,
+  };
+
+  await ack({
+    response_action: 'clear',
+  });
+
+  await client.views.update({
+    view_id: privateMetadata.viewId,
+    hash: privateMetadata.viewHash,
+    view: homeView,
+  });
 
   const newUserPromises = userResults.map((result, index) => {
     const missingId = missingApproverIds[index];
@@ -122,22 +141,6 @@ const submitPtoRequest = async ({
     blocks: await buildRequestDecisionBlocks(context, request, false),
   });
 
-  const admins = await organizationService.getAdmins(context.organization);
-  const blocks: AnyBlock[] = await buildAppHome(context, showAdminSection(context.user, admins));
-  const homeView: HomeView = {
-    type: 'home',
-    blocks: blocks,
-  };
-
-  await ack({
-    response_action: 'clear',
-  });
-
-  await client.views.update({
-    view_id: privateMetadata.viewId,
-    hash: privateMetadata.viewHash,
-    view: homeView,
-  });
 };
 
 export default submitPtoRequest;
