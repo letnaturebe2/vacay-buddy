@@ -92,6 +92,7 @@ export default {
   start_date_before_end_date: '시작 날짜는 종료 날짜보다 앞서야 합니다',
   end_date_after_start_date: '종료 날짜는 시작 날짜보다 뒤에 있어야 합니다',
   same_day_required: '이 템플릿 유형은 시작 날짜와 종료 날짜가 같아야 합니다',
+  approver_is_bot: '봇은 연차 승인자로 지정할 수 없습니다',
 
   // Request Review
   pto_request_review: '연차 요청 검토',

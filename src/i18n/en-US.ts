@@ -92,6 +92,7 @@ export default {
   start_date_before_end_date: 'Start date must be before end date',
   end_date_after_start_date: 'End date must be after start date',
   same_day_required: 'This template type requires same start and end dates',
+  approver_is_bot: 'Bots cannot be assigned as approvers',
 
   // Request Review
   pto_request_review: 'PTO Request Review',

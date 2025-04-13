@@ -12,7 +12,7 @@ export class UserService {
     this.userRepository = dataSource.getRepository(User);
   }
 
-  public async getUsers(organizationId: string): Promise<User[]> {
+  public async getUsersByOrganizationId(organizationId: string): Promise<User[]> {
     return await this.userRepository.find({
       where: {
         organization: { organizationId },
@@ -95,6 +95,14 @@ export class UserService {
     await this.dataSource.transaction(async (transactionalEntityManager) => {
       await transactionalEntityManager.update(User, { organization }, { isAdmin: false });
       await transactionalEntityManager.update(User, { organization, userId: In(userIds) }, { isAdmin: true });
+    });
+  }
+
+  public async getUsers(userIds: string[]): Promise<User[]> {
+    return await this.userRepository.find({
+      where: {
+        userId: In(userIds),
+      },
     });
   }
 }

@@ -19,7 +19,7 @@ export class OrganizationService {
   }
 
   public async getUsers(organizationId: string): Promise<User[]> {
-    return await this.userService.getUsers(organizationId);
+    return await this.userService.getUsersByOrganizationId(organizationId);
   }
 
   public async getOrCreateOrganization(

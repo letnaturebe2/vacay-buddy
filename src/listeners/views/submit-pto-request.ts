@@ -62,9 +62,42 @@ const submitPtoRequest = async ({
     return;
   }
 
-  const approvers: User[] = await Promise.all(
-    approverIds.map((userId) => userService.getOrCreateUser(userId, context.organization)),
+  const approvers: User[] = await userService.getUsers(approverIds);
+  const missingApproverIds = approverIds.filter((id) => !approvers.some((user) => user.userId === id));
+
+  const userInfoPromises = missingApproverIds.map((missingId) =>
+    client.users.info({
+      user: missingId,
+    }),
   );
+
+  const userResults = await Promise.all(userInfoPromises);
+
+  // Check if any of the users are bots
+  for (const result of userResults) {
+    if (result.user?.is_bot === true) {
+      await ack({
+        response_action: 'errors',
+        errors: {
+          block_id_approvers: t(context.locale, 'approver_is_bot'),
+        },
+      });
+      return;
+    }
+  }
+
+  const newUserPromises = userResults.map((result, index) => {
+    const missingId = missingApproverIds[index];
+    const userData = {
+      name: result.user?.real_name ?? '',
+      organization: context.organization,
+    };
+
+    return userService.upsertUser(missingId, userData);
+  });
+
+  const newUsers = await Promise.all(newUserPromises);
+  approvers.push(...newUsers);
 
   const request = await ptoService.createPtoRequest(
     context.user,

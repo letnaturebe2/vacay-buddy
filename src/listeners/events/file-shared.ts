@@ -40,7 +40,7 @@ const fileShared = async ({
 
     const buffer = response.data;
 
-    // 3. parsing
+    // parsing
     const workbook = XLSX.read(buffer, { type: 'buffer' });
     const sheetName = workbook.SheetNames[0];
     const sheet = workbook.Sheets[sheetName];
