@@ -1,7 +1,8 @@
 import { Application, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { PtoRequestStatus } from '../constants';
 import { ptoService, userService } from '../service';
+import { getRequestStatus } from '../utils';
+import { commonStyles, expiredTokenStyles } from './css';
 
 export default (app: Application) => {
   app.get('/user-vacation-html', async (req: Request, res: Response) => {
@@ -26,35 +27,7 @@ export default (app: Application) => {
     <head>
       <meta charset="UTF-8">
       <title>만료된 접근</title>
-      <style>
-        body {
-          font-family: Arial, sans-serif;
-          margin: 0;
-          padding: 20px;
-          color: #333;
-          text-align: center;
-        }
-        .container {
-          max-width: 600px;
-          margin: 50px auto;
-          padding: 30px;
-          border-radius: 8px;
-          box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        h1 {
-          color: #e74c3c;
-        }
-        p {
-          font-size: 18px;
-          line-height: 1.6;
-        }
-        .message {
-          margin: 20px 0;
-          padding: 15px;
-          background-color: #f8f9fa;
-          border-radius: 4px;
-        }
-      </style>
+      <style>${expiredTokenStyles}</style>
     </head>
     <body>
       <div class="container">
@@ -94,67 +67,7 @@ export default (app: Application) => {
     <head>
       <meta charset="UTF-8">
       <title>내 연차 요약</title>
-      <style>
-        body {
-          font-family: Arial, sans-serif;
-          margin: 0;
-          padding: 20px;
-          color: #333;
-        }
-        h1 {
-          color: #1976d2;
-          border-bottom: 2px solid #1976d2;
-          padding-bottom: 10px;
-        }
-        table {
-          width: 100%;
-          border-collapse: collapse;
-          margin-top: 20px;
-        }
-        th, td {
-          border: 1px solid #ddd;
-          padding: 8px 12px;
-          text-align: left;
-        }
-        th {
-          background-color: #f2f2f2;
-          font-weight: bold;
-        }
-        tr:nth-child(even) {
-          background-color: #f9f9f9;
-        }
-        .summary {
-          margin-top: 30px;
-          padding: 15px;
-          background-color: #e3f2fd;
-          border-radius: 4px;
-        }
-        .request-row:hover {
-          background-color: #e1f5fe;
-        }
-        .status-approved {
-          color: #43a047;
-          font-weight: bold;
-        }
-        .status-rejected {
-          color: #e53935;
-          font-weight: bold;
-        }
-        .status-pending {
-          color: #fb8c00;
-          font-weight: bold;
-        }
-        .status-ongoing {
-          color: #2196f3;
-          font-weight: bold;
-        }
-        .status-completed {
-          color: #757575;
-        }
-        .status-scheduled {
-          color: #9c27b0;
-        }
-      </style>
+      <style>${commonStyles}</style>
     </head>
     <body>
       <h1>내 연차 요약</h1>
@@ -184,29 +97,7 @@ export default (app: Application) => {
             <tbody>
               ${userRequests
                 .map((request) => {
-                  const today = new Date();
-                  let statusClass = '';
-                  let statusText = '';
-
-                  if (request.status === PtoRequestStatus.Approved) {
-                    if (request.endDate < today) {
-                      statusClass = 'status-completed';
-                      statusText = '완료';
-                    } else if (request.startDate <= today && request.endDate >= today) {
-                      statusClass = 'status-ongoing';
-                      statusText = '진행 중';
-                    } else {
-                      statusClass = 'status-scheduled';
-                      statusText = '예정';
-                    }
-                  } else if (request.status === PtoRequestStatus.Rejected) {
-                    statusClass = 'status-rejected';
-                    statusText = '거부됨';
-                  } else {
-                    statusClass = 'status-pending';
-                    statusText = '대기 중';
-                  }
-
+                  const [statusClass, statusText] = getRequestStatus(request);
                   return `
                   <tr class="request-row">
                     <td>${request.title}</td>

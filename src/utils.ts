@@ -1,4 +1,5 @@
-import { PTO_TEMPLATE_KEY } from './constants';
+import { PTO_TEMPLATE_KEY, PtoRequestStatus } from './constants';
+import { PtoRequest } from './entity/pto-request.model';
 import { PtoTemplate } from './entity/pto-template.model';
 import { User } from './entity/user.model';
 import { t } from './i18n';
@@ -57,3 +58,31 @@ export const getDefaultTemplates = (locale: string): Partial<PtoTemplate>[] => [
     content: t(locale, 'default_pto_template_content'),
   },
 ];
+
+export const getRequestStatus = (request: PtoRequest): [string, string] => {
+  const today = new Date();
+
+  let statusClass = '';
+  let statusText = '';
+
+  if (request.status === PtoRequestStatus.Approved) {
+    if (request.endDate < today) {
+      statusClass = 'status-completed';
+      statusText = '완료';
+    } else if (request.startDate <= today && request.endDate >= today) {
+      statusClass = 'status-ongoing';
+      statusText = '진행 중';
+    } else {
+      statusClass = 'status-scheduled';
+      statusText = '예정';
+    }
+  } else if (request.status === PtoRequestStatus.Rejected) {
+    statusClass = 'status-rejected';
+    statusText = '거부됨';
+  } else {
+    statusClass = 'status-pending';
+    statusText = '대기 중';
+  }
+
+  return [statusClass, statusText];
+};

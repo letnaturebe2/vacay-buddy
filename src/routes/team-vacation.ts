@@ -1,7 +1,8 @@
 import { Application, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { User } from '../entity/user.model';
 import { organizationService, ptoService } from '../service';
+import { getRequestStatus } from '../utils';
+import { commonStyles, expiredTokenStyles } from './css';
 
 export default (app: Application) => {
   app.get('/team-vacation-html', async (req: Request, res: Response) => {
@@ -26,35 +27,7 @@ export default (app: Application) => {
     <head>
       <meta charset="UTF-8">
       <title>만료된 접근</title>
-      <style>
-        body {
-          font-family: Arial, sans-serif;
-          margin: 0;
-          padding: 20px;
-          color: #333;
-          text-align: center;
-        }
-        .container {
-          max-width: 600px;
-          margin: 50px auto;
-          padding: 30px;
-          border-radius: 8px;
-          box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        h1 {
-          color: #e74c3c;
-        }
-        p {
-          font-size: 18px;
-          line-height: 1.6;
-        }
-        .message {
-          margin: 20px 0;
-          padding: 15px;
-          background-color: #f8f9fa;
-          border-radius: 4px;
-        }
-      </style>
+      <style>${expiredTokenStyles}</style>
     </head>
     <body>
       <div class="container">
@@ -87,7 +60,7 @@ export default (app: Application) => {
     const users = await organizationService.getUsers(organizationId);
     const monthlyRequests = await ptoService.getOrganizationPtoRequestsMonthly(organizationId);
     const onGoingRequests = monthlyRequests.filter((monthlyRequest) => monthlyRequest.onGoing);
-    const onVacationUsers: Set<User> = new Set(onGoingRequests.map((request) => request.user));
+    const onVacationUsers: Set<string> = new Set(onGoingRequests.map((request) => request.user.userId));
 
     const html = `
     <!DOCTYPE html>
@@ -95,46 +68,7 @@ export default (app: Application) => {
     <head>
       <meta charset="UTF-8">
       <title>팀 연차 현황</title>
-      <style>
-        body {
-          font-family: Arial, sans-serif;
-          margin: 0;
-          padding: 20px;
-          color: #333;
-        }
-        h1 {
-          color: #1976d2;
-          border-bottom: 2px solid #1976d2;
-          padding-bottom: 10px;
-        }
-        table {
-          width: 100%;
-          border-collapse: collapse;
-          margin-top: 20px;
-        }
-        th, td {
-          border: 1px solid #ddd;
-          padding: 8px 12px;
-          text-align: left;
-        }
-        th {
-          background-color: #f2f2f2;
-          font-weight: bold;
-        }
-        tr:nth-child(even) {
-          background-color: #f9f9f9;
-        }
-        .summary {
-          margin-top: 30px;
-          padding: 15px;
-          background-color: #e3f2fd;
-          border-radius: 4px;
-        }
-        .member-row:hover, 
-        .request-row:hover {
-          background-color: #e1f5fe;
-        }
-      </style>
+      <style>${commonStyles}</style>
     </head>
     <body>
       <h1>팀 연차 현황</h1>
@@ -193,16 +127,8 @@ export default (app: Application) => {
           return monthlyRequests
             .map((pto) => {
               const user = users.find((u) => u.id === pto.user.id);
-              const today = new Date();
 
-              let status = '';
-              if (pto.endDate < today) {
-                status = '완료';
-              } else if (pto.startDate <= today && pto.endDate >= today) {
-                status = '진행 중';
-              } else {
-                status = '예정';
-              }
+              const [statusClass, statusText] = getRequestStatus(pto);
 
               return `
                 <tr class="request-row">
@@ -211,7 +137,7 @@ export default (app: Application) => {
                   <td>${pto.endDate.toLocaleDateString('ko-KR')}</td>
                   <td>${pto.consumedDays}</td>
                   <td>${pto.template.title}</td>
-                  <td>${status}</td>
+                  <td class="${statusClass}">${statusText}</td>
                 </tr>
               `;
             })
