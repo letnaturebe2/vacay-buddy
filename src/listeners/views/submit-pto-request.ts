@@ -2,13 +2,13 @@ import type { AllMiddlewareArgs, SlackViewMiddlewareArgs, ViewSubmitAction } fro
 import type { AnyBlock } from '@slack/types';
 import type { HomeView } from '@slack/types/dist/views';
 import type { AppContext } from '../../app';
+import { INVALID_USER_IDS } from '../../constants';
 import type { User } from '../../entity/user.model';
 import { t } from '../../i18n';
 import { organizationService, ptoService, userService } from '../../service';
 import { assert, isSameDay, showAdminSection } from '../../utils';
 import { buildAppHome } from '../events/slack-ui/build-app-home';
 import { buildRequestDecisionBlocks } from './slack-ui/build-request-decision-blocks';
-import {INVALID_USER_IDS} from "../../constants";
 
 const submitPtoRequest = async ({
   ack,
@@ -37,9 +37,9 @@ const submitPtoRequest = async ({
 
   assert(!!startDate && !!endDate && !!title && !!content, 'All fields are required');
 
+  // Check if the start date is before the end date
   const start = new Date(startDate);
   const end = new Date(endDate);
-
   if (start > end) {
     await ack({
       response_action: 'errors',
@@ -51,8 +51,8 @@ const submitPtoRequest = async ({
     return;
   }
 
+  // Check if the PTO template is valid
   const selectedTemplate = await ptoService.getTemplate(templateId);
-
   if (selectedTemplate.daysConsumed < 1 && selectedTemplate.daysConsumed > 0 && !isSameDay(start, end)) {
     await ack({
       response_action: 'errors',
@@ -63,8 +63,17 @@ const submitPtoRequest = async ({
     return;
   }
 
-  const approvers: User[] = await userService.getUsers(approverIds);
-  const missingApproverIds = approverIds.filter((id) => !approvers.some((user) => user.userId === id));
+  const approverMap = new Map<string, User>();
+  const existingUsers: User[] = await userService.getUsers(approverIds);
+  const missingApproverIds: string[] = [];
+  for (const approverId of approverIds) {
+    const user: User | undefined = existingUsers.find((user) => user.userId === approverId);
+    if (user) {
+      approverMap.set(approverId, user);
+    } else {
+      missingApproverIds.push(approverId);
+    }
+  }
 
   const userInfoPromises = missingApproverIds.map((missingId) =>
     client.users.info({
@@ -105,6 +114,7 @@ const submitPtoRequest = async ({
     view: homeView,
   });
 
+  // Create new users for missing approvers
   const newUserPromises = userResults.map((result, index) => {
     const missingId = missingApproverIds[index];
     const userData = {
@@ -116,7 +126,14 @@ const submitPtoRequest = async ({
   });
 
   const newUsers = await Promise.all(newUserPromises);
-  approvers.push(...newUsers);
+  for (const missingId of missingApproverIds) {
+    const user = newUsers.find((user) => user.userId === missingId);
+    if (user) {
+      approverMap.set(missingId, user);
+    }
+  }
+
+  const approvers = Array.from(approverMap.values());
 
   const request = await ptoService.createPtoRequest(
     context.user,
@@ -140,7 +157,6 @@ const submitPtoRequest = async ({
     channel: context.user.userId,
     blocks: await buildRequestDecisionBlocks(context, request, false),
   });
-
 };
 
 export default submitPtoRequest;
