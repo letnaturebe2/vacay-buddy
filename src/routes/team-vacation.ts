@@ -96,8 +96,17 @@ export default (app: Application) => {
               const userRequests = monthlyRequests.filter((pto) => pto.user.id === user.id);
               const isOnVacation = userRequests.some((pto) => pto.onGoing);
 
+              const userToken = jwt.sign(
+                {
+                  organizationId: organizationId,
+                  userId: user.userId,
+                },
+                process.env.JWT_SECRET || 'default-secret-key',
+                { expiresIn: '1h' },
+              );
+
               return `
-              <tr class="member-row">
+              <tr class="member-row clickable" onclick="window.location.href='/user-vacation-html?token=${userToken}'">
                 <td>${user.name || `<@${user.userId}>`}</td>
                 <td>${user.annualPtoDays}</td>
                 <td>${user.usedPtoDays}</td>

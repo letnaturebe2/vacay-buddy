@@ -60,6 +60,13 @@ export const commonStyles = `
   .status-scheduled {
     color: #9c27b0;
   }
+  .clickable {
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  .clickable:hover {
+    background-color: #f5f5f5;
+  }
 `;
 
 export const expiredTokenStyles = `
