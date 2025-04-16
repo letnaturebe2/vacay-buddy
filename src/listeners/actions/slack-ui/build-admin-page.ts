@@ -35,7 +35,7 @@ export const buildAdminPage = async (context: AppContext, ptoTemplates: PtoTempl
             emoji: true,
           },
           url: `${process.env.APP_URL || 'http://localhost:3000'}/team-vacation-html?token=${token}`,
-          action_id: ActionId.ACKNOWLEDGE, // this action is used to acknowledge for direct link
+          action_id: ActionId.UPDATE_ADMIN_PAGE,
         },
         {
           type: 'button',

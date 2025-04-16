@@ -18,8 +18,9 @@ export const openPtoRequestModal = async ({
 
   assert(!!body.view, 'body.view.id is undefined');
   const templates = await ptoService.getTemplates(context.organization);
+  const activeTemplates = templates.filter((template) => template.enabled);
 
-  if (templates.length === 0) {
+  if (activeTemplates.length === 0) {
     await client.views.open({
       trigger_id: body.trigger_id,
       view: {
@@ -45,7 +46,7 @@ export const openPtoRequestModal = async ({
   }
 
   // TODO : set user's default template
-  const blocks = await buildPtoRequestModal(context, templates, templates[0], context.user);
+  const blocks = await buildPtoRequestModal(context, activeTemplates, activeTemplates[0], context.user);
 
   const private_metadata = JSON.stringify({
     viewId: body.view.id,

@@ -18,10 +18,6 @@ const register = (app: App) => {
   app.action(ActionId.SELECT_PTO_TEMPLATE, selectPtoTemplate);
   app.action(ActionId.OPEN_DECISION_MODAL, openRequestApproveModal);
   app.action(ActionId.OPEN_EXCEL_INFO_MODAL, openExcelInfoModal);
-  // this action is used to acknowledge for direct link
-  app.action(ActionId.ACKNOWLEDGE, async ({ ack }) => {
-    await ack();
-  });
 };
 
 export default { register };
