@@ -29,7 +29,10 @@ export class PtoService {
   }
 
   async getTemplates(organization: Organization): Promise<PtoTemplate[]> {
-    return this.ptoTemplateRepository.find({ where: { organization: { id: organization.id } } });
+    return this.ptoTemplateRepository.find({
+      where: { organization: { id: organization.id } },
+      order: { daysConsumed: 'DESC' },
+    });
   }
 
   async upsertTemplate(template: Partial<PtoTemplate>, organization: Organization): Promise<PtoTemplate> {
