@@ -2,10 +2,9 @@
 
 ####  VacayBuddy는 연차 신청부터 승인, 현황 확인까지 전부 슬랙 안에서 해결할 수 있는 스마트한 연차 관리 도우미입니다.<a href="https://vacaybuddy-server-1080165942907.asia-northeast3.run.app//slack/install">
 
-
 <div align="center"> 
 설치하기 
-<a>
+<a href="https://vacaybuddy-server-1080165942907.asia-northeast3.run.app//slack/install">
 <img src="assets/logo/slack_icon.png" alt="Slack logo" width="15">
 </a>
 </div>
