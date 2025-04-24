@@ -9,6 +9,7 @@ export default (app: Application) => {
       <body>
         <h1>Hello VacayBuddy</h1>
         <button onclick="window.location.href='/slack/install'">Install</button>
+        <button onclick="window.location.href='/googleauth?userId=U08KACRV6AF'">Login with Google</button>
       </body>
     </html>
   `;

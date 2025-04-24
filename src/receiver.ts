@@ -1,5 +1,6 @@
 import { ExpressReceiver, LogLevel } from '@slack/bolt';
 import { WebClient } from '@slack/web-api';
+import express from 'express';
 import { buildInstallMessage } from './listeners/events/slack-ui/build-install-message';
 import routes from './routes';
 import { organizationService, ptoService, userService } from './service';
@@ -73,6 +74,8 @@ const receiver = new ExpressReceiver({
     redirectUriPath: '/slack/oauth_redirect',
   },
 });
+
+receiver.app.use(express.json());
 
 routes.register(receiver.app);
 

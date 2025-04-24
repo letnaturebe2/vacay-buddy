@@ -28,4 +28,7 @@ export class User extends BaseEntity {
 
   @Column({ type: 'float', default: 0 })
   usedPtoDays: number;
+
+  @Column({ type: 'varchar', nullable: true })
+  googleRefreshToken: string | null;
 }
