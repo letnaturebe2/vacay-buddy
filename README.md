@@ -2,7 +2,7 @@
 
 ####  VacayBuddy는 연차 신청부터 승인, 현황 확인까지 전부 슬랙 안에서 해결할 수 있는 스마트한 연차 관리 도우미입니다.<a href="https://vacaybuddy-server-1080165942907.asia-northeast3.run.app//slack/install">
 
-<div align="center"> 
+<div> 
 설치하기 
 <a href="https://vacaybuddy-server-1080165942907.asia-northeast3.run.app//slack/install">
 <img src="assets/logo/slack_icon.png" alt="Slack logo" width="15">
@@ -19,7 +19,7 @@
 
 ## 편리한 승인 및 검토
 
-<img src="./assets/screens/pto-review.png" alt="PTO 검토 화면">
+<img src="./assets/gifs/pto-approve.gif" alt="PTO 검토 화면">
 
 - **알림 및 승인**: 연차 신청 시 메시지 알림이 오고, 버튼을 눌러 모달창에서 승인 또는 거절할 수 있습니다.
 - **간편한 승인 처리**: 슬랙 메시지에서 바로 모달창을 열어 승인 또는 거절할 수 있습니다.
