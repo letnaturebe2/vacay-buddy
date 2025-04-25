@@ -52,14 +52,71 @@
 ### 환경 변수 설정
 
 1. `env.sample`을 `.env`로 복사
-2. [앱 설정 페이지](https://api.slack.com/apps)에서 "OAuth & Permissions"를 클릭하고 Bot User OAuth Token을 복사하여 `.env` 파일의 `SLACK_BOT_TOKEN`에 추가
-3. 필요에 따라 데이터베이스 연결을 위한 추가 환경 변수 구성
+2. 다음과 같이 환경 변수를 구성합니다:
+
+```
+# Socket Mode 설정 (Socket Mode 사용 시 필수)
+SLACK_BOT_TOKEN=xoxb-ababa
+SLACK_APP_TOKEN=xapp-1abab
+
+# HTTP Mode 설정 (HTTP Mode 사용 시 필수)
+SLACK_SIGNING_SECRET=...
+SLACK_CLIENT_ID=...
+SLACK_CLIENT_SECRET=...
+SLACK_STATE_SECRET=...
+
+# Slack OAuth Scopes
+SLACK_SCOPES=files:read,im:history,im:write,users:read,users:read.email,chat:write,chat:write.public,channels:read
+
+# 애플리케이션 설정
+APP_URL=...  # HTTP Mode 사용 시 필요, 로컬 개발 환경에서는 ngrok 주소 입력
+JWT_SECRET=JWT_SECRET
+
+# 데이터베이스 설정 (기본값: SQLite)
+# 기본적으로 SQLite를 사용하며, 별도 설정 없이 로컬에서 실행 가능합니다.
+# MySQL을 사용하려면 다음 설정의 주석을 제거하고 값을 입력하세요 (선택사항)
+#DB_TYPE=mysql
+#DB_HOST=
+#DB_PORT=3306
+#DB_USERNAME=
+#DB_PASSWORD=
+#DB_DATABASE=
+#DB_SYNC=true
+#DB_LOGGING=false
+```
+
+3. [앱 설정 페이지](https://api.slack.com/apps)에서 필요한 토큰과 시크릿을 확인하여 입력합니다.
+4. 기본적으로 SQLite 데이터베이스를 사용하므로 별도의 데이터베이스 설정 없이 바로 실행할 수 있습니다.
 
 ### 로컬 실행 방법
 
+VacayBuddy는 두 가지 모드로 실행할 수 있습니다:
+
+#### 1. Socket Mode (개발용)
+로컬 개발 환경에서 터널링 없이 Slack과 통신할 수 있습니다. 초기 개발 단계에서 권장됩니다.
+필수 환경 변수: `SLACK_BOT_TOKEN`, `SLACK_APP_TOKEN`
+
 ```bash
 npm install
-npm run dev-socket  # 소켓 서버 실행
+npm run dev-socket
+```
+
+#### 2. HTTP Mode (프로덕션용)
+실제 프로덕션 환경과 동일한 방식으로 HTTP 엔드포인트를 통해 Slack과 통신합니다.
+필수 환경 변수: `SLACK_SIGNING_SECRET`, `SLACK_CLIENT_ID`, `SLACK_CLIENT_SECRET`, `SLACK_STATE_SECRET`, `APP_URL`
+
+HTTP Mode를 로컬에서 테스트하려면:
+1. [ngrok](https://ngrok.com/)을 설치하고 `ngrok http 3000` 명령으로 터널을 생성
+2. 생성된 ngrok URL을 `.env` 파일의 `APP_URL`에 설정
+3. Slack 앱 설정의 Redirect URLs와 Event Subscriptions URL도 ngrok URL로 업데이트
+
+```bash
+npm install
+npm run dev-http
+```
+
+#### 프로덕션 배포
+```bash
 npm start
 ```
 
