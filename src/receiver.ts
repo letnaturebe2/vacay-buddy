@@ -1,11 +1,11 @@
+import path from 'node:path';
 import { ExpressReceiver, LogLevel } from '@slack/bolt';
 import { WebClient } from '@slack/web-api';
+import express from 'express';
 import { buildInstallMessage } from './listeners/events/slack-ui/build-install-message';
 import routes from './routes';
 import { organizationService, ptoService, userService } from './service';
 import { assert } from './utils';
-import path from 'path';
-import express from 'express';
 
 const receiver = new ExpressReceiver({
   logLevel: LogLevel.INFO,

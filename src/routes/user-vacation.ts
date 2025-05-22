@@ -3,7 +3,6 @@ import jwt from 'jsonwebtoken';
 import { ptoService, userService } from '../service';
 import { getRequestStatus } from '../utils';
 import { commonStyles, expiredTokenStyles } from './css';
-import path from 'path';
 
 export default (app: Application) => {
   app.get('/user-vacation-html', async (req: Request, res: Response) => {
@@ -61,19 +60,20 @@ export default (app: Application) => {
     // Get all vacation requests for the user
     const user = await userService.getUser(userId);
     const userRequests = await ptoService.getMyPtoRequests(user);
-    
+
     // Prepare for year filtering
     const currentYear = new Date().getFullYear();
-    const selectedYear = year && !isNaN(Number(year)) ? Number(year) : currentYear;
-    
+    const yearNum = year ? Number(year) : Number.NaN;
+    const selectedYear = !Number.isNaN(yearNum) ? yearNum : currentYear;
+
     // Create list of available years (current year and 3 previous years)
     const availableYears = [];
     for (let i = 0; i < 4; i++) {
       availableYears.push(currentYear - i);
     }
-    
+
     // Filter requests for the selected year
-    const filteredRequests = userRequests.filter(request => {
+    const filteredRequests = userRequests.filter((request) => {
       const requestYear = request.startDate.getFullYear();
       return selectedYear === requestYear;
     });
@@ -211,7 +211,7 @@ export default (app: Application) => {
       <div class="year-selector">
         <span><i class="fas fa-calendar-alt"></i> 연도 선택:</span>
         <select id="yearSelect">
-          ${availableYears.map(y => `<option value="${y}" ${y === selectedYear ? 'selected' : ''}>${y}년</option>`).join('')}
+          ${availableYears.map((y) => `<option value="${y}" ${y === selectedYear ? 'selected' : ''}>${y}년</option>`).join('')}
         </select>
         <button id="applyYearFilter">적용</button>
       </div>
@@ -219,9 +219,9 @@ export default (app: Application) => {
       <div class="pto-card">
         <h2>내 연차 요청 목록 (${selectedYear}년)</h2>
         ${
-      filteredRequests.length === 0
-        ? '<p>선택한 연도에 등록된 연차 요청이 없습니다.</p>'
-        : `
+          filteredRequests.length === 0
+            ? '<p>선택한 연도에 등록된 연차 요청이 없습니다.</p>'
+            : `
             <table id="ptoTable" class="display responsive nowrap" style="width:100%">
               <thead>
                 <tr>
@@ -235,9 +235,9 @@ export default (app: Application) => {
               </thead>
               <tbody>
                 ${filteredRequests
-          .map((request) => {
-            const [statusClass, statusText] = getRequestStatus(request);
-            return `
+                  .map((request) => {
+                    const [statusClass, statusText] = getRequestStatus(request);
+                    return `
                     <tr class="request-row">
                       <td>${request.title}</td>
                       <td>${request.startDate.toLocaleDateString('ko-KR')}</td>
@@ -247,12 +247,12 @@ export default (app: Application) => {
                       <td class="${statusClass}">${statusText}</td>
                     </tr>
                   `;
-          })
-          .join('')}
+                  })
+                  .join('')}
               </tbody>
             </table>
           `
-    }
+        }
       </div>
 
       <script>
