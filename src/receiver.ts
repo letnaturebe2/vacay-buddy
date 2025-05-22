@@ -4,6 +4,8 @@ import { buildInstallMessage } from './listeners/events/slack-ui/build-install-m
 import routes from './routes';
 import { organizationService, ptoService, userService } from './service';
 import { assert } from './utils';
+import path from 'path';
+import express from 'express';
 
 const receiver = new ExpressReceiver({
   logLevel: LogLevel.INFO,
@@ -73,6 +75,9 @@ const receiver = new ExpressReceiver({
     redirectUriPath: '/slack/oauth_redirect',
   },
 });
+
+// Serve static assets (CSS, JS, fonts) from the public directory
+receiver.app.use('/assets', express.static(path.join(process.cwd(), 'public/assets')));
 
 routes.register(receiver.app);
 

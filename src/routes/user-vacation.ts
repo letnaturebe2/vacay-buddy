@@ -3,10 +3,11 @@ import jwt from 'jsonwebtoken';
 import { ptoService, userService } from '../service';
 import { getRequestStatus } from '../utils';
 import { commonStyles, expiredTokenStyles } from './css';
+import path from 'path';
 
 export default (app: Application) => {
   app.get('/user-vacation-html', async (req: Request, res: Response) => {
-    const { token } = req.query;
+    const { token, year } = req.query;
 
     if (!token || typeof token !== 'string') {
       res.status(400).send('Invalid token');
@@ -45,8 +46,8 @@ export default (app: Application) => {
         return;
       }
 
-      // 그 외 다른 토큰 에러의 경우
-      res.status(401).send('유효하지 않은 토큰입니다');
+      // For other token errors
+      res.status(401).send('Invalid token');
       return;
     }
 
@@ -57,63 +58,233 @@ export default (app: Application) => {
       return;
     }
 
-    // 사용자의 모든 휴가 요청을 가져오기
+    // Get all vacation requests for the user
     const user = await userService.getUser(userId);
     const userRequests = await ptoService.getMyPtoRequests(user);
+    
+    // Prepare for year filtering
+    const currentYear = new Date().getFullYear();
+    const selectedYear = year && !isNaN(Number(year)) ? Number(year) : currentYear;
+    
+    // Create list of available years (current year and 3 previous years)
+    const availableYears = [];
+    for (let i = 0; i < 4; i++) {
+      availableYears.push(currentYear - i);
+    }
+    
+    // Filter requests for the selected year
+    const filteredRequests = userRequests.filter(request => {
+      const requestYear = request.startDate.getFullYear();
+      return selectedYear === requestYear;
+    });
 
     const html = `
     <!DOCTYPE html>
     <html lang="ko">
     <head>
       <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>내 연차 요약</title>
-      <style>${commonStyles}</style>
+      <link rel="stylesheet" href="/assets/css/jquery.dataTables.min.css">
+      <link rel="stylesheet" href="/assets/css/responsive.dataTables.min.css">
+      <link rel="stylesheet" href="/assets/css/fontawesome.min.css">
+      <script src="/assets/js/jquery.min.js"></script>
+      <script src="/assets/js/jquery.dataTables.min.js"></script>
+      <script src="/assets/js/dataTables.responsive.min.js"></script>
+      <style>
+        ${commonStyles}
+      .year-selector {
+        margin: 20px 0;
+        display: flex;
+        align-items: center;
+      }
+      .year-selector select {
+        padding: 8px 10px;
+        margin-left: 10px;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+      }
+      .year-selector button {
+        padding: 8px 15px;
+        margin-left: 10px;
+        background-color: #1976d2;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      .year-selector button:hover {
+        background-color: #1565c0;
+      }
+      .pto-card {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        padding: 20px;
+        margin-bottom: 30px;
+      }
+      .pto-info {
+        display: flex;
+        justify-content: space-around;
+        text-align: center;
+      }
+      .pto-info-item {
+        flex: 1;
+        padding: 15px;
+      }
+      .pto-info-item h3 {
+        margin-bottom: 10px;
+        color: #1976d2;
+      }
+      .pto-info-item .value {
+        font-size: 24px;
+        font-weight: bold;
+      }
+      .progress-bar-container {
+        width: 100%;
+        background-color: #e0e0e0;
+        border-radius: 4px;
+        height: 20px;
+        margin-top: 15px;
+      }
+      .progress-bar {
+        height: 100%;
+        border-radius: 4px;
+        background-color: #1976d2;
+        text-align: center;
+        color: white;
+        line-height: 20px;
+        font-size: 12px;
+      }
+      
+      /* Mobile responsiveness improvements */
+      @media (max-width: 768px) {
+        .dtr-details {
+          width: 100%;
+        }
+        .dtr-details li {
+          display: flex;
+          justify-content: space-between;
+          padding: 8px 0;
+          border-bottom: 1px solid #eee;
+        }
+        .dtr-details li:last-child {
+          border-bottom: none;
+        }
+        .dtr-title {
+          font-weight: bold;
+          flex: 1;
+        }
+        .dtr-data {
+          flex: 2;
+          text-align: right;
+        }
+      }
+      </style>
     </head>
     <body>
       <h1>내 연차 요약</h1>
 
-      <div class="summary">
+      <div class="pto-card">
         <h2>휴가 정보</h2>
-        <p>사용한 연차: ${user.usedPtoDays}/${user.annualPtoDays} 일</p>
-        <p>남은 일수: ${user.annualPtoDays - user.usedPtoDays} 일</p>
+        <div class="pto-info">
+          <div class="pto-info-item">
+            <h3>총 연차</h3>
+            <div class="value">${user.annualPtoDays}일</div>
+          </div>
+          <div class="pto-info-item">
+            <h3>사용한 연차</h3>
+            <div class="value">${user.usedPtoDays}일</div>
+          </div>
+          <div class="pto-info-item">
+            <h3>남은 연차</h3>
+            <div class="value">${user.annualPtoDays - user.usedPtoDays}일</div>
+          </div>
+        </div>
+        <div class="progress-bar-container">
+          <div class="progress-bar" style="width: ${(user.usedPtoDays / user.annualPtoDays) * 100}%">
+            ${Math.round((user.usedPtoDays / user.annualPtoDays) * 100)}%
+          </div>
+        </div>
       </div>
 
-      <h2>내 연차 요청 목록</h2>
-      ${
-        userRequests.length === 0
-          ? '<p>등록된 연차 요청이 없습니다.</p>'
-          : `
-          <table>
-            <thead>
-              <tr>
-                <th>제목</th>
-                <th>시작일</th>
-                <th>종료일</th>
-                <th>소모 일수</th>
-                <th>유형</th>
-                <th>상태</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${userRequests
-                .map((request) => {
-                  const [statusClass, statusText] = getRequestStatus(request);
-                  return `
-                  <tr class="request-row">
-                    <td>${request.title}</td>
-                    <td>${request.startDate.toLocaleDateString('ko-KR')}</td>
-                    <td>${request.endDate.toLocaleDateString('ko-KR')}</td>
-                    <td>${request.consumedDays}</td>
-                    <td>${request.template.title}</td>
-                    <td class="${statusClass}">${statusText}</td>
-                  </tr>
-                `;
-                })
-                .join('')}
-            </tbody>
-          </table>
-        `
-      }
+      <div class="year-selector">
+        <span><i class="fas fa-calendar-alt"></i> 연도 선택:</span>
+        <select id="yearSelect">
+          ${availableYears.map(y => `<option value="${y}" ${y === selectedYear ? 'selected' : ''}>${y}년</option>`).join('')}
+        </select>
+        <button id="applyYearFilter">적용</button>
+      </div>
+
+      <div class="pto-card">
+        <h2>내 연차 요청 목록 (${selectedYear}년)</h2>
+        ${
+      filteredRequests.length === 0
+        ? '<p>선택한 연도에 등록된 연차 요청이 없습니다.</p>'
+        : `
+            <table id="ptoTable" class="display responsive nowrap" style="width:100%">
+              <thead>
+                <tr>
+                  <th>제목</th>
+                  <th>시작일</th>
+                  <th>종료일</th>
+                  <th>소모 일수</th>
+                  <th>유형</th>
+                  <th>상태</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${filteredRequests
+          .map((request) => {
+            const [statusClass, statusText] = getRequestStatus(request);
+            return `
+                    <tr class="request-row">
+                      <td>${request.title}</td>
+                      <td>${request.startDate.toLocaleDateString('ko-KR')}</td>
+                      <td>${request.endDate.toLocaleDateString('ko-KR')}</td>
+                      <td>${request.consumedDays}</td>
+                      <td>${request.template.title}</td>
+                      <td class="${statusClass}">${statusText}</td>
+                    </tr>
+                  `;
+          })
+          .join('')}
+              </tbody>
+            </table>
+          `
+    }
+      </div>
+
+      <script>
+        $(document).ready(function() {
+          // Initialize DataTables with mobile-optimized settings
+          $('#ptoTable').DataTable({
+            language: {
+              url: '/assets/i18n/ko.json'
+            },
+            responsive: true,
+            rowReorder: {
+              selector: 'td:nth-child(2)'
+            },
+            order: [[1, 'desc']], // Sort by start date
+            pageLength: 10,
+            autoWidth: false,
+            columnDefs: [
+              { responsivePriority: 1, targets: [0, 5] }, // Title and status always visible
+              { responsivePriority: 2, targets: [1, 3] }, // Start date and days consumed second priority
+              { responsivePriority: 3, targets: [2, 4] }  // End date and type third priority
+            ]
+          });
+
+          // Apply year filter
+          $('#applyYearFilter').click(function() {
+            const selectedYear = $('#yearSelect').val();
+            const currentUrl = new URL(window.location.href);
+            currentUrl.searchParams.set('year', selectedYear);
+            window.location.href = currentUrl.toString();
+          });
+        });
+      </script>
     </body>
     </html>
     `;
