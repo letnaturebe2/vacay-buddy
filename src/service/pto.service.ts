@@ -266,4 +266,14 @@ export class PtoService {
 
     return approvals.filter((approval) => approval.ptoRequest.currentApprovalId === approval.id);
   }
+
+  async getPendingRequests(): Promise<PtoRequest[]> {
+    return this.ptoRequestRepository.find({
+      where: { status: PtoRequestStatus.Pending },
+      relations: ['user', 'template', 'approvals', 'approvals.approver'],
+      order: {
+        startDate: 'ASC',
+      },
+    });
+  }
 }
