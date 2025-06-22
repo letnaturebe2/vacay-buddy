@@ -22,15 +22,19 @@ const loadAppContext = async ({ context, client, next }: AllMiddlewareArgs<AppCo
     include_locale: true,
   });
 
-  context.locale = result.user?.locale ?? 'en-US';
+  const slackUser = result.user;
+
+  context.locale = slackUser?.locale ?? 'ko-KR';
   context.organization = organization;
   context.user = await userService.getOrCreateUser(context.userId, context.organization);
 
-  if (context.user.name !== result.user?.real_name) {
-    context.user.name = result.user?.real_name ?? '';
+  if (context.user.name !== slackUser?.real_name) {
+    context.user.name = slackUser?.real_name ?? '';
     await userService.updateUser(context.userId, {
       ...context.user,
       name: context.user.name,
+      tz: slackUser?.tz ?? 'Asia/Seoul',
+      tz_offset: slackUser?.tz_offset ?? 32400,
     });
   }
 

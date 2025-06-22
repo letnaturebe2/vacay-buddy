@@ -28,4 +28,10 @@ export class User extends BaseEntity {
 
   @Column({ type: 'float', default: 0 })
   usedPtoDays: number;
+
+  @Column({ type: 'varchar', nullable: false, length: 30, default: 'Asia/Seoul' })
+  tz: string;
+
+  @Column({ type: 'int', nullable: false, default: 32400 })
+  tz_offset: number;
 }
