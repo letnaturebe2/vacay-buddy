@@ -27,4 +27,10 @@ export class Organization extends BaseEntity {
     assert(installation.appId !== undefined, 'App ID is undefined');
     return installation.appId;
   }
+
+  get botToken(): string {
+    const installation: Installation = JSON.parse(this.installation);
+    assert(installation.bot?.token !== undefined, 'Bot token is undefined');
+    return installation.bot.token;
+  }
 }

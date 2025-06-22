@@ -270,7 +270,7 @@ export class PtoService {
   async getPendingRequests(): Promise<PtoRequest[]> {
     return this.ptoRequestRepository.find({
       where: { status: PtoRequestStatus.Pending },
-      relations: ['user', 'template', 'approvals', 'approvals.approver'],
+      relations: ['user', 'user.organization', 'approvals', 'approvals.approver'],
       order: {
         startDate: 'ASC',
       },
