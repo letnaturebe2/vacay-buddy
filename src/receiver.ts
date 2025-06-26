@@ -29,29 +29,34 @@ const receiver = new ExpressReceiver({
       });
 
       const locale = result.user?.locale || 'en-US';
+      const isEnterprise = installation.isEnterpriseInstall !== undefined;
+      const installationJson = JSON.stringify(installation);
 
-      const organization = await organizationService.getOrganization(organizationId);
+      let organization = await organizationService.getOrganizationWithDeleted(organizationId);
       if (organization) {
-        await organizationService.deleteOrganization(organizationId);
+        organization = await organizationService.restoreOrganization(organizationId, isEnterprise, installationJson);
+      } else {
+        // create organization, user, and default pto templates
+        organization = await organizationService.createOrganization(organizationId, isEnterprise, installationJson);
+        await ptoService.createDefaultPtoTemplates(locale, organization);
       }
 
-      // create organization, user, and default pto templates
-      const newOrganization = await organizationService.createOrganization(
-        organizationId,
-        installation.isEnterpriseInstall !== undefined,
-        JSON.stringify(installation),
-      );
-      await ptoService.createDefaultPtoTemplates(locale, newOrganization);
-      const installer = await userService.getOrCreateUser(installation.user.id, newOrganization, true);
+      const installer = await userService.getOrCreateUser(installation.user.id, organization, true);
+
+      // ensure installer is saved and admin, if organization is restored, it might not be admin
+      if (!installer.isAdmin) {
+        installer.isAdmin = true;
+        await userService.updateUser(installer.userId, installer);
+      }
 
       // Create users for all team members
-      await organizationService.importTeamMembers(installation.bot.token, newOrganization);
+      await organizationService.importTeamMembers(installation.bot.token, organization);
 
       // send welcome message to the installer
       await client.chat.postMessage({
         channel: installer.userId,
         text: `Hello <@${installer.userId}>! Thanks for installing the app!`,
-        blocks: buildInstallMessage(locale, newOrganization.organizationId, installation.appId),
+        blocks: buildInstallMessage(locale, organization.organizationId, installation.appId),
       });
     },
 
