@@ -4,7 +4,6 @@
   "description": "A Slack app for easily requesting, approving, and managing PTO directly within Slack",
   "main": "dist/app.js",
   "scripts": {
-    "prepare": "husky install",
     "build": "tsc",
     "start": "npm run build && node ./dist/src/app-prod.js",
     "lint": "npx @biomejs/biome check src",
