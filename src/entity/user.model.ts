@@ -1,8 +1,8 @@
-import {Column, Entity, JoinColumn, ManyToOne} from 'typeorm';
-import {BaseEntity} from './base';
-import {Organization} from './organization.model';
-import { startOfDay, isEqual } from 'date-fns';
-import { toZonedTime, fromZonedTime } from 'date-fns-tz';
+import { startOfDay } from 'date-fns';
+import { toZonedTime } from 'date-fns-tz';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { BaseEntity } from './base';
+import { Organization } from './organization.model';
 
 @Entity()
 export class User extends BaseEntity {
@@ -16,31 +16,31 @@ export class User extends BaseEntity {
       onDelete: 'CASCADE',
     },
   )
-  @JoinColumn({name: 'organization_id'})
+  @JoinColumn({ name: 'organization_id' })
   organization: Organization;
 
-  @Column({default: false})
+  @Column({ default: false })
   isAdmin: boolean;
 
-  @Column({type: 'varchar', nullable: true, length: 255})
+  @Column({ type: 'varchar', nullable: true, length: 255 })
   name: string | null;
 
-  @Column({type: 'float', default: 15})
+  @Column({ type: 'float', default: 15 })
   annualPtoDays: number;
 
-  @Column({type: 'float', default: 0})
+  @Column({ type: 'float', default: 0 })
   usedPtoDays: number;
 
-  @Column({type: 'varchar', nullable: false, length: 30, default: 'Asia/Seoul'})
+  @Column({ type: 'varchar', nullable: false, length: 30, default: 'Asia/Seoul' })
   tz: string;
 
-  @Column({type: 'int', nullable: false, default: 32400})
+  @Column({ type: 'int', nullable: false, default: 32400 })
   tz_offset: number;
 
   @Column({
     type: 'datetime',
     nullable: false,
-    default: () => 'CURRENT_TIMESTAMP'
+    default: () => 'CURRENT_TIMESTAMP',
   })
   lastNotificationSentAt: Date;
 
@@ -56,8 +56,7 @@ export class User extends BaseEntity {
    */
   get isNotificationTime(): boolean {
     const userLocalTime = this.getUserLocalTime;
-    return true;
-    // return userLocalTime.getHours() === 10;
+    return userLocalTime.getHours() === 10;
   }
 
   /**

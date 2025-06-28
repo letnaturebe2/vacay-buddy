@@ -1,13 +1,13 @@
 import { type Application, Request, Response } from 'express';
-import { ptoService, notificationService } from '../service';
+import { notificationService, ptoService } from '../service';
 
 export default (app: Application) => {
   app.get('/pending-notification', async (req: Request, res: Response) => {
     try {
       const pendingRequestsByUser = await ptoService.getPendingRequests();
-      
+
       const usersWithRequests = Array.from(pendingRequestsByUser.values());
-      
+
       const notificationsSent = await notificationService.sendPendingNotifications(usersWithRequests);
 
       res.json({

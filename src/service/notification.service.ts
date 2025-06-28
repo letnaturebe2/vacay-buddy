@@ -1,8 +1,8 @@
 import { WebClient } from '@slack/web-api';
 import { AppContext } from '../app';
-import { buildPendingNotificationMessage } from '../listeners/events/slack-ui/build-pending-notification-message';
-import { User } from '../entity/user.model';
 import { PtoRequest } from '../entity/pto-request.model';
+import { User } from '../entity/user.model';
+import { buildPendingNotificationMessage } from '../listeners/events/slack-ui/build-pending-notification-message';
 import { UserService } from './user.service';
 
 export class NotificationService {
@@ -54,4 +54,4 @@ export class NotificationService {
 
     return notificationsSent;
   }
-} 
+}
