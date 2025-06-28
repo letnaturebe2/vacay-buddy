@@ -1,10 +1,8 @@
-import {WebClient} from '@slack/web-api';
-import {type Application, Request, Response} from 'express';
-import {AppContext} from '../app';
-import {buildRequestDecisionBlocks} from '../listeners/views/slack-ui/build-request-decision-blocks';
-import {ptoService} from '../service';
-import {assert} from '../utils';
-import {buildPendingNotificationMessage} from "../listeners/events/slack-ui/build-pending-notification-message";
+import { WebClient } from '@slack/web-api';
+import { type Application, Request, Response } from 'express';
+import { AppContext } from '../app';
+import { buildPendingNotificationMessage } from '../listeners/events/slack-ui/build-pending-notification-message';
+import { ptoService } from '../service';
 
 export default (app: Application) => {
   app.get('/pending-notification', async (req: Request, res: Response) => {

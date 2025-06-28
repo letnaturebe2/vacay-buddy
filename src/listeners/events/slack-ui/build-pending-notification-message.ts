@@ -1,13 +1,10 @@
 import type { AnyBlock } from '@slack/types';
-import { t } from '../../../i18n';
 import { AppContext } from '../../../app';
+import { t } from '../../../i18n';
 
-export const buildPendingNotificationMessage = (
-  context: AppContext,
-  pendingCount: number
-): AnyBlock[] => {
+export const buildPendingNotificationMessage = (context: AppContext, pendingCount: number): AnyBlock[] => {
   const { locale } = context;
-  
+
   return [
     {
       type: 'section',

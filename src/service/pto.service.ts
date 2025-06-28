@@ -6,9 +6,9 @@ import { PtoApproval } from '../entity/pto-approval.model';
 import { PtoRequest } from '../entity/pto-request.model';
 import { PtoTemplate } from '../entity/pto-template.model';
 import { User } from '../entity/user.model';
+import { UserWithRequests } from '../types';
 import { assert, getDefaultTemplates, isSameDay } from '../utils';
 import { UserService } from './user.service';
-import {UserWithRequests} from "../types";
 
 export class PtoService {
   private readonly ptoTemplateRepository: Repository<PtoTemplate>;
@@ -191,7 +191,7 @@ export class PtoService {
       if (!requestsByPendingApprover.has(approverId)) {
         requestsByPendingApprover.set(approverId, {
           user: approver,
-          requests: []
+          requests: [],
         });
       }
 
