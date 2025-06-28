@@ -121,6 +121,9 @@ export default {
   request_rejected_notification: 'Your PTO request has been rejected',
   request_pending_notification: 'Your PTO request is pending approval from {{approvers}}',
   reminder_notification: 'Reminder: You have a pending PTO request to review',
+  pending_notification_title: '🔔 *Notification*',
+  pending_notification_message: 'You currently have {{count}} unapproved request(s).',
+  pending_notification_description: 'Please review and approve or reject the PTO requests.',
 
   // Dashboard
   upcoming_time_off: 'Upcoming Time Off',

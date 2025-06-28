@@ -8,6 +8,7 @@ import { PtoTemplate } from '../entity/pto-template.model';
 import { User } from '../entity/user.model';
 import { assert, getDefaultTemplates, isSameDay } from '../utils';
 import { UserService } from './user.service';
+import {UserWithRequests} from "../types";
 
 export class PtoService {
   private readonly ptoTemplateRepository: Repository<PtoTemplate>;
@@ -173,6 +174,35 @@ export class PtoService {
     });
   }
 
+  async getPendingRequests(): Promise<Map<number, UserWithRequests>> {
+    const requestsByPendingApprover = new Map<number, UserWithRequests>();
+    const pendingRequests = await this.ptoRequestRepository.find({
+      where: { status: PtoRequestStatus.Pending },
+      relations: ['approvals', 'approvals.approver', 'approvals.approver.organization'],
+    });
+
+    for (const request of pendingRequests) {
+      const currentApproval = request.approvals.find((approval) => approval.id === request.currentApprovalId);
+      assert(currentApproval !== undefined, 'Current approval must exist for pending request');
+
+      const approver = currentApproval.approver;
+      const approverId = approver.id;
+
+      if (!requestsByPendingApprover.has(approverId)) {
+        requestsByPendingApprover.set(approverId, {
+          user: approver,
+          requests: []
+        });
+      }
+
+      const userWithRequests = requestsByPendingApprover.get(approverId);
+      assert(userWithRequests !== undefined, 'User with requests must exist');
+      userWithRequests.requests.push(request);
+    }
+
+    return requestsByPendingApprover;
+  }
+
   private validatePendingApproval(approver: User, approval: PtoApproval): void {
     if (!approver.isAdmin) {
       assert(approver.id === approval.approver.id, 'You are not the approver for this request');
@@ -265,15 +295,5 @@ export class PtoService {
     });
 
     return approvals.filter((approval) => approval.ptoRequest.currentApprovalId === approval.id);
-  }
-
-  async getPendingRequests(): Promise<PtoRequest[]> {
-    return this.ptoRequestRepository.find({
-      where: { status: PtoRequestStatus.Pending },
-      relations: ['user', 'user.organization', 'approvals', 'approvals.approver'],
-      order: {
-        startDate: 'ASC',
-      },
-    });
   }
 }
