@@ -122,8 +122,8 @@ export default {
   request_pending_notification: '연차 요청이 {{approvers}}의 승인을 기다리고 있습니다',
   reminder_notification: '알림: 검토할 연차 요청이 있습니다',
   pending_notification_title: '🔔 *알림*',
-  pending_notification_message: '현재 {{count}}개의 승인하지 않은 요청이 있습니다.',
-  pending_notification_description: '연차 요청을 검토하고 승인 또는 거부 결정을 내려주세요.',
+  pending_notification_message: '{{count}}개의 승인 대기 중인 연차 요청이 있습니다.',
+  pending_notification_description: '요청을 검토하고 승인 또는 거부해 주세요.',
 
   // Dashboard
   upcoming_time_off: '예정된 휴가',

@@ -1,6 +1,8 @@
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
-import { BaseEntity } from './base';
-import { Organization } from './organization.model';
+import {Column, Entity, JoinColumn, ManyToOne} from 'typeorm';
+import {BaseEntity} from './base';
+import {Organization} from './organization.model';
+import { startOfDay, isEqual } from 'date-fns';
+import { toZonedTime, fromZonedTime } from 'date-fns-tz';
 
 @Entity()
 export class User extends BaseEntity {
@@ -14,24 +16,72 @@ export class User extends BaseEntity {
       onDelete: 'CASCADE',
     },
   )
-  @JoinColumn({ name: 'organization_id' })
+  @JoinColumn({name: 'organization_id'})
   organization: Organization;
 
-  @Column({ default: false })
+  @Column({default: false})
   isAdmin: boolean;
 
-  @Column({ type: 'varchar', nullable: true, length: 255 })
+  @Column({type: 'varchar', nullable: true, length: 255})
   name: string | null;
 
-  @Column({ type: 'float', default: 15 })
+  @Column({type: 'float', default: 15})
   annualPtoDays: number;
 
-  @Column({ type: 'float', default: 0 })
+  @Column({type: 'float', default: 0})
   usedPtoDays: number;
 
-  @Column({ type: 'varchar', nullable: false, length: 30, default: 'Asia/Seoul' })
+  @Column({type: 'varchar', nullable: false, length: 30, default: 'Asia/Seoul'})
   tz: string;
 
-  @Column({ type: 'int', nullable: false, default: 32400 })
+  @Column({type: 'int', nullable: false, default: 32400})
   tz_offset: number;
+
+  @Column({
+    type: 'datetime',
+    nullable: false,
+    default: () => 'CURRENT_TIMESTAMP'
+  })
+  lastNotificationSentAt: Date;
+
+  /**
+   * 사용자의 현재 로컬 시간 가져오기
+   */
+  get getUserLocalTime(): Date {
+    return toZonedTime(new Date(), this.tz);
+  }
+
+  /**
+   * 사용자의 timezone 기준으로 현재 시간이 10시대(10:00-10:59)인지 확인
+   */
+  get isNotificationTime(): boolean {
+    const userLocalTime = this.getUserLocalTime;
+    return true;
+    // return userLocalTime.getHours() === 10;
+  }
+
+  /**
+   * 사용자가 오늘 이미 알림을 받았는지 확인
+   * - 오늘 받았으면 true (중복 방지)
+   * - 어제 이전에 받았으면 false (보내야 함)
+   * - 미래에 받았으면 true (시간대 엣지케이스 방지)
+   */
+  get hasReceivedNotificationToday(): boolean {
+    const userNow = this.getUserLocalTime;
+    const userToday = startOfDay(userNow);
+
+    const lastNotificationUserTime = toZonedTime(this.lastNotificationSentAt, this.tz);
+    const lastNotificationDay = startOfDay(lastNotificationUserTime);
+
+    // 마지막 알림이 오늘 또는 미래인 경우만 true
+    // 과거(어제 이전)인 경우는 false → 알림 발송
+    return lastNotificationDay >= userToday;
+  }
+
+  /**
+   * 사용자가 알림을 받을 수 있는 상태인지 확인
+   */
+  get shouldSendNotification(): boolean {
+    return this.isNotificationTime && !this.hasReceivedNotificationToday;
+  }
 }

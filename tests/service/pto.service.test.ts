@@ -9,8 +9,16 @@ import {Organization} from "../../src/entity/organization.model";
 import {PtoRequestStatus} from "../../src/constants";
 import {UserService} from "../../src/service/user.service";
 import {OrganizationService} from "../../src/service/organization.service";
-import {TEST_INSTALLATION} from "../config/constants";
 import {getDefaultTemplates} from "../../src/utils";
+import {
+  createOrganization,
+  createUser,
+  createPtoTemplate,
+  getRepositories,
+  getServices,
+  clearAllTestData,
+  ensureTestDatabaseInitialized
+} from "../config/test-utils";
 
 describe("PtoService Tests", () => {
   let organizationService: OrganizationService;
@@ -23,54 +31,26 @@ describe("PtoService Tests", () => {
   let organizationRepository: Repository<Organization>;
 
   beforeAll(async () => {
-    ptoTemplateRepository = testDataSource.getRepository(PtoTemplate);
-    ptoRequestRepository = testDataSource.getRepository(PtoRequest);
-    ptoApprovalRepository = testDataSource.getRepository(PtoApproval);
-    userRepository = testDataSource.getRepository(User);
-    organizationRepository = testDataSource.getRepository(Organization);
+    // 데이터베이스가 초기화되어 있는지 확인 (setup.ts에서 이미 초기화됨)
+    await ensureTestDatabaseInitialized();
+    
+    const repositories = getRepositories();
+    const services = getServices();
+    
+    ptoTemplateRepository = repositories.ptoTemplateRepository;
+    ptoRequestRepository = repositories.ptoRequestRepository;
+    ptoApprovalRepository = repositories.ptoApprovalRepository;
+    userRepository = repositories.userRepository;
+    organizationRepository = repositories.organizationRepository;
 
-    userService = new UserService(testDataSource);
-    organizationService = new OrganizationService(testDataSource, userService);
+    userService = services.userService;
+    organizationService = services.organizationService;
     ptoService = new PtoService(testDataSource, userService);
   });
 
   beforeEach(async () => {
-    await ptoApprovalRepository.clear();
-    await ptoRequestRepository.clear();
-    await ptoTemplateRepository.clear();
-    await userRepository.clear();
-    await organizationRepository.clear();
+    await clearAllTestData();
   });
-
-  // Helper functions to reduce code duplication
-  const createOrganization = async (organizationId = "test-organization"): Promise<Organization> => {
-    return await organizationService.createOrganization(
-      organizationId,
-      false,
-      JSON.stringify(TEST_INSTALLATION)
-    )
-  };
-
-  const createUser = async (userId: string, organization?: Organization): Promise<User> => {
-    const user = new User();
-    user.userId = userId;
-    if (organization) user.organization = organization;
-    return userRepository.save(user);
-  };
-
-  const createPtoTemplate = async (
-    organization: Organization,
-    data: Partial<PtoTemplate> = {}
-  ): Promise<PtoTemplate> => {
-    const template = new PtoTemplate();
-    template.title = data.title || "Vacation";
-    template.description = data.description || "Vacation template";
-    template.content = data.content || "📋 Leave Request Details: \n - Reason:";
-    template.enabled = data.enabled ?? true;
-    template.daysConsumed = data.daysConsumed ?? 1;
-    template.organization = organization;
-    return ptoTemplateRepository.save(template);
-  };
 
   describe("createTemplate", () => {
     test("should create a new PTO template with all fields", async () => {
