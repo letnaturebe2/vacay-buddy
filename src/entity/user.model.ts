@@ -78,9 +78,21 @@ export class User extends BaseEntity {
   }
 
   /**
+   * 사용자의 로컬 시간 기준으로 오늘이 주말(토요일, 일요일)인지 확인
+   */
+  get isWeekend(): boolean {
+    const userLocalTime = this.getUserLocalTime;
+    const dayOfWeek = userLocalTime.getDay(); // 0: 일요일, 6: 토요일
+    return dayOfWeek === 0 || dayOfWeek === 6;
+  }
+
+  /**
    * 사용자가 알림을 받을 수 있는 상태인지 확인
+   * - 10시대여야 함
+   * - 오늘 알림을 받지 않았어야 함
+   * - 평일이어야 함 (주말 제외)
    */
   get shouldSendNotification(): boolean {
-    return this.isNotificationTime && !this.hasReceivedNotificationToday;
+    return this.isNotificationTime && !this.hasReceivedNotificationToday && !this.isWeekend;
   }
 }

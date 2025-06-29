@@ -48,7 +48,6 @@ export class NotificationService {
       await this.sendPendingNotification(user, requests.length);
       notificationsSent++;
 
-      // API 호출 간격 조절
       await new Promise((resolve) => setTimeout(resolve, 300));
     }
 
