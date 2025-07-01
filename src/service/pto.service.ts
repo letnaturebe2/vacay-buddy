@@ -255,7 +255,7 @@ export class PtoService {
   /**
    * Rejects a PTO request approval.
    * The method validates that the user is the authorized approver and the approval is in pending status.
-   * When rejected, the entire PTO request is marked as rejected.
+   * When rejected, the entire PTO request is marked as rejected and all pending approvals are also rejected.
    * Returns the refreshed approval entity after processing.
    *
    * @param approver The user attempting to reject the request
@@ -268,16 +268,33 @@ export class PtoService {
     const approval = await this.getApprovalWithRelations(approvalId);
     this.validatePendingApproval(approver, approval);
 
-    const ptoRequest = approval.ptoRequest;
-    ptoRequest.status = PtoRequestStatus.Rejected;
-    await this.ptoRequestRepository.save(ptoRequest);
+    return this.dataSource.transaction(async (manager) => {
+      const ptoRequest = approval.ptoRequest;
+      ptoRequest.status = PtoRequestStatus.Rejected;
+      await manager.save(ptoRequest);
 
-    approval.status = PtoRequestStatus.Rejected;
-    approval.comment = comment;
-    approval.actionDate = new Date();
-    await this.ptoApprovalRepository.save(approval);
+      // Update the current approval with rejection details
+      approval.status = PtoRequestStatus.Rejected;
+      approval.comment = comment;
+      approval.actionDate = new Date();
+      await manager.save(approval);
 
-    return await this.getApprovalWithRelations(approvalId);
+      // Mark all other pending approvals as rejected
+      const pendingApprovals = ptoRequest.approvals.filter(
+        (a) => a.id !== approvalId && a.status === PtoRequestStatus.Pending,
+      );
+
+      if (pendingApprovals.length > 0) {
+        const pendingApprovalIds = pendingApprovals.map((a) => a.id);
+        await manager.update(PtoApproval, pendingApprovalIds, {
+          status: PtoRequestStatus.Rejected,
+          comment: 'auto rejected',
+          actionDate: new Date(),
+        });
+      }
+
+      return await this.getApprovalWithRelations(approvalId);
+    });
   }
 
   /**

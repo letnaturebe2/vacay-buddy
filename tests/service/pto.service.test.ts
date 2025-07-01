@@ -612,6 +612,62 @@ describe("PtoService Tests", () => {
         ptoService.reject(approver, approval.id, "Rejected again")
       ).rejects.toThrow("This request has already been processed");
     });
+
+    test("should reject all pending approvals when one approver rejects", async () => {
+      // Arrange
+      const organization = await createOrganization();
+      const user = await createUser("requester", organization);
+      const approver1 = await createUser("approver1", organization);
+      const approver2 = await createUser("approver2", organization);
+      const approver3 = await createUser("approver3", organization);
+      const template = await createPtoTemplate(organization);
+
+      const ptoRequest = await ptoService.createPtoRequest(
+        user,
+        template,
+        new Date("2025-04-01"),
+        new Date("2025-04-05"),
+        "Vacation time",
+        "Vacation time",
+        [approver1, approver2, approver3]
+      );
+
+      const firstApproval = ptoRequest.approvals.find(a => a.approver.userId === "approver1")!;
+
+      // Act - First approver rejects
+      const rejected = await ptoService.reject(approver1, firstApproval.id, "Not approved");
+
+      // Assert - Check the rejected approval
+      expect(rejected.status).toBe(PtoRequestStatus.Rejected);
+      expect(rejected.comment).toBe("Not approved");
+      expect(rejected.actionDate).toBeDefined();
+      expect(rejected.ptoRequest.status).toBe(PtoRequestStatus.Rejected);
+
+      // Assert - Check that all other approvals are also rejected
+      const updatedRequest = await ptoRequestRepository.findOne({
+        where: { id: ptoRequest.id },
+        relations: ['approvals', 'approvals.approver']
+      });
+
+      expect(updatedRequest!.status).toBe(PtoRequestStatus.Rejected);
+      expect(updatedRequest!.approvals).toHaveLength(3);
+
+      // All approvals should be rejected
+      updatedRequest!.approvals.forEach(approval => {
+        expect(approval.status).toBe(PtoRequestStatus.Rejected);
+        expect(approval.actionDate).toBeDefined();
+      });
+
+      // The first approval should have the comment
+      const rejectedApproval = updatedRequest!.approvals.find(a => a.id === firstApproval.id);
+      expect(rejectedApproval!.comment).toBe("Not approved");
+
+      // Other approvals should not have comments (they were auto-rejected)
+      const otherApprovals = updatedRequest!.approvals.filter(a => a.id !== firstApproval.id);
+      otherApprovals.forEach(approval => {
+        expect(approval.comment).toBe("auto rejected");
+      });
+    });
   });
 
   describe("getOrganizationPtoRequestsMonthly", () => {
