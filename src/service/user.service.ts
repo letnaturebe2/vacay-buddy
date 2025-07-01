@@ -1,4 +1,4 @@
-import { DataSource, In, Repository } from 'typeorm';
+import { DataSource, EntityManager, In, Repository } from 'typeorm';
 import { Organization } from '../entity/organization.model';
 import { User } from '../entity/user.model';
 import { assert } from '../utils';
@@ -20,12 +20,14 @@ export class UserService {
     });
   }
 
-  public async updateUser(userId: string, userData: Partial<User>): Promise<User> {
-    const user = await this.userRepository.findOne({ where: { userId: userId } });
+  public async updateUser(userId: string, userData: Partial<User>, manager?: EntityManager): Promise<User> {
+    const repository = manager ? manager.getRepository(User) : this.userRepository;
+
+    const user = await repository.findOne({ where: { userId: userId } });
     assert(!!user, `user not found: ${userId}`);
 
     Object.assign(user, userData);
-    return await this.userRepository.save(user);
+    return await repository.save(user);
   }
 
   public async getOrCreateUser(userId: string, organization: Organization, isAdmin = false): Promise<User> {

@@ -227,31 +227,37 @@ export class PtoService {
    * @throws Error if the user is not authorized or the approval is not in pending status
    */
   async approve(approver: User, approvalId: number, comment: string): Promise<PtoApproval> {
-    const approval = await this.getApprovalWithRelations(approvalId);
-    this.validatePendingApproval(approver, approval);
+    return this.dataSource.transaction(async (manager) => {
+      const approval = await this.getApprovalWithRelations(approvalId, manager);
+      this.validatePendingApproval(approver, approval);
 
-    const requestApprovals = approval.ptoRequest.approvals;
-    const ptoRequest = approval.ptoRequest;
+      const requestApprovals = approval.ptoRequest.approvals;
+      const ptoRequest = approval.ptoRequest;
 
-    const nextApproverIndex = requestApprovals.findIndex((a) => a.id === approvalId) + 1;
-    if (nextApproverIndex < requestApprovals.length) {
-      ptoRequest.currentApprovalId = requestApprovals[nextApproverIndex].id;
-    } else {
-      // All approvers have approved the request
-      ptoRequest.status = PtoRequestStatus.Approved;
-      // update user's used PTO days
-      await this.userService.updateUser(ptoRequest.user.userId, {
-        usedPtoDays: ptoRequest.user.usedPtoDays + ptoRequest.consumedDays,
-      });
-    }
+      const nextApproverIndex = requestApprovals.findIndex((a) => a.id === approvalId) + 1;
+      if (nextApproverIndex < requestApprovals.length) {
+        ptoRequest.currentApprovalId = requestApprovals[nextApproverIndex].id;
+      } else {
+        // All approvers have approved the request
+        ptoRequest.status = PtoRequestStatus.Approved;
+        // update user's used PTO days
+        await this.userService.updateUser(
+          ptoRequest.user.userId,
+          {
+            usedPtoDays: ptoRequest.user.usedPtoDays + ptoRequest.consumedDays,
+          },
+          manager,
+        );
+      }
 
-    await this.ptoRequestRepository.save(ptoRequest);
-    approval.status = PtoRequestStatus.Approved;
-    approval.comment = comment;
-    approval.actionDate = new Date();
-    await this.ptoApprovalRepository.save(approval);
+      await manager.save(ptoRequest);
+      approval.status = PtoRequestStatus.Approved;
+      approval.comment = comment;
+      approval.actionDate = new Date();
+      await manager.save(approval);
 
-    return await this.getApprovalWithRelations(approvalId);
+      return await this.getApprovalWithRelations(approvalId, manager);
+    });
   }
 
   /**
