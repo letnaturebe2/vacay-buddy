@@ -1,5 +1,5 @@
 import { endOfMonth, startOfMonth } from 'date-fns';
-import { DataSource, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
+import { DataSource, EntityManager, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { PtoRequestStatus } from '../constants';
 import { Organization } from '../entity/organization.model';
 import { PtoApproval } from '../entity/pto-approval.model';
@@ -127,8 +127,10 @@ export class PtoService {
     });
   }
 
-  async getApprovalWithRelations(id: number): Promise<PtoApproval> {
-    return this.ptoApprovalRepository.findOneOrFail({
+  async getApprovalWithRelations(id: number, manager?: EntityManager): Promise<PtoApproval> {
+    const repository = manager ? manager.getRepository(PtoApproval) : this.ptoApprovalRepository;
+
+    return repository.findOneOrFail({
       where: { id },
       relations: ['approver', 'ptoRequest', 'ptoRequest.user', 'ptoRequest.approvals', 'ptoRequest.approvals.approver'],
     });
@@ -265,10 +267,10 @@ export class PtoService {
    * @throws Error if the user is not authorized or the approval is not in pending status
    */
   async reject(approver: User, approvalId: number, comment: string): Promise<PtoApproval> {
-    const approval = await this.getApprovalWithRelations(approvalId);
-    this.validatePendingApproval(approver, approval);
-
     return this.dataSource.transaction(async (manager) => {
+      const approval = await this.getApprovalWithRelations(approvalId, manager);
+      this.validatePendingApproval(approver, approval);
+
       const ptoRequest = approval.ptoRequest;
       ptoRequest.status = PtoRequestStatus.Rejected;
       await manager.save(ptoRequest);
@@ -293,7 +295,7 @@ export class PtoService {
         });
       }
 
-      return await this.getApprovalWithRelations(approvalId);
+      return await this.getApprovalWithRelations(approvalId, manager);
     });
   }
 

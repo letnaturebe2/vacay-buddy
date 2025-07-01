@@ -644,10 +644,7 @@ describe("PtoService Tests", () => {
       expect(rejected.ptoRequest.status).toBe(PtoRequestStatus.Rejected);
 
       // Assert - Check that all other approvals are also rejected
-      const updatedRequest = await ptoRequestRepository.findOne({
-        where: { id: ptoRequest.id },
-        relations: ['approvals', 'approvals.approver']
-      });
+      const updatedRequest = rejected.ptoRequest;
 
       expect(updatedRequest!.status).toBe(PtoRequestStatus.Rejected);
       expect(updatedRequest!.approvals).toHaveLength(3);
