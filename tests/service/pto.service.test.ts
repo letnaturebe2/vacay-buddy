@@ -662,7 +662,7 @@ describe("PtoService Tests", () => {
       // Other approvals should not have comments (they were auto-rejected)
       const otherApprovals = updatedRequest!.approvals.filter(a => a.id !== firstApproval.id);
       otherApprovals.forEach(approval => {
-        expect(approval.comment).toBe("auto rejected");
+        expect(approval.comment).toBeNull();
       });
     });
   });

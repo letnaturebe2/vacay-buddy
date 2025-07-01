@@ -296,7 +296,6 @@ export class PtoService {
         const pendingApprovalIds = pendingApprovals.map((a) => a.id);
         await manager.update(PtoApproval, pendingApprovalIds, {
           status: PtoRequestStatus.Rejected,
-          comment: 'auto rejected',
           actionDate: new Date(),
         });
       }
