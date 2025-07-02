@@ -1,5 +1,8 @@
+import { IncomingMessage, ServerResponse } from 'node:http';
 import path from 'node:path';
-import { ExpressReceiver, LogLevel } from '@slack/bolt';
+import { ExpressReceiver, Installation, LogLevel } from '@slack/bolt';
+import type { CodedError } from '@slack/oauth/dist/errors';
+import type { InstallURLOptions } from '@slack/oauth/dist/install-url-options';
 import { WebClient } from '@slack/web-api';
 import express from 'express';
 import { buildInstallMessage } from './listeners/events/slack-ui/build-install-message';
@@ -78,6 +81,115 @@ const receiver = new ExpressReceiver({
   installerOptions: {
     directInstall: true,
     redirectUriPath: '/slack/oauth_redirect',
+    callbackOptions: {
+      success: (
+        installation: Installation,
+        installOptions: InstallURLOptions,
+        req: IncomingMessage,
+        res: ServerResponse,
+      ) => {
+        const html = `
+          <!DOCTYPE html>
+          <html lang="ko">
+          <head>
+            <title>설치 완료</title>
+            <meta charset="utf-8">
+            <style>
+              body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                margin: 0;
+                background-color: #f4f4f4;
+              }
+              .success-container {
+                text-align: center;
+                background: white;
+                padding: 40px;
+                border-radius: 8px;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+              }
+              .success-icon {
+                color: #2ea44f;
+                font-size: 48px;
+                margin-bottom: 20px;
+              }
+              a {
+                color: #4A154B;
+                text-decoration: none;
+                font-weight: 600;
+              }
+              a:hover {
+                text-decoration: underline;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="success-container">
+              <div class="success-icon">✓</div>
+              <h1>설치가 완료되었습니다!</h1>
+              <p>감사합니다! Slack 앱으로 리다이렉트 중입니다...</p>
+              <p>
+                <a href="slack://open">여기를 클릭하세요</a>. 
+                브라우저 버전의 Slack을 사용하신다면, 
+                <a href="https://app.slack.com/client/${installation.team?.id || installation.enterprise?.id}">이 링크를 대신 클릭하세요</a>.
+              </p>
+            </div>
+            <script>
+            </script>
+          </body>
+          </html>
+        `;
+        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+        res.end(html);
+      },
+      failure: (error: CodedError, installOptions: InstallURLOptions, req: IncomingMessage, res: ServerResponse) => {
+        const html = `
+          <!DOCTYPE html>
+          <html lang="ko">
+          <head>
+            <title>설치 실패</title>
+            <meta charset="utf-8">
+            <style>
+              body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                margin: 0;
+                background-color: #f4f4f4;
+              }
+              .error-container {
+                text-align: center;
+                background: white;
+                padding: 40px;
+                border-radius: 8px;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+              }
+              .error-icon {
+                color: #d73a49;
+                font-size: 48px;
+                margin-bottom: 20px;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="error-container">
+              <div class="error-icon">✗</div>
+              <h1>설치 중 오류가 발생했습니다</h1>
+              <p>${error.message}</p>
+              <p>다시 시도해주세요.</p>
+            </div>
+          </body>
+          </html>
+        `;
+        res.writeHead(500, { 'Content-Type': 'text/html; charset=utf-8' });
+        res.end(html);
+      },
+    },
   },
 });
 
