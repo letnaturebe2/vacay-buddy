@@ -156,9 +156,7 @@ const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
   if (req.path.startsWith('/api')) {
     res.status(statusCode).json({
       error: getErrorTitle(statusCode),
-      message: isHttpError || process.env.NODE_ENV === 'development'
-        ? err.message
-        : 'Something went wrong'
+      message: isHttpError || process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong',
     });
     return;
   }
@@ -167,8 +165,8 @@ const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
   res.status(statusCode).render('pages/error', {
     error: {
       message: err.message,
-      statusCode: statusCode
-    }
+      statusCode: statusCode,
+    },
   });
 };
 
@@ -180,7 +178,7 @@ function getErrorTitle(statusCode: number): string {
     403: 'Forbidden',
     404: 'Not Found',
     422: 'Unprocessable Entity',
-    500: 'Internal Server Error'
+    500: 'Internal Server Error',
   };
 
   return titles[statusCode] || 'Error';

@@ -5,7 +5,10 @@ import { User } from './entity/user.model';
 import { t } from './i18n';
 
 export class HttpError extends Error {
-  constructor(public statusCode: number, message: string) {
+  constructor(
+    public statusCode: number,
+    message: string,
+  ) {
     super(message);
     this.name = 'HttpError';
   }
