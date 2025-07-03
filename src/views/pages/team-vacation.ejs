@@ -70,6 +70,176 @@
       background-color: #f0f7ff !important;
     }
     
+    /* Editable DataTable styles */
+    .editable-cell {
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s ease;
+      border-radius: 4px;
+    }
+    .editable-cell.editing .cell-value {
+      visibility: hidden;
+    }
+    .editable-cell:hover {
+      background-color: #f5f5f5;
+      cursor: text;
+    }
+    .editable-cell.editing {
+      background-color: #f8f9fa;
+      transform: none;
+    }
+    .editable-input {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      border: 1px solid #e0e0e0;
+      border-radius: 2px;
+      text-align: center;
+      font-size: inherit;
+      font-weight: inherit;
+      line-height: inherit;
+      background-color: #ffffff;
+      outline: none;
+      transition: border-color 0.2s ease;
+      box-sizing: border-box;
+      margin: 0;
+    }
+    .editable-input:focus {
+      border-color: #2196f3;
+      box-shadow: none;
+    }
+    .edit-controls {
+      margin: 20px 0;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .edit-controls button {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .edit-controls button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    .edit-controls button:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .btn-edit {
+      background-color: #2196f3;
+      color: white;
+    }
+    .btn-edit:hover {
+      background-color: #1976d2;
+    }
+    .btn-save {
+      background-color: #4caf50;
+      color: white;
+    }
+    .btn-save:hover {
+      background-color: #45a049;
+    }
+    .btn-cancel {
+      background-color: #757575;
+      color: white;
+    }
+    .btn-cancel:hover {
+      background-color: #616161;
+    }
+    .btn-batch-save {
+      background-color: #00bcd4;
+      color: white;
+    }
+    .btn-batch-save:hover {
+      background-color: #00acc1;
+    }
+    .edit-mode-notice {
+      background: linear-gradient(135deg, #e8f5e8, #f1f8e9);
+      border: 1px solid #81c784;
+      color: #2e7d32;
+      padding: 16px 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: none;
+      box-shadow: 0 2px 8px rgba(76, 175, 80, 0.1);
+      font-weight: 500;
+    }
+    .edit-mode-notice i {
+      margin-right: 8px;
+    }
+    .drag-handle {
+      cursor: grab;
+      width: 12px;
+      height: 12px;
+      background: linear-gradient(135deg, #2196f3, #1976d2);
+      position: absolute;
+      right: 4px;
+      bottom: 4px;
+      border-radius: 3px;
+      display: none;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .drag-handle:active {
+      cursor: grabbing;
+    }
+    .edit-mode .editable-cell:hover .drag-handle {
+      display: block;
+      opacity: 1;
+    }
+    .drag-highlight {
+      background: linear-gradient(135deg, #e3f2fd, #f3e5f5) !important;
+      border: 2px dashed #2196f3;
+      border-radius: 4px;
+      animation: pulse 1s infinite;
+    }
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.7; }
+      100% { opacity: 1; }
+    }
+
+    /* Changed cell indicator */
+    .editable-cell.changed {
+      background: linear-gradient(135deg, #fff3cd, #ffeaa7) !important;
+      border-left: 4px solid #ffc107;
+      position: relative;
+    }
+    .editable-cell.changed::after {
+      content: '●';
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      color: #ff9800;
+      font-size: 8px;
+      line-height: 1;
+    }
+
+    /* Smooth transitions for all editable elements */
+    .editable-cell .cell-value {
+      transition: all 0.2s ease;
+    }
+    
+    /* User name cell styling when edit mode is active */
+    .edit-mode .user-name-cell {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+    
     /* Mobile responsiveness improvements */
     @media (max-width: 768px) {
       .team-stats {
@@ -120,6 +290,22 @@
     </div>
   </div>
   
+  <div class="edit-mode-notice" id="editModeNotice">
+    <i class="fas fa-edit"></i> 편집 모드입니다. 연차 일수를 클릭하여 수정하고, 완료 후 저장 버튼을 눌러주세요.
+  </div>
+
+  <div class="edit-controls">
+    <button class="btn-edit" id="toggleEditBtn" onclick="toggleEditMode()">
+      <i class="fas fa-edit"></i> 편집 모드
+    </button>
+    <button class="btn-batch-save" id="batchSaveBtn" onclick="saveAllChanges()" style="display: none;">
+      <i class="fas fa-save"></i> 모든 변경사항 저장
+    </button>
+    <button class="btn-cancel" id="cancelEditBtn" onclick="cancelEditMode()" style="display: none;">
+      <i class="fas fa-times"></i> 편집 취소
+    </button>
+  </div>
+
   <div class="team-card">
     <table id="teamTable" class="display responsive nowrap" style="width:100%">
       <thead>
@@ -134,12 +320,22 @@
       <tbody>
         <% users.forEach(function(user) { %>
           <% const isOnVacation = onVacationUsers.has(user.userId); %>
-          <tr class="member-row user-link" onclick="window.location.href='/user-vacation-html?token=<%= user.userToken %>'">
-            <td><i class="fas fa-user"></i> <%= user.name || `<@${user.userId}>` %></td>
-            <td><%= user.annualPtoDays %>일</td>
-            <td><%= user.usedPtoDays %>일</td>
-            <td><%= user.annualPtoDays - user.usedPtoDays %>일</td>
-            <td>
+          <tr class="member-row" data-user-id="<%= user.userId %>">
+            <td class="user-name-cell" onclick="window.location.href='/user-vacation-html?token=<%= user.userToken %>'">
+              <i class="fas fa-user"></i> <%= user.name || `<@${user.userId}>` %>
+            </td>
+            <td class="editable-cell annual-days" data-field="annualPtoDays" data-original="<%= user.annualPtoDays %>">
+              <span class="cell-value"><%= user.annualPtoDays %>일</span>
+              <div class="drag-handle"></div>
+            </td>
+            <td class="editable-cell used-days" data-field="usedPtoDays" data-original="<%= user.usedPtoDays %>">
+              <span class="cell-value"><%= user.usedPtoDays %>일</span>
+              <div class="drag-handle"></div>
+            </td>
+            <td class="remaining-days">
+              <span class="cell-value"><%= user.annualPtoDays - user.usedPtoDays %>일</span>
+            </td>
+            <td class="status-cell">
               <span class="status-badge <%= isOnVacation ? 'status-on-vacation' : 'status-working' %>">
                 <%= isOnVacation ? '🏖️ 연차 중' : '🏢 근무 중' %>
               </span>
@@ -151,6 +347,23 @@
   </div>
 
   <script>
+    let isEditMode = false;
+    let originalData = {};
+    let pendingChanges = {};
+    
+    // Extract token from any user's userToken (they all have the same organization token)
+    function getAuthToken() {
+      const firstRow = $('#teamTable tbody tr').first();
+      const onclick = firstRow.find('.user-name-cell').attr('onclick');
+      if (onclick) {
+        const tokenMatch = onclick.match(/token=([^']+)/);
+        if (tokenMatch) {
+          return tokenMatch[1];
+        }
+      }
+      return null;
+    }
+
     $(document).ready(function() {
       // Initialize DataTables with mobile-optimized settings
       $('#teamTable').DataTable({
@@ -167,7 +380,295 @@
           { responsivePriority: 3, targets: [1] }     // Annual days third priority
         ]
       });
+
+      // Store original data
+      $('.editable-cell').each(function() {
+        const userId = $(this).closest('tr').data('user-id');
+        const field = $(this).data('field');
+        const value = parseInt($(this).data('original'));
+        
+        if (!originalData[userId]) {
+          originalData[userId] = {};
+        }
+        originalData[userId][field] = value;
+      });
     });
+
+    function toggleEditMode() {
+      isEditMode = !isEditMode;
+      
+      if (isEditMode) {
+        enterEditMode();
+      } else {
+        exitEditMode();
+      }
+    }
+
+    function enterEditMode() {
+      $('#editModeNotice').show();
+      $('#toggleEditBtn').text('편집 종료').removeClass('btn-edit').addClass('btn-cancel');
+      $('#batchSaveBtn, #cancelEditBtn').show();
+      
+      // Add edit mode class to body
+      $('body').addClass('edit-mode');
+      
+      // Disable row click navigation
+      $('.user-name-cell').css('pointer-events', 'none');
+      
+      // Make cells editable
+      $('.editable-cell').on('click', function(e) {
+        e.stopPropagation();
+        editCell(this);
+      });
+
+      // Enable drag to fill
+      setupDragToFill();
+    }
+
+    function exitEditMode() {
+      $('#editModeNotice').hide();
+      $('#toggleEditBtn').text('편집 모드').removeClass('btn-cancel').addClass('btn-edit');
+      $('#batchSaveBtn, #cancelEditBtn').hide();
+      
+      // Remove edit mode class from body
+      $('body').removeClass('edit-mode');
+      
+      // Re-enable row click navigation
+      $('.user-name-cell').css('pointer-events', 'auto');
+      
+      // Remove edit handlers
+      $('.editable-cell').off('click');
+      $('.editable-cell').removeClass('editing changed');
+      
+      // Clear any active inputs
+      $('.editable-input').remove();
+      
+      isEditMode = false;
+    }
+
+    function editCell(cell) {
+      if ($(cell).hasClass('editing')) return;
+      
+      const $cell = $(cell);
+      const currentValue = parseInt($cell.data('original'));
+      const $span = $cell.find('.cell-value');
+      
+      $cell.addClass('editing');
+      
+      const $input = $('<input type="number" class="editable-input" min="0">');
+      $input.val(currentValue);
+      
+      $cell.append($input);
+      $input.focus().select();
+      
+      $input.on('blur keypress', function(e) {
+        if (e.type === 'keypress' && e.which !== 13) return;
+        
+        const newValue = parseInt($input.val()) || 0;
+        const userId = $cell.closest('tr').data('user-id');
+        const field = $cell.data('field');
+        
+        // Store change
+        if (!pendingChanges[userId]) {
+          pendingChanges[userId] = {};
+        }
+        pendingChanges[userId][field] = newValue;
+        
+        // Update display
+        $span.text(newValue + '일');
+        $input.remove();
+        $cell.removeClass('editing');
+        $cell.data('original', newValue);
+        
+        // Update remaining days if needed
+        updateRemainingDays(userId);
+        
+        // Visual feedback for changed cells
+        if (newValue !== originalData[userId][field]) {
+          $cell.addClass('changed');
+        } else {
+          $cell.removeClass('changed');
+        }
+      });
+    }
+
+    function updateRemainingDays(userId) {
+      const $row = $(`tr[data-user-id="${userId}"]`);
+      const annual = parseInt($row.find('.annual-days').data('original'));
+      const used = parseInt($row.find('.used-days').data('original'));
+      const remaining = annual - used;
+      
+      $row.find('.remaining-days .cell-value').text(remaining + '일');
+    }
+
+    function setupDragToFill() {
+      let dragStartCell = null;
+      
+      $('.drag-handle').on('mousedown', function(e) {
+        e.preventDefault();
+        dragStartCell = $(this).parent();
+        $(document).on('mousemove', onDragMove);
+        $(document).on('mouseup', onDragEnd);
+      });
+      
+      function onDragMove(e) {
+        // Highlight cells being dragged over
+        const elementBelow = document.elementFromPoint(e.clientX, e.clientY);
+        const $targetCell = $(elementBelow).closest('.editable-cell');
+        
+        if ($targetCell.length && $targetCell.data('field') === dragStartCell.data('field')) {
+          $('.drag-highlight').removeClass('drag-highlight');
+          $targetCell.addClass('drag-highlight');
+        }
+      }
+      
+      function onDragEnd(e) {
+        const elementBelow = document.elementFromPoint(e.clientX, e.clientY);
+        const $targetCell = $(elementBelow).closest('.editable-cell');
+        
+        if ($targetCell.length && $targetCell.data('field') === dragStartCell.data('field')) {
+          const sourceValue = parseInt(dragStartCell.data('original'));
+          
+          // Fill selected range
+          const sourceIndex = dragStartCell.closest('tr').index();
+          const targetIndex = $targetCell.closest('tr').index();
+          const startIndex = Math.min(sourceIndex, targetIndex);
+          const endIndex = Math.max(sourceIndex, targetIndex);
+          
+          for (let i = startIndex; i <= endIndex; i++) {
+            const $row = $('#teamTable tbody tr').eq(i);
+            const $cell = $row.find(`[data-field="${dragStartCell.data('field')}"]`);
+            const userId = $row.data('user-id');
+            
+            if (!pendingChanges[userId]) {
+              pendingChanges[userId] = {};
+            }
+            pendingChanges[userId][$cell.data('field')] = sourceValue;
+            
+            $cell.data('original', sourceValue);
+            $cell.find('.cell-value').text(sourceValue + '일');
+            $cell.addClass('changed');
+            
+            updateRemainingDays(userId);
+          }
+        }
+        
+        $('.drag-highlight').removeClass('drag-highlight');
+        $(document).off('mousemove mouseup');
+        dragStartCell = null;
+      }
+    }
+
+    async function saveAllChanges() {
+      if (Object.keys(pendingChanges).length === 0) {
+        alert('변경사항이 없습니다.');
+        return;
+      }
+
+      const token = getAuthToken();
+      if (!token) {
+        alert('인증 토큰을 찾을 수 없습니다.');
+        return;
+      }
+      
+      const updates = [];
+      for (const userId in pendingChanges) {
+        const userChanges = pendingChanges[userId];
+        const currentData = originalData[userId];
+        
+        updates.push({
+          userId: userId,
+          annualPtoDays: userChanges.annualPtoDays !== undefined ? userChanges.annualPtoDays : currentData.annualPtoDays,
+          usedPtoDays: userChanges.usedPtoDays !== undefined ? userChanges.usedPtoDays : currentData.usedPtoDays
+        });
+      }
+      
+      try {
+        $('#batchSaveBtn').prop('disabled', true).text('저장 중...');
+        
+        const response = await fetch(`/api/vacation?token=${token}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ updates })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          const successCount = result.results.filter(r => r.success).length;
+          const failCount = result.results.filter(r => !r.success).length;
+          
+          if (failCount > 0) {
+            const failedUsers = result.results.filter(r => !r.success);
+            const errorMessages = failedUsers.map(f => `${f.userId}: ${f.error}`).join('\n');
+            alert(`일부 저장에 실패했습니다.\n성공: ${successCount}개, 실패: ${failCount}개\n\n실패 내역:\n${errorMessages}`);
+          } else {
+            alert(`모든 변경사항이 저장되었습니다. (${successCount}개)`);
+          }
+          
+          // Update original data for successful updates
+          result.results.forEach(item => {
+            if (item.success) {
+              originalData[item.userId] = {
+                annualPtoDays: item.user.annualPtoDays,
+                usedPtoDays: item.user.usedPtoDays
+              };
+            }
+          });
+          
+          // Clear pending changes and visual indicators
+          pendingChanges = {};
+          $('.editable-cell').removeClass('changed');
+          
+          exitEditMode();
+          
+          // Reload page to reflect changes
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
+        } else {
+          alert(`저장 중 오류가 발생했습니다: ${result.error || '알 수 없는 오류'}`);
+        }
+      } catch (error) {
+        console.error('Save error:', error);
+        if (error.name === 'TypeError' && error.message.includes('fetch')) {
+          alert('서버에 연결할 수 없습니다. 네트워크 연결을 확인해주세요.');
+        } else {
+          alert(`저장 중 오류가 발생했습니다: ${error.message || '알 수 없는 오류'}`);
+        }
+      } finally {
+        $('#batchSaveBtn').prop('disabled', false).text('모든 변경사항 저장');
+      }
+    }
+
+    function cancelEditMode() {
+      if (Object.keys(pendingChanges).length > 0) {
+        if (!confirm('변경사항이 있습니다. 정말 취소하시겠습니까?')) {
+          return;
+        }
+      }
+      
+      // Restore original values
+      for (const userId in pendingChanges) {
+        const $row = $(`tr[data-user-id="${userId}"]`);
+        
+        for (const field in pendingChanges[userId]) {
+          const originalValue = originalData[userId][field];
+          const $cell = $row.find(`[data-field="${field}"]`);
+          
+          $cell.data('original', originalValue);
+          $cell.find('.cell-value').text(originalValue + '일');
+          $cell.removeClass('changed');
+        }
+        
+        updateRemainingDays(userId);
+      }
+      
+      pendingChanges = {};
+      exitEditMode();
+    }
   </script>
 </body>
 </html> 

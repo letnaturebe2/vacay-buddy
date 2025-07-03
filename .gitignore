@@ -16,3 +16,10 @@ start-ngork.sh
 database.sqlite
 
 firebase.json
+
+# Firebase 및 호스팅 관련 파일
+.firebaserc
+404.html
+claude.md
+hosting.cHV*
+index.html

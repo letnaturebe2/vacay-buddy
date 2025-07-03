@@ -4,6 +4,7 @@ import home from './home';
 import pendingNotification from './pending-notification';
 import teamVacation from './team-vacation';
 import userVacation from './user-vacation';
+import vacationApi from './vacation-api';
 
 const registerRoutes = (app: Application) => {
   userVacation(app);
@@ -11,6 +12,7 @@ const registerRoutes = (app: Application) => {
   excelTemplate(app);
   home(app);
   pendingNotification(app);
+  vacationApi(app);
 };
 
 export default { register: registerRoutes };

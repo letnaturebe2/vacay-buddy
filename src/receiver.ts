@@ -127,6 +127,10 @@ const receiver = new ExpressReceiver({
 receiver.app.set('view engine', 'ejs');
 receiver.app.set('views', path.join(process.cwd(), 'src/views'));
 
+// Configure middleware to parse JSON requests
+receiver.app.use(express.json());
+receiver.app.use(express.urlencoded({ extended: true }));
+
 // Serve static assets (CSS, JS, fonts) from the public directory
 receiver.app.use('/assets', express.static(path.join(process.cwd(), 'public/assets')));
 
