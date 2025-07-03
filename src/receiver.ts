@@ -5,11 +5,11 @@ import type { CodedError } from '@slack/oauth/dist/errors';
 import type { InstallURLOptions } from '@slack/oauth/dist/install-url-options';
 import { WebClient } from '@slack/web-api';
 import ejs from 'ejs';
-import express from 'express';
+import express, { ErrorRequestHandler } from 'express';
 import { buildInstallMessage } from './listeners/events/slack-ui/build-install-message';
 import routes from './routes';
 import { organizationService, ptoService, userService } from './service';
-import { assert } from './utils';
+import { assert, HttpError } from './utils';
 
 const receiver = new ExpressReceiver({
   logLevel: LogLevel.INFO,
@@ -135,5 +135,57 @@ receiver.app.use(express.urlencoded({ extended: true }));
 receiver.app.use('/assets', express.static(path.join(process.cwd(), 'public/assets')));
 
 routes.register(receiver.app);
+
+// Global error handler for Express routes
+const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
+  // If headers already sent, delegate to default Express error handler
+  if (res.headersSent) {
+    return next(err);
+  }
+
+  // Determine if it's an HttpError or unexpected error
+  const isHttpError = err instanceof HttpError;
+  const statusCode = isHttpError ? err.statusCode : 500;
+
+  // Log only unexpected errors (500) with full stack trace
+  if (!isHttpError) {
+    console.error('Unexpected error:', err.stack || err);
+  }
+
+  // API routes: return JSON
+  if (req.path.startsWith('/api')) {
+    res.status(statusCode).json({
+      error: getErrorTitle(statusCode),
+      message: isHttpError || process.env.NODE_ENV === 'development'
+        ? err.message
+        : 'Something went wrong'
+    });
+    return;
+  }
+
+  // Web routes: render error page
+  res.status(statusCode).render('pages/error', {
+    error: {
+      message: err.message,
+      statusCode: statusCode
+    }
+  });
+};
+
+// Helper function to get error title by status code
+function getErrorTitle(statusCode: number): string {
+  const titles: Record<number, string> = {
+    400: 'Bad Request',
+    401: 'Unauthorized',
+    403: 'Forbidden',
+    404: 'Not Found',
+    422: 'Unprocessable Entity',
+    500: 'Internal Server Error'
+  };
+
+  return titles[statusCode] || 'Error';
+}
+
+receiver.app.use(errorHandler);
 
 export default receiver;

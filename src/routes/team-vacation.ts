@@ -2,11 +2,11 @@ import { Application, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { organizationService, ptoService } from '../service';
 import { commonStyles } from './css';
+import {assert, assert400} from "../utils";
 
 export default (app: Application) => {
   app.get('/team-vacation-html', async (req: Request, res: Response) => {
     const { token } = req.query;
-
     if (!token || typeof token !== 'string') {
       res.status(400).send('Invalid token');
       return;
