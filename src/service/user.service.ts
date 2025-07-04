@@ -64,6 +64,38 @@ export class UserService {
     return await this.userRepository.insert(users);
   }
 
+  public async bulkUpsertUsers(userIds: string[], usersData: Partial<User>[], organization: Organization) {
+    assert(userIds.length === usersData.length, 'Number of userIds and usersData must match');
+
+    await this.dataSource.transaction(async (manager) => {
+      const users = await manager.find(User, {
+        where: {
+          userId: In(userIds),
+          organization: { id: organization.id },
+        },
+      });
+
+      const usersToInsert: Partial<User>[] = usersData.filter(
+        (data) => !users.some((user) => user.userId === data.userId),
+      );
+
+      const usersToUpdate: Partial<User>[] = usersData.filter((data) =>
+        users.some((user) => user.userId === data.userId),
+      );
+
+      if (usersToInsert.length > 0) {
+        await manager.insert(User, usersToInsert);
+      }
+
+      for (const userData of usersToUpdate) {
+        const { userId, ...updateData } = userData;
+        if (userId) {
+          await manager.update(User, { userId, organization: { id: organization.id } }, updateData);
+        }
+      }
+    });
+  }
+
   public async upsertUser(userId: string, userData: Partial<User>): Promise<User> {
     let user = await this.userRepository.findOne({ where: { userId } });
 

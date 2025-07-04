@@ -4,11 +4,21 @@ import type { Organization } from './entity/organization.model';
 import { organizationService, userService } from './service';
 import { assert } from './utils';
 
-const loadAppContext = async ({ context, client, next }: AllMiddlewareArgs<AppContext>) => {
+type EventWithUser = {
+  user_id?: string;
+};
+
+type ExtendedSlackMiddlewareArgs = AllMiddlewareArgs<AppContext> & {
+  event?: EventWithUser;
+};
+
+const loadAppContext = async ({ context, client, next, event }: ExtendedSlackMiddlewareArgs) => {
   const organizationId = context.teamId || context.enterpriseId;
+  const userId = context.userId || event?.user_id;
+
   assert(organizationId !== undefined, 'Organization ID is undefined');
 
-  if (!organizationId || !context.userId) {
+  if (!organizationId || !userId) {
     return await next();
   }
 
@@ -18,7 +28,7 @@ const loadAppContext = async ({ context, client, next }: AllMiddlewareArgs<AppCo
   );
 
   const result = await client.users.info({
-    user: context.userId,
+    user: userId,
     include_locale: true,
   });
 
@@ -26,11 +36,11 @@ const loadAppContext = async ({ context, client, next }: AllMiddlewareArgs<AppCo
 
   context.locale = slackUser?.locale ?? 'ko-KR';
   context.organization = organization;
-  context.user = await userService.getOrCreateUser(context.userId, context.organization);
+  context.user = await userService.getOrCreateUser(userId, context.organization);
 
   if (context.user.name !== slackUser?.real_name) {
     context.user.name = slackUser?.real_name ?? '';
-    await userService.updateUser(context.userId, {
+    await userService.updateUser(userId, {
       ...context.user,
       name: context.user.name,
       tz: slackUser?.tz ?? 'Asia/Seoul',
@@ -42,7 +52,8 @@ const loadAppContext = async ({ context, client, next }: AllMiddlewareArgs<AppCo
 };
 
 const registerMiddleware = (app: App) => {
-  app.use(loadAppContext);
+  // biome-ignore lint/suspicious/noExplicitAny: Slack Bolt's type system limitation requires type assertion for middleware with extended event types
+  app.use(loadAppContext as any);
 };
 
 export default registerMiddleware;
