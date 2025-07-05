@@ -60,6 +60,7 @@ export default (app: Application) => {
       onVacationUsers,
       onVacationCount: onVacationUsers.size,
       commonStyles,
+      token: token,
     });
   });
 };

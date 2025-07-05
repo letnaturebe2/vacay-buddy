@@ -95,4 +95,11 @@ export class User extends BaseEntity {
   get shouldSendNotification(): boolean {
     return this.isNotificationTime && !this.hasReceivedNotificationToday && !this.isWeekend;
   }
+
+  /**
+   * 사용자의 남은 연차 계산
+   */
+  get remainingPtoDays(): number {
+    return this.annualPtoDays - this.usedPtoDays;
+  }
 }

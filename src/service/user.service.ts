@@ -39,7 +39,7 @@ export class UserService {
   }
 
   public async getUser(userId: string): Promise<User> {
-    return await this.userRepository.findOneOrFail({ where: { userId } });
+    return await this.userRepository.findOneOrFail({ where: { userId }, relations: ['organization'] });
   }
 
   public async createBulkUsers(usersData: { id: string; name: string }[], organization: Organization) {

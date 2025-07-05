@@ -351,17 +351,9 @@
     let originalData = {};
     let pendingChanges = {};
     
-    // Extract token from any user's userToken (they all have the same organization token)
+    // Use the token passed from the server
     function getAuthToken() {
-      const firstRow = $('#teamTable tbody tr').first();
-      const onclick = firstRow.find('.user-name-cell').attr('onclick');
-      if (onclick) {
-        const tokenMatch = onclick.match(/token=([^']+)/);
-        if (tokenMatch) {
-          return tokenMatch[1];
-        }
-      }
-      return null;
+      return '<%= token %>';
     }
 
     $(document).ready(function() {
@@ -582,7 +574,7 @@
           usedPtoDays: userChanges.usedPtoDays !== undefined ? userChanges.usedPtoDays : currentData.usedPtoDays
         });
       }
-      
+
       try {
         $('#batchSaveBtn').prop('disabled', true).text('저장 중...');
         
@@ -595,27 +587,23 @@
         });
         
         const result = await response.json();
-        
-        if (result.success) {
-          const successCount = result.results.filter(r => r.success).length;
-          const failCount = result.results.filter(r => !r.success).length;
+        debugger;
+        if (response.ok) {
+          // Success case - all updates succeeded
+          const successCount = result.results.length;
           
-          if (failCount > 0) {
-            const failedUsers = result.results.filter(r => !r.success);
-            const errorMessages = failedUsers.map(f => `${f.userId}: ${f.error}`).join('\n');
-            alert(`일부 저장에 실패했습니다.\n성공: ${successCount}개, 실패: ${failCount}개\n\n실패 내역:\n${errorMessages}`);
+          if (result.message) {
+            alert(result.message);
           } else {
-            alert(`모든 변경사항이 저장되었습니다. (${successCount}개)`);
+            alert(`${successCount}명의 사용자에 대한 연차 정보가 성공적으로 업데이트되었습니다.`);
           }
           
-          // Update original data for successful updates
+          // Update original data for all successful updates
           result.results.forEach(item => {
-            if (item.success) {
-              originalData[item.userId] = {
-                annualPtoDays: item.user.annualPtoDays,
-                usedPtoDays: item.user.usedPtoDays
-              };
-            }
+            originalData[item.userId] = {
+              annualPtoDays: item.user.annualPtoDays,
+              usedPtoDays: item.user.usedPtoDays
+            };
           });
           
           // Clear pending changes and visual indicators
@@ -629,7 +617,9 @@
             window.location.reload();
           }, 1000);
         } else {
-          alert(`저장 중 오류가 발생했습니다: ${result.error || '알 수 없는 오류'}`);
+          // Error case - use message field from error response
+          const errorMessage = result.message || result.error || '알 수 없는 오류가 발생했습니다';
+          alert(`저장 중 오류가 발생했습니다: ${errorMessage}`);
         }
       } catch (error) {
         console.error('Save error:', error);

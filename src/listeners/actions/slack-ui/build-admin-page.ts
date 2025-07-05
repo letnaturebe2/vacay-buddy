@@ -9,6 +9,7 @@ export const buildAdminPage = async (context: AppContext, ptoTemplates: PtoTempl
   const token = jwt.sign(
     {
       organizationId: context.organization.organizationId,
+      userId: context.user.userId,
     },
     process.env.JWT_SECRET || 'default-secret-key',
     { expiresIn: '1h' },

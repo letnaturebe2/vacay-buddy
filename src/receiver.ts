@@ -156,7 +156,7 @@ const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
   if (req.path.startsWith('/api')) {
     res.status(statusCode).json({
       error: getErrorTitle(statusCode),
-      message: isHttpError || process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong',
+      message: isHttpError ? err.message : 'Something went wrong',
     });
     return;
   }

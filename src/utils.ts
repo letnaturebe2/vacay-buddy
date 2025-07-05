@@ -32,6 +32,12 @@ export function assert401(condition: boolean, message: string): asserts conditio
   }
 }
 
+export function assert403(condition: boolean, message: string): asserts condition {
+  if (!condition) {
+    throw new HttpError(403, message);
+  }
+}
+
 export function formatToYYYYMMDD(date: Date): string {
   return new Date(date).toISOString().split('T')[0];
 }
