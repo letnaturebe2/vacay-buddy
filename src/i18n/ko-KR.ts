@@ -166,7 +166,7 @@ export default {
 
   // excel file
   users_updated_success: '{{count}}명의 사용자가 업데이트 되었습니다.',
-  file_shared_error: '파일 공유 처리 중 오류가 발생했습니다: {{error}}',
+  file_shared_error: '파일 처리 중 오류가 발생했습니다: {{message}}',
   excel_info_title: '엑셀 사용 안내',
   excel_info_content:
     '다운로드된 엑셀 파일을 작성하여 Slack 메시지로 업로드해주세요. 직원들의 연차 정보가 엑셀에 입력된 내용으로 자동 업데이트됩니다.',
