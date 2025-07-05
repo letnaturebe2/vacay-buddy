@@ -70,6 +70,11 @@
       background-color: #f0f7ff !important;
     }
     
+    /* User name cell cursor */
+    .user-name-cell {
+      cursor: pointer;
+    }
+    
     /* Editable DataTable styles */
     .editable-cell {
       cursor: pointer;
@@ -240,6 +245,116 @@
       cursor: not-allowed;
     }
     
+    /* Custom Modal Styles */
+    .custom-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 9999;
+      opacity: 0;
+      visibility: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    .custom-modal.show {
+      opacity: 1;
+      visibility: visible;
+    }
+    .modal-content {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+      text-align: center;
+    }
+    .custom-modal.show .modal-content {
+      transform: scale(1);
+    }
+    .modal-icon {
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+    .modal-icon.success {
+      color: #4caf50;
+    }
+    .modal-icon.error {
+      color: #f44336;
+    }
+    .modal-icon.warning {
+      color: #ff9800;
+    }
+    .modal-icon.info {
+      color: #2196f3;
+    }
+    .modal-title {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 15px;
+      color: #333;
+    }
+    .modal-message {
+      font-size: 16px;
+      color: #666;
+      margin-bottom: 25px;
+      line-height: 1.5;
+    }
+    .modal-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+    .modal-btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      min-width: 100px;
+    }
+    .modal-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    .modal-btn.primary {
+      background-color: #2196f3;
+      color: white;
+    }
+    .modal-btn.primary:hover {
+      background-color: #1976d2;
+    }
+    .modal-btn.success {
+      background-color: #4caf50;
+      color: white;
+    }
+    .modal-btn.success:hover {
+      background-color: #45a049;
+    }
+    .modal-btn.danger {
+      background-color: #f44336;
+      color: white;
+    }
+    .modal-btn.danger:hover {
+      background-color: #d32f2f;
+    }
+    .modal-btn.secondary {
+      background-color: #757575;
+      color: white;
+    }
+    .modal-btn.secondary:hover {
+      background-color: #616161;
+    }
+
     /* Mobile responsiveness improvements */
     @media (max-width: 768px) {
       .team-stats {
@@ -267,6 +382,15 @@
       .dtr-data {
         flex: 2;
         text-align: right;
+      }
+      .modal-content {
+        padding: 20px;
+      }
+      .modal-buttons {
+        flex-direction: column;
+      }
+      .modal-btn {
+        width: 100%;
       }
     }
   </style>
@@ -346,6 +470,16 @@
     </table>
   </div>
 
+  <!-- Custom Modal -->
+  <div id="customModal" class="custom-modal">
+    <div class="modal-content">
+      <div id="modalIcon" class="modal-icon"></div>
+      <div id="modalTitle" class="modal-title"></div>
+      <div id="modalMessage" class="modal-message"></div>
+      <div id="modalButtons" class="modal-buttons"></div>
+    </div>
+  </div>
+
   <script>
     let isEditMode = false;
     let originalData = {};
@@ -354,6 +488,108 @@
     // Use the token passed from the server
     function getAuthToken() {
       return '<%= token %>';
+    }
+
+    // Custom Modal Functions
+    function showModal(options) {
+      const {
+        type = 'info',
+        title = '알림',
+        message = '',
+        buttons = [{ text: '확인', class: 'primary', callback: null }],
+        onClose = null
+      } = options;
+
+      const modal = document.getElementById('customModal');
+      const modalIcon = document.getElementById('modalIcon');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalMessage = document.getElementById('modalMessage');
+      const modalButtons = document.getElementById('modalButtons');
+
+      // Set icon based on type
+      const icons = {
+        success: 'fas fa-check-circle',
+        error: 'fas fa-exclamation-circle',
+        warning: 'fas fa-exclamation-triangle',
+        info: 'fas fa-info-circle'
+      };
+
+      modalIcon.className = `modal-icon ${type}`;
+      modalIcon.innerHTML = `<i class="${icons[type]}"></i>`;
+      modalTitle.textContent = title;
+      modalMessage.textContent = message;
+
+      // Clear previous buttons
+      modalButtons.innerHTML = '';
+
+      // Add buttons
+      buttons.forEach(button => {
+        const btn = document.createElement('button');
+        btn.className = `modal-btn ${button.class || 'primary'}`;
+        btn.textContent = button.text;
+        btn.onclick = () => {
+          hideModal();
+          if (button.callback) {
+            button.callback();
+          }
+        };
+        modalButtons.appendChild(btn);
+      });
+
+      // Show modal
+      modal.classList.add('show');
+
+      // Close on background click
+      modal.onclick = (e) => {
+        if (e.target === modal) {
+          hideModal();
+          if (onClose) onClose();
+        }
+      };
+    }
+
+    function hideModal() {
+      const modal = document.getElementById('customModal');
+      modal.classList.remove('show');
+    }
+
+    function showSuccessModal(message, callback = null) {
+      showModal({
+        type: 'success',
+        title: '성공',
+        message: message,
+        buttons: [{ text: '확인', class: 'success', callback }]
+      });
+    }
+
+    function showErrorModal(message, callback = null) {
+      showModal({
+        type: 'error',
+        title: '오류',
+        message: message,
+        buttons: [{ text: '확인', class: 'danger', callback }]
+      });
+    }
+
+    function showWarningModal(message, callback = null) {
+      showModal({
+        type: 'warning',
+        title: '경고',
+        message: message,
+        buttons: [{ text: '확인', class: 'primary', callback }]
+      });
+    }
+
+    function showConfirmModal(message, onConfirm, onCancel = null) {
+      showModal({
+        type: 'warning',
+        title: '확인',
+        message: message,
+        buttons: [
+          { text: '취소', class: 'secondary', callback: onCancel },
+          { text: '확인', class: 'danger', callback: onConfirm }
+        ]
+      });
     }
 
     $(document).ready(function() {
@@ -553,13 +789,13 @@
 
     async function saveAllChanges() {
       if (Object.keys(pendingChanges).length === 0) {
-        alert('변경사항이 없습니다.');
+        showWarningModal('변경사항이 없습니다.');
         return;
       }
 
       const token = getAuthToken();
       if (!token) {
-        alert('인증 토큰을 찾을 수 없습니다.');
+        showErrorModal('인증 토큰을 찾을 수 없습니다.');
         return;
       }
       
@@ -592,41 +828,39 @@
           // Success case - all updates succeeded
           const successCount = result.results.length;
           
-          if (result.message) {
-            alert(result.message);
-          } else {
-            alert(`${successCount}명의 사용자에 대한 연차 정보가 성공적으로 업데이트되었습니다.`);
-          }
+          const successMessage = result.message || `${successCount}명의 사용자에 대한 연차 정보가 성공적으로 업데이트되었습니다.`;
           
-          // Update original data for all successful updates
-          result.results.forEach(item => {
-            originalData[item.userId] = {
-              annualPtoDays: item.user.annualPtoDays,
-              usedPtoDays: item.user.usedPtoDays
-            };
+          showSuccessModal(successMessage, () => {
+            // Update original data for all successful updates
+            result.results.forEach(item => {
+              originalData[item.userId] = {
+                annualPtoDays: item.user.annualPtoDays,
+                usedPtoDays: item.user.usedPtoDays
+              };
+            });
+            
+            // Clear pending changes and visual indicators
+            pendingChanges = {};
+            $('.editable-cell').removeClass('changed');
+            
+            exitEditMode();
+            
+            // Reload page to reflect changes
+            setTimeout(() => {
+              window.location.reload();
+            }, 1000);
           });
-          
-          // Clear pending changes and visual indicators
-          pendingChanges = {};
-          $('.editable-cell').removeClass('changed');
-          
-          exitEditMode();
-          
-          // Reload page to reflect changes
-          setTimeout(() => {
-            window.location.reload();
-          }, 1000);
         } else {
           // Error case - use message field from error response
           const errorMessage = result.message || result.error || '알 수 없는 오류가 발생했습니다';
-          alert(`저장 중 오류가 발생했습니다: ${errorMessage}`);
+          showErrorModal(`저장 중 오류가 발생했습니다: ${errorMessage}`);
         }
       } catch (error) {
         console.error('Save error:', error);
         if (error.name === 'TypeError' && error.message.includes('fetch')) {
-          alert('서버에 연결할 수 없습니다. 네트워크 연결을 확인해주세요.');
+          showErrorModal('서버에 연결할 수 없습니다. 네트워크 연결을 확인해주세요.');
         } else {
-          alert(`저장 중 오류가 발생했습니다: ${error.message || '알 수 없는 오류'}`);
+          showErrorModal(`저장 중 오류가 발생했습니다: ${error.message || '알 수 없는 오류'}`);
         }
       } finally {
         $('#batchSaveBtn').prop('disabled', false).text('모든 변경사항 저장');
@@ -635,29 +869,29 @@
 
     function cancelEditMode() {
       if (Object.keys(pendingChanges).length > 0) {
-        if (!confirm('변경사항이 있습니다. 정말 취소하시겠습니까?')) {
-          return;
-        }
-      }
-      
-      // Restore original values
-      for (const userId in pendingChanges) {
-        const $row = $(`tr[data-user-id="${userId}"]`);
-        
-        for (const field in pendingChanges[userId]) {
-          const originalValue = originalData[userId][field];
-          const $cell = $row.find(`[data-field="${field}"]`);
+        showConfirmModal('변경사항이 있습니다. 정말 취소하시겠습니까?', () => {
+          // Restore original values
+          for (const userId in pendingChanges) {
+            const $row = $(`tr[data-user-id="${userId}"]`);
+            
+            for (const field in pendingChanges[userId]) {
+              const originalValue = originalData[userId][field];
+              const $cell = $row.find(`[data-field="${field}"]`);
+              
+              $cell.data('original', originalValue);
+              $cell.find('.cell-value').text(originalValue + '일');
+              $cell.removeClass('changed');
+            }
+            
+            updateRemainingDays(userId);
+          }
           
-          $cell.data('original', originalValue);
-          $cell.find('.cell-value').text(originalValue + '일');
-          $cell.removeClass('changed');
-        }
-        
-        updateRemainingDays(userId);
+          pendingChanges = {};
+          exitEditMode();
+        });
+      } else {
+        exitEditMode();
       }
-      
-      pendingChanges = {};
-      exitEditMode();
     }
   </script>
 </body>
