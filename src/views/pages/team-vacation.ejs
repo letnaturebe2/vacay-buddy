@@ -517,7 +517,7 @@
       modalIcon.className = `modal-icon ${type}`;
       modalIcon.innerHTML = `<i class="${icons[type]}"></i>`;
       modalTitle.textContent = title;
-      modalMessage.textContent = message;
+      modalMessage.innerHTML = message.replace(/\n/g, '<br>');
 
       // Clear previous buttons
       modalButtons.innerHTML = '';
@@ -620,6 +620,20 @@
         }
         originalData[userId][field] = value;
       });
+
+      // Show installation welcome modal if coming from installation
+      <% if (isFromInstallation) { %>
+      setTimeout(() => {
+        showModal({
+          type: 'success',
+          title: '🎉 설치 완료!',
+          message: '이름을 클릭하면 개별 연차 상세 정보를 볼 수 있습니다\n"편집 모드"를 통해 연차 일수를 수정할 수도 있습니다.',
+          buttons: [
+            { text: '시작하기', class: 'success', callback: null }
+          ]
+        });
+      }, 500);
+      <% } %>
     });
 
     function toggleEditMode() {

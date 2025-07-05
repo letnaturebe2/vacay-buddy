@@ -6,6 +6,7 @@ import type { InstallURLOptions } from '@slack/oauth/dist/install-url-options';
 import { WebClient } from '@slack/web-api';
 import ejs from 'ejs';
 import express, { ErrorRequestHandler } from 'express';
+import jwt from 'jsonwebtoken';
 import { buildInstallMessage } from './listeners/events/slack-ui/build-install-message';
 import routes from './routes';
 import { organizationService, ptoService, userService } from './service';
@@ -90,13 +91,26 @@ const receiver = new ExpressReceiver({
         res: ServerResponse,
       ) => {
         try {
-          const html = await ejs.renderFile(path.join(process.cwd(), 'src/views/pages/oauth-success.ejs'), {
-            teamId: installation.team?.id || installation.enterprise?.id,
-          });
-          res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-          res.end(html);
+          const organizationId = installation.enterprise?.id || installation.team?.id;
+          assert(organizationId !== undefined, 'Organization ID is undefined');
+          const userId = installation.user.id;
+
+          // Generate JWT token for team vacation access
+          const token = jwt.sign(
+            {
+              organizationId: organizationId,
+              userId: userId,
+            },
+            process.env.JWT_SECRET || 'default-secret-key',
+            { expiresIn: '1h' },
+          );
+
+          // Redirect to team vacation page with installation flag
+          const redirectUrl = `${process.env.APP_URL || 'http://localhost:3000'}/team-vacation-html?token=${token}&from=installation`;
+          res.writeHead(302, { Location: redirectUrl });
+          res.end();
         } catch (error) {
-          console.error('Error rendering OAuth success template:', error);
+          console.error('Error in OAuth success callback:', error);
           res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });
           res.end('Internal Server Error');
         }

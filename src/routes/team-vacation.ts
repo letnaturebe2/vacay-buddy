@@ -5,7 +5,7 @@ import { commonStyles } from './css';
 
 export default (app: Application) => {
   app.get('/team-vacation-html', async (req: Request, res: Response) => {
-    const { token } = req.query;
+    const { token, from } = req.query;
     if (!token || typeof token !== 'string') {
       res.status(400).send('Invalid token');
       return;
@@ -61,6 +61,7 @@ export default (app: Application) => {
       onVacationCount: onVacationUsers.size,
       commonStyles,
       token: token,
+      isFromInstallation: from === 'installation',
     });
   });
 };
