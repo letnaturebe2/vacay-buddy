@@ -327,38 +327,117 @@
       line-height: 1.4;
     }
     
-    /* Status styling */
+    /* Status styling - unified with team page */
     .status-approved {
       color: #155724;
-      background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+      background: #d4edda;
       padding: 6px 12px;
       border-radius: 16px;
       font-weight: 600;
-      font-size: 0.8rem;
-      display: inline-block;
-      box-shadow: 0 2px 8px rgba(21, 87, 36, 0.2);
+      font-size: 0.75rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 2px 8px rgba(21, 87, 36, 0.1);
+      border: 1px solid rgba(255,255,255,0.3);
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+      white-space: nowrap;
     }
     
     .status-pending {
       color: #856404;
-      background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+      background: #fff3cd;
       padding: 6px 12px;
       border-radius: 16px;
       font-weight: 600;
-      font-size: 0.8rem;
-      display: inline-block;
-      box-shadow: 0 2px 8px rgba(133, 100, 4, 0.2);
+      font-size: 0.75rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 2px 8px rgba(133, 100, 4, 0.1);
+      border: 1px solid rgba(255,255,255,0.3);
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+      white-space: nowrap;
     }
     
     .status-rejected {
       color: #721c24;
-      background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+      background: #f8d7da;
       padding: 6px 12px;
       border-radius: 16px;
       font-weight: 600;
-      font-size: 0.8rem;
-      display: inline-block;
-      box-shadow: 0 2px 8px rgba(114, 28, 36, 0.2);
+      font-size: 0.75rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 2px 8px rgba(114, 28, 36, 0.1);
+      border: 1px solid rgba(255,255,255,0.3);
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+      white-space: nowrap;
+    }
+    
+    .status-completed {
+      color: #155724;
+      background: #d1f2d1;
+      padding: 6px 12px;
+      border-radius: 16px;
+      font-weight: 600;
+      font-size: 0.75rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 2px 8px rgba(21, 87, 36, 0.1);
+      border: 1px solid rgba(255,255,255,0.3);
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+      white-space: nowrap;
+    }
+    
+    .status-ongoing {
+      color: #004085;
+      background: #cce5ff;
+      padding: 6px 12px;
+      border-radius: 16px;
+      font-weight: 600;
+      font-size: 0.75rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 2px 8px rgba(0, 64, 133, 0.1);
+      border: 1px solid rgba(255,255,255,0.3);
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+      white-space: nowrap;
+    }
+    
+    .status-scheduled {
+      color: #6f42c1;
+      background: #e7d6ff;
+      padding: 6px 12px;
+      border-radius: 16px;
+      font-weight: 600;
+      font-size: 0.75rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 2px 8px rgba(111, 66, 193, 0.1);
+      border: 1px solid rgba(255,255,255,0.3);
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+      white-space: nowrap;
+    }
+    
+    .status-approved:hover,
+    .status-pending:hover,
+    .status-rejected:hover,
+    .status-completed:hover,
+    .status-ongoing:hover,
+    .status-scheduled:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
     }
     
     /* DataTable specific overrides */
@@ -485,11 +564,14 @@
         padding: 15px;
         margin-top: 10px;
         backdrop-filter: blur(10px);
+        border: 1px solid rgba(59, 130, 246, 0.1);
+        box-shadow: 0 4px 16px rgba(59, 130, 246, 0.1);
       }
       
       .dtr-details li {
         display: flex;
         justify-content: space-between;
+        align-items: center;
         padding: 12px 0;
         border-bottom: 1px solid rgba(0,0,0,0.05);
       }
@@ -503,12 +585,35 @@
         flex: 1;
         color: #64748b;
         font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      
+      .dtr-title::before {
+        content: '▸';
+        color: #3b82f6;
+        font-weight: bold;
       }
       
       .dtr-data {
         flex: 2;
         text-align: right;
         font-weight: 500;
+        color: #2c3e50;
+      }
+      
+      /* Mobile status badges */
+      .status-approved,
+      .status-pending,
+      .status-rejected,
+      .status-completed,
+      .status-ongoing,
+      .status-scheduled {
+        padding: 4px 8px;
+        font-size: 0.7rem;
+        gap: 3px;
+        border-radius: 12px;
       }
     }
     
@@ -608,7 +713,24 @@
         language: {
           url: '/assets/i18n/ko.json'
         },
-        responsive: true,
+        responsive: {
+          details: {
+            display: $.fn.dataTable.Responsive.display.childRowImmediate,
+            type: '',
+            renderer: function (api, rowIdx, columns) {
+              var data = $.map(columns, function (col, i) {
+                return col.hidden ?
+                  '<li>' +
+                  '<span class="dtr-title">' + col.title + '</span> ' +
+                  '<span class="dtr-data">' + col.data + '</span>' +
+                  '</li>' :
+                  '';
+              }).join('');
+              
+              return data ? $('<ul class="dtr-details"/>').append(data) : false;
+            }
+          }
+        },
         rowReorder: {
           selector: 'td:nth-child(2)'
         },

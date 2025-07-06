@@ -156,17 +156,18 @@
       filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
     }
     .status-badge {
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-size: 0.85rem;
+      padding: 6px 12px;
+      border-radius: 16px;
+      font-size: 0.75rem;
       font-weight: 600;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      gap: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       border: 1px solid rgba(255,255,255,0.3);
       backdrop-filter: blur(10px);
       transition: all 0.3s ease;
+      white-space: nowrap;
     }
     
     .status-badge:hover {
@@ -198,6 +199,64 @@
     /* User name cell cursor */
     .user-name-cell {
       cursor: pointer;
+      position: relative;
+    }
+    
+    /* User page link button */
+    .user-page-btn {
+      display: none;
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 0.7rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      z-index: 10;
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+    }
+    
+    .user-page-btn:hover {
+      background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+      transform: translateY(-50%) translateY(-1px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    }
+    
+    /* Show user page button on hover for desktop */
+    @media (min-width: 769px) {
+      .user-name-cell:hover .user-page-btn {
+        display: inline-block;
+      }
+    }
+    
+    /* Always show user page button on mobile */
+    @media (max-width: 768px) {
+      .user-page-btn {
+        display: inline-block;
+        position: static;
+        transform: none;
+        margin-left: auto;
+        font-size: 0.65rem;
+        padding: 3px 6px;
+      }
+      
+      .user-name-cell {
+        display: flex !important;
+        align-items: center;
+        justify-content: space-between;
+        cursor: default;
+      }
+      
+      .user-name-text {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
     }
     
     /* Editable DataTable styles */
@@ -685,13 +744,7 @@
       }
       
       .edit-controls {
-        gap: 12px;
-        margin: 20px 0;
-      }
-      
-      .edit-controls button {
-        padding: 12px 20px;
-        font-size: 0.9rem;
+        display: none !important;
       }
       
       #teamTable thead th {
@@ -721,11 +774,14 @@
         padding: 15px;
         margin-top: 10px;
         backdrop-filter: blur(10px);
+        border: 1px solid rgba(59, 130, 246, 0.1);
+        box-shadow: 0 4px 16px rgba(59, 130, 246, 0.1);
       }
       
       .dtr-details li {
         display: flex;
         justify-content: space-between;
+        align-items: center;
         padding: 12px 0;
         border-bottom: 1px solid rgba(0,0,0,0.05);
       }
@@ -739,12 +795,49 @@
         flex: 1;
         color: #64748b;
         font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      
+      .dtr-title::before {
+        content: '▸';
+        color: #3b82f6;
+        font-weight: bold;
       }
       
       .dtr-data {
         flex: 2;
         text-align: right;
         font-weight: 500;
+        color: #2c3e50;
+      }
+      
+      /* Add user page link in mobile details */
+      .dtr-details .user-page-link {
+        display: inline-block;
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        color: white;
+        text-decoration: none;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-top: 10px;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+      }
+      
+      .dtr-details .user-page-link:hover {
+        background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        color: white;
+        text-decoration: none;
+      }
+      
+      .dtr-details .user-page-link i {
+        margin-right: 6px;
       }
       
       .modal-content {
@@ -763,8 +856,13 @@
       }
       
       .edit-mode-notice {
-        padding: 15px 18px;
-        margin-bottom: 20px;
+        display: none !important;
+      }
+      
+      .status-badge {
+        padding: 4px 8px;
+        font-size: 0.7rem;
+        gap: 3px;
         border-radius: 12px;
       }
     }
@@ -839,8 +937,13 @@
         <% users.forEach(function(user) { %>
           <% const isOnVacation = onVacationUsers.has(user.userId); %>
           <tr class="member-row" data-user-id="<%= user.userId %>">
-            <td class="user-name-cell" onclick="window.location.href='/user-vacation-html?token=<%= user.userToken %>'">
-              <i class="fas fa-user"></i> <%= user.name || `<@${user.userId}>` %>
+            <td class="user-name-cell">
+              <span class="user-name-text">
+                <i class="fas fa-user"></i> <%= user.name || `<@${user.userId}>` %>
+              </span>
+              <button class="user-page-btn" onclick="event.stopPropagation(); window.open('/user-vacation-html?token=<%= user.userToken %>', '_blank')">
+                <i class="fas fa-external-link-alt"></i> 상세
+              </button>
             </td>
             <td class="editable-cell annual-days" data-field="annualPtoDays" data-original="<%= user.annualPtoDays %>">
               <span class="cell-value"><%= user.annualPtoDays %>일</span>
@@ -992,7 +1095,25 @@
         language: {
           url: '/assets/i18n/ko.json'
         },
-        responsive: true,
+        responsive: {
+          details: {
+            display: $.fn.dataTable.Responsive.display.childRowImmediate,
+            type: '',
+            renderer: function (api, rowIdx, columns) {
+              var data = $.map(columns, function (col, i) {
+                return col.hidden ?
+                  '<li>' +
+                  '<span class="dtr-title">' + col.title + '</span> ' +
+                  '<span class="dtr-data">' + col.data + '</span>' +
+                  '</li>' :
+                  '';
+              }).join('');
+              
+              
+              return data ? $('<ul class="dtr-details"/>').append(data) : false;
+            }
+          }
+        },
         order: [[4, 'asc'], [0, 'asc']], // Sort by status first, then by name
         pageLength: 10,
         autoWidth: false,
