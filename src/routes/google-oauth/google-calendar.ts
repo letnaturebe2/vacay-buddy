@@ -52,14 +52,14 @@ export async function createCalendarEvent(user: User, ptoRequest: PtoRequest): P
       description: `연차 유형: ${ptoRequest.template.title}\n사유: ${ptoRequest.reason}\n소모 일수: ${ptoRequest.consumedDays}일`,
       start: {
         date: startDate,
-        timeZone: user.tz || 'Asia/Seoul', // 기본값 설정
+        timeZone: user.tz
       },
       end: {
         date: endDate,
-        timeZone: user.tz || 'Asia/Seoul', // 기본값 설정
+        timeZone: user.tz
       },
       transparency: 'transparent', // 바쁜 시간으로 표시하지 않음
-      visibility: 'private',
+      // visibility: 'private',
       colorId: '10', // 초록색으로 설정 (휴가 느낌)
     };
 
@@ -162,7 +162,6 @@ export default (app: Application) => {
       },
     );
 
-    // 구글 OAuth 성공 전용 페이지로 렌더링
     res.render('pages/google-oauth-success', {
       token: token,
     });
@@ -176,25 +175,25 @@ export default (app: Application) => {
       throw new GoogleOAuthError('token_invalid', '유효하지 않은 토큰입니다.');
     }
 
+    let decoded : {
+      organizationId: string
+      userId: string
+    };
+
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'default-secret-key') as {
+      decoded = jwt.verify(token, process.env.JWT_SECRET || 'default-secret-key') as {
         organizationId: string;
         userId: string;
-      };
-
-      const user = await userService.getUser(decoded.userId);
-
-      // 전용 페이지로 렌더링
-      res.render('pages/google-calendar-status', {
-        connected: !!user.googleRefreshToken,
-        token: token,
-      });
-    } catch (error) {
-      if (error instanceof jwt.JsonWebTokenError) {
-        throw new GoogleOAuthError('token_invalid', '토큰이 유효하지 않습니다.', token);
       }
-      throw error; // 다른 에러는 일반 에러 핸들러로
+    } catch (error) {
+      throw new GoogleOAuthError('token_invalid', '토큰이 유효하지 않습니다.', token);
     }
+
+    const user = await userService.getUser(decoded.userId);
+    res.render('pages/google-calendar-status', {
+      connected: !!user.googleRefreshToken,
+      token: token,
+    });
   });
 
   // 캘린더 연동 해제
