@@ -104,6 +104,7 @@ export const buildAppHome = async (context: AppContext, showAdminSection: boolea
               emoji: true,
             },
             url: `${process.env.APP_URL || 'http://localhost:3000'}/team-vacation-html?token=${token}`,
+            action_id: ActionId.UPDATE_BACK_TO_HOME,
           },
         ],
       },
