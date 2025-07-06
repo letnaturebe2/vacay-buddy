@@ -13,99 +13,529 @@
   <script src="/assets/js/dataTables.responsive.min.js"></script>
   <style>
     <%- commonStyles %>
-    .year-selector {
-      margin: 20px 0;
+    
+    /* Enhanced body styling */
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    /* Enhanced header */
+    h1 {
+      color: white;
+      text-align: center;
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin: 0 0 30px 0;
+      padding: 30px 20px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      margin-bottom: 40px;
+      border: 1px solid rgba(255,255,255,0.2);
       display: flex;
       align-items: center;
+      justify-content: center;
+      gap: 15px;
     }
+    
+    h1::before {
+      content: '📊';
+      font-size: 2rem;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+    }
+    
+    /* Container wrapper */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    
+    .year-selector {
+      margin: 30px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%);
+      padding: 20px 25px;
+      border-radius: 16px;
+      box-shadow: 
+        0 8px 32px rgba(0,0,0,0.1),
+        inset 0 1px 0 rgba(255,255,255,0.8);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    
+    .year-selector span {
+      font-weight: 600;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .year-selector span i {
+      color: #667eea;
+      font-size: 1.1rem;
+    }
+    
     .year-selector select {
-      padding: 8px 10px;
-      margin-left: 10px;
-      border-radius: 4px;
-      border: 1px solid #ddd;
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: 2px solid rgba(0,0,0,0.1);
+      background: white;
+      font-size: 1rem;
+      font-weight: 500;
+      color: #2c3e50;
+      cursor: pointer;
+      min-width: 120px;
+      transition: all 0.3s ease;
     }
+    
+    .year-selector select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
     .year-selector button {
-      padding: 8px 15px;
-      margin-left: 10px;
-      background-color: #1976d2;
+      padding: 12px 24px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
       border: none;
-      border-radius: 4px;
+      border-radius: 12px;
       cursor: pointer;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
+    
     .year-selector button:hover {
-      background-color: #1565c0;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+      background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
     }
+    
+    .year-selector button::before {
+      font-size: 0.9rem;
+    }
+    
     .pto-card {
-      background-color: #fff;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      padding: 20px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%);
+      border-radius: 20px;
+      box-shadow: 
+        0 20px 40px rgba(0,0,0,0.1),
+        0 0 0 1px rgba(255,255,255,0.3),
+        inset 0 1px 0 rgba(255,255,255,0.6);
+      padding: 30px;
+      margin-bottom: 40px;
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.2);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .pto-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #667eea, #764ba2, #f093fb, #f5576c);
+      border-radius: 20px 20px 0 0;
+    }
+    
+    .pto-card h2 {
+      color: #2c3e50;
+      font-size: 1.8rem;
+      font-weight: 600;
+      margin-bottom: 25px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .pto-card h2::before {
+      font-family: 'Font Awesome 6 Free';
+      font-weight: 900;
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-size: 1.6rem;
+    }
+    
+    .pto-card h2:first-of-type::before {
+      content: '\f0f3'; /* fa-bell */
+    }
+    
+    .pto-card h2:last-of-type::before {
+      content: '\f073'; /* fa-calendar */
+    }
+    
+    .pto-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 25px;
       margin-bottom: 30px;
     }
-    .pto-info {
-      display: flex;
-      justify-content: space-around;
-      text-align: center;
-    }
+    
     .pto-info-item {
-      flex: 1;
-      padding: 15px;
+      text-align: center;
+      padding: 25px 20px;
+      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+      border-radius: 16px;
+      box-shadow: 
+        0 8px 32px rgba(0,0,0,0.1),
+        inset 0 1px 0 rgba(255,255,255,0.8);
+      border: 1px solid rgba(0,0,0,0.05);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
     }
+    
+    .pto-info-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+    }
+    
+    .pto-info-item:hover {
+      transform: translateY(-3px);
+      box-shadow: 
+        0 12px 40px rgba(0,0,0,0.15),
+        inset 0 1px 0 rgba(255,255,255,0.8);
+    }
+    
+    .pto-info-item:hover::before {
+      transform: translateX(0);
+    }
+    
     .pto-info-item h3 {
-      margin-bottom: 10px;
-      color: #1976d2;
+      margin-bottom: 15px;
+      color: #64748b;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
+    
     .pto-info-item .value {
-      font-size: 24px;
-      font-weight: bold;
+      font-size: 2.2rem;
+      font-weight: 800;
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
     }
+    
     .progress-bar-container {
       width: 100%;
-      background-color: #e0e0e0;
-      border-radius: 4px;
-      height: 20px;
-      margin-top: 15px;
+      background: linear-gradient(135deg, #e0e0e0 0%, #f5f5f5 100%);
+      border-radius: 12px;
+      height: 24px;
+      margin-top: 20px;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+      overflow: hidden;
+      position: relative;
     }
+    
     .progress-bar {
       height: 100%;
-      border-radius: 4px;
-      background-color: #1976d2;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       text-align: center;
       color: white;
-      line-height: 20px;
-      font-size: 12px;
+      line-height: 24px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      position: relative;
+      transition: width 0.6s ease;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    }
+    
+    .progress-bar::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      animation: progressShimmer 2s infinite;
+    }
+    
+    @keyframes progressShimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+    
+    /* Enhanced table styling */
+    #ptoTable {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      width: 100% !important;
+    }
+    
+    #ptoTable thead th {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 16px 12px !important;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-size: 0.85rem;
+      border: none !important;
+      vertical-align: middle !important;
+      height: 50px;
+      line-height: 1.2;
+    }
+    
+    #ptoTable tbody tr {
+      transition: all 0.2s ease;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+      height: auto;
+    }
+    
+    #ptoTable tbody tr:hover {
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    }
+    
+    #ptoTable tbody td {
+      padding: 14px 12px !important;
+      vertical-align: middle !important;
+      border: none !important;
+      height: auto !important;
+      line-height: 1.4;
+    }
+    
+    /* Status styling */
+    .status-approved {
+      color: #155724;
+      background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+      padding: 6px 12px;
+      border-radius: 16px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      display: inline-block;
+      box-shadow: 0 2px 8px rgba(21, 87, 36, 0.2);
+    }
+    
+    .status-pending {
+      color: #856404;
+      background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+      padding: 6px 12px;
+      border-radius: 16px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      display: inline-block;
+      box-shadow: 0 2px 8px rgba(133, 100, 4, 0.2);
+    }
+    
+    .status-rejected {
+      color: #721c24;
+      background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+      padding: 6px 12px;
+      border-radius: 16px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      display: inline-block;
+      box-shadow: 0 2px 8px rgba(114, 28, 36, 0.2);
+    }
+    
+    /* DataTable specific overrides */
+    .dataTables_wrapper {
+      font-family: inherit;
+    }
+    
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter,
+    .dataTables_wrapper .dataTables_info,
+    .dataTables_wrapper .dataTables_paginate {
+      color: #64748b;
+      font-size: 0.9rem;
+    }
+    
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+      padding: 8px 12px;
+      margin: 0 2px;
+      border-radius: 8px;
+      border: 1px solid rgba(0,0,0,0.1);
+      background: white;
+      color: #64748b !important;
+    }
+    
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+      color: white !important;
+      border-color: transparent;
+    }
+    
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+      color: white !important;
+      border-color: transparent;
+    }
+    
+    .dataTables_wrapper .dataTables_filter input {
+      border: 2px solid rgba(0,0,0,0.1);
+      border-radius: 8px;
+      padding: 8px 12px;
+      margin-left: 8px;
+    }
+    
+    .dataTables_wrapper .dataTables_filter input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .dataTables_wrapper .dataTables_length select {
+      border: 2px solid rgba(0,0,0,0.1);
+      border-radius: 8px;
+      padding: 6px 10px;
+      margin: 0 8px;
     }
     
     /* Mobile responsiveness improvements */
     @media (max-width: 768px) {
+      body {
+        background-attachment: scroll;
+      }
+      
+      h1 {
+        font-size: 2rem;
+        padding: 20px 15px;
+        margin-bottom: 25px;
+        flex-direction: column;
+        gap: 10px;
+      }
+      
+      h1::before {
+        font-size: 1.5rem;
+      }
+      
+      .container {
+        padding: 0 15px;
+      }
+      
+      .pto-card {
+        padding: 20px;
+        margin-bottom: 25px;
+        border-radius: 16px;
+      }
+      
+      .pto-info {
+        grid-template-columns: 1fr;
+        gap: 15px;
+      }
+      
+      .pto-info-item {
+        padding: 20px 15px;
+      }
+      
+      .pto-info-item .value {
+        font-size: 2rem;
+      }
+      
+      .year-selector {
+        flex-direction: column;
+        gap: 15px;
+        padding: 20px;
+        text-align: center;
+      }
+      
+      .year-selector select {
+        min-width: 140px;
+      }
+      
+      #ptoTable thead th {
+        padding: 12px 8px !important;
+        font-size: 0.8rem;
+        height: 44px;
+      }
+      
+      #ptoTable tbody td {
+        padding: 12px 8px !important;
+        min-height: 44px;
+      }
+      
       .dtr-details {
         width: 100%;
+        background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,249,250,0.95) 100%);
+        border-radius: 12px;
+        padding: 15px;
+        margin-top: 10px;
+        backdrop-filter: blur(10px);
       }
+      
       .dtr-details li {
         display: flex;
         justify-content: space-between;
-        padding: 8px 0;
-        border-bottom: 1px solid #eee;
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
       }
+      
       .dtr-details li:last-child {
         border-bottom: none;
       }
+      
       .dtr-title {
-        font-weight: bold;
+        font-weight: 600;
         flex: 1;
+        color: #64748b;
+        font-size: 0.9rem;
       }
+      
       .dtr-data {
         flex: 2;
         text-align: right;
+        font-weight: 500;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .container {
+        padding: 0 10px;
+      }
+      
+      h1 {
+        font-size: 1.8rem;
+      }
+      
+      .pto-card {
+        padding: 15px;
+      }
+      
+      .pto-info-item .value {
+        font-size: 1.8rem;
       }
     }
   </style>
 </head>
 <body>
-  <h1>내 연차 요약</h1>
+  <div class="container">
+    <h1>내 연차 요약</h1>
 
-  <div class="pto-card">
+    <div class="pto-card">
     <h2>휴가 정보</h2>
     <div class="pto-info">
       <div class="pto-info-item">
@@ -201,5 +631,6 @@
       });
     });
   </script>
+  </div>
 </body>
 </html> 

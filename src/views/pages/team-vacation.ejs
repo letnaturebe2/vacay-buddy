@@ -13,53 +13,177 @@
   <script src="/assets/js/dataTables.responsive.min.js"></script>
   <style>
     <%- commonStyles %>
-    .team-card {
-      background-color: #fff;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      padding: 20px;
-      margin-bottom: 30px;
+    
+    /* Enhanced body styling */
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
+    
+    /* Enhanced header */
+    h1 {
+      color: white;
+      text-align: center;
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin: 0 0 30px 0;
+      padding: 30px 20px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      margin-bottom: 40px;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    
+    h1 i {
+      margin-right: 15px;
+      background: linear-gradient(45deg, #ffd700, #ffed4e);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+    }
+    
+    .team-card {
+      background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%);
+      border-radius: 20px;
+      box-shadow: 
+        0 20px 40px rgba(0,0,0,0.1),
+        0 0 0 1px rgba(255,255,255,0.3),
+        inset 0 1px 0 rgba(255,255,255,0.6);
+      padding: 30px;
+      margin-bottom: 40px;
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.2);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .team-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #667eea, #764ba2, #f093fb, #f5576c);
+      border-radius: 20px 20px 0 0;
+    }
+    
+    .team-card h2 {
+      color: #2c3e50;
+      font-size: 1.8rem;
+      font-weight: 600;
+      margin-bottom: 25px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .team-card h2 i {
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-size: 1.6rem;
+    }
+    
     .team-stats {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 25px;
       margin-bottom: 20px;
     }
+    
     .stat-item {
       text-align: center;
-      padding: 15px;
-      background-color: #f8f9fa;
-      border-radius: 6px;
+      padding: 25px 20px;
+      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+      border-radius: 16px;
+      box-shadow: 
+        0 8px 32px rgba(0,0,0,0.1),
+        inset 0 1px 0 rgba(255,255,255,0.8);
+      border: 1px solid rgba(0,0,0,0.05);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
     }
+    
+    .stat-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+    }
+    
+    .stat-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 
+        0 12px 32px rgba(0,0,0,0.15),
+        inset 0 1px 0 rgba(255,255,255,0.8);
+    }
+    
     .stat-item h3 {
-      margin-bottom: 10px;
-      color: #1976d2;
-      font-size: 14px;
+      margin-bottom: 15px;
+      color: #64748b;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
+    
     .stat-item .value {
-      font-size: 28px;
-      font-weight: bold;
-      color: #333;
-    }
-    .stat-item .icon {
-      font-size: 24px;
+      font-size: 2.2rem;
+      font-weight: 800;
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
       margin-bottom: 10px;
-      color: #1976d2;
+    }
+    
+    .stat-item .icon {
+      font-size: 2.5rem;
+      margin-bottom: 15px;
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
     }
     .status-badge {
-      padding: 4px 8px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      border: 1px solid rgba(255,255,255,0.3);
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
     }
+    
+    .status-badge:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    }
+    
     .status-on-vacation {
-      background-color: #e8f5e8;
-      color: #2e7d32;
+      background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+      color: #155724;
+      border-color: #c3e6cb;
     }
+    
     .status-working {
-      background-color: #e3f2fd;
-      color: #1976d2;
+      background: linear-gradient(135deg, #cce7ff 0%, #b3d9ff 100%);
+      color: #004085;
+      border-color: #b3d9ff;
     }
     .user-link {
       cursor: pointer;
@@ -117,74 +241,219 @@
       border-color: #2196f3;
       box-shadow: none;
     }
-    .edit-controls {
-      margin: 20px 0;
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
+    /* Enhanced table styling */
+    #teamTable {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      width: 100% !important;
     }
-    .edit-controls button {
-      padding: 12px 20px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
+    
+    #teamTable thead th {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 16px 12px !important;
       font-weight: 600;
-      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-size: 0.85rem;
+      border: none !important;
+      vertical-align: middle !important;
+      height: 50px;
+      line-height: 1.2;
+    }
+    
+    #teamTable thead th:first-child {
+      border-radius: 0;
+    }
+    
+    #teamTable thead th:last-child {
+      border-radius: 0;
+    }
+    
+    #teamTable tbody tr {
       transition: all 0.2s ease;
-      display: flex;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+      height: auto;
+    }
+    
+    #teamTable tbody tr:hover {
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    }
+    
+    #teamTable tbody td {
+      padding: 14px 12px !important;
+      vertical-align: middle !important;
+      border: none !important;
+      height: auto !important;
+      line-height: 1.4;
+    }
+    
+    .user-name-cell {
+      font-weight: 600;
+      color: #2c3e50;
+      display: flex !important;
       align-items: center;
       gap: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      min-height: 40px;
     }
+    
+    .user-name-cell i {
+      color: #667eea;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    
+    /* DataTable specific overrides */
+    .dataTables_wrapper {
+      font-family: inherit;
+    }
+    
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter,
+    .dataTables_wrapper .dataTables_info,
+    .dataTables_wrapper .dataTables_paginate {
+      color: #64748b;
+      font-size: 0.9rem;
+    }
+    
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+      padding: 8px 12px;
+      margin: 0 2px;
+      border-radius: 8px;
+      border: 1px solid rgba(0,0,0,0.1);
+      background: white;
+      color: #64748b !important;
+    }
+    
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+      color: white !important;
+      border-color: transparent;
+    }
+    
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+      color: white !important;
+      border-color: transparent;
+    }
+    
+    .dataTables_wrapper .dataTables_filter input {
+      border: 2px solid rgba(0,0,0,0.1);
+      border-radius: 8px;
+      padding: 8px 12px;
+      margin-left: 8px;
+    }
+    
+    .dataTables_wrapper .dataTables_filter input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .dataTables_wrapper .dataTables_length select {
+      border: 2px solid rgba(0,0,0,0.1);
+      border-radius: 8px;
+      padding: 6px 10px;
+      margin: 0 8px;
+    }
+    
+    .edit-controls {
+      margin: 30px 0;
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
+    .edit-controls button {
+      padding: 14px 28px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.2);
+      position: relative;
+      overflow: hidden;
+    }
+    
     .edit-controls button:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
     }
+    
     .edit-controls button:active {
       transform: translateY(0);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
     .btn-edit {
-      background-color: #2196f3;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
     }
     .btn-edit:hover {
-      background-color: #1976d2;
+      background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
     }
     .btn-save {
-      background-color: #4caf50;
+      background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
       color: white;
     }
     .btn-save:hover {
-      background-color: #45a049;
+      background: linear-gradient(135deg, #43a047 0%, #3d8b40 100%);
     }
     .btn-cancel {
-      background-color: #757575;
+      background: linear-gradient(135deg, #757575 0%, #616161 100%);
       color: white;
     }
     .btn-cancel:hover {
-      background-color: #616161;
+      background: linear-gradient(135deg, #616161 0%, #424242 100%);
     }
     .btn-batch-save {
-      background-color: #00bcd4;
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
       color: white;
     }
     .btn-batch-save:hover {
-      background-color: #00acc1;
+      background: linear-gradient(135deg, #ee82f5 0%, #f44762 100%);
     }
     .edit-mode-notice {
-      background: linear-gradient(135deg, #e8f5e8, #f1f8e9);
-      border: 1px solid #81c784;
+      background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(139, 195, 74, 0.1) 100%);
+      border: 2px solid rgba(76, 175, 80, 0.3);
       color: #2e7d32;
-      padding: 16px 20px;
-      border-radius: 8px;
-      margin-bottom: 20px;
+      padding: 20px 24px;
+      border-radius: 16px;
+      margin-bottom: 30px;
       display: none;
-      box-shadow: 0 2px 8px rgba(76, 175, 80, 0.1);
-      font-weight: 500;
+      box-shadow: 
+        0 8px 32px rgba(76, 175, 80, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+      font-weight: 600;
+      backdrop-filter: blur(10px);
+      position: relative;
+      overflow: hidden;
     }
+    
+    .edit-mode-notice::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #4caf50, #8bc34a);
+    }
+    
     .edit-mode-notice i {
-      margin-right: 8px;
+      margin-right: 12px;
+      font-size: 1.2rem;
+      color: #4caf50;
     }
     .drag-handle {
       cursor: grab;
@@ -267,16 +536,35 @@
       visibility: visible;
     }
     .modal-content {
-      background: white;
-      border-radius: 12px;
-      padding: 30px;
-      max-width: 400px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%);
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 450px;
       width: 90%;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      box-shadow: 
+        0 30px 60px rgba(0, 0, 0, 0.3),
+        0 0 0 1px rgba(255,255,255,0.3),
+        inset 0 1px 0 rgba(255,255,255,0.6);
       transform: scale(0.9);
       transition: transform 0.3s ease;
       text-align: center;
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.2);
+      position: relative;
+      overflow: hidden;
     }
+    
+    .modal-content::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #667eea, #764ba2, #f093fb, #f5576c);
+      border-radius: 20px 20px 0 0;
+    }
+    
     .custom-modal.show .modal-content {
       transform: scale(1);
     }
@@ -356,50 +644,155 @@
       background-color: #616161;
     }
 
-    /* Mobile responsiveness improvements */
+    /* Container wrapper */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    
+    /* Remove floating animation for better performance */
+    
+    /* Improved mobile responsiveness */
     @media (max-width: 768px) {
+      body {
+        background-attachment: scroll;
+      }
+      
+      h1 {
+        font-size: 2rem;
+        padding: 20px 15px;
+        margin-bottom: 25px;
+      }
+      
+      .team-card {
+        padding: 20px;
+        margin-bottom: 25px;
+        border-radius: 16px;
+      }
+      
       .team-stats {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: 1fr;
+        gap: 15px;
       }
+      
+      .stat-item {
+        padding: 20px 15px;
+      }
+      
       .stat-item .value {
-        font-size: 24px;
+        font-size: 2rem;
       }
+      
+      .edit-controls {
+        gap: 12px;
+        margin: 20px 0;
+      }
+      
+      .edit-controls button {
+        padding: 12px 20px;
+        font-size: 0.9rem;
+      }
+      
+      #teamTable thead th {
+        padding: 12px 8px !important;
+        font-size: 0.8rem;
+        height: 44px;
+      }
+      
+      #teamTable tbody td {
+        padding: 12px 8px !important;
+        min-height: 44px;
+      }
+      
+      .user-name-cell {
+        min-height: 44px;
+        gap: 6px;
+      }
+      
+      .user-name-cell i {
+        font-size: 0.9rem;
+      }
+      
       .dtr-details {
         width: 100%;
+        background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,249,250,0.95) 100%);
+        border-radius: 12px;
+        padding: 15px;
+        margin-top: 10px;
+        backdrop-filter: blur(10px);
       }
+      
       .dtr-details li {
         display: flex;
         justify-content: space-between;
-        padding: 8px 0;
-        border-bottom: 1px solid #eee;
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
       }
+      
       .dtr-details li:last-child {
         border-bottom: none;
       }
+      
       .dtr-title {
-        font-weight: bold;
+        font-weight: 600;
         flex: 1;
+        color: #64748b;
+        font-size: 0.9rem;
       }
+      
       .dtr-data {
         flex: 2;
         text-align: right;
+        font-weight: 500;
       }
+      
       .modal-content {
-        padding: 20px;
+        padding: 25px;
+        border-radius: 16px;
       }
+      
       .modal-buttons {
         flex-direction: column;
+        gap: 10px;
       }
+      
       .modal-btn {
         width: 100%;
+        padding: 14px;
+      }
+      
+      .edit-mode-notice {
+        padding: 15px 18px;
+        margin-bottom: 20px;
+        border-radius: 12px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .container {
+        padding: 0 15px;
+      }
+      
+      h1 {
+        font-size: 1.8rem;
+      }
+      
+      .team-card {
+        padding: 15px;
+      }
+      
+      .stat-item .value {
+        font-size: 1.8rem;
       }
     }
   </style>
 </head>
 <body>
-  <h1><i class="fas fa-users"></i> 팀 연차 현황</h1>
-  
-  <div class="team-card">
+  <div class="container">
+    <h1><i class="fas fa-users"></i> 팀 연차 현황</h1>
+    
+    <div class="team-card">
     <h2><i class="fas fa-chart-bar"></i> 팀 요약 정보</h2>
     <div class="team-stats">
       <div class="stat-item">
@@ -909,5 +1302,6 @@
       }
     }
   </script>
+  </div>
 </body>
 </html> 
