@@ -58,12 +58,16 @@ export const buildAppHome = async (context: AppContext, showAdminSection: boolea
           type: 'button',
           text: {
             type: 'plain_text',
-            text: `:calendar: ${t(context.locale, 'connect_google_calendar')}`,
+            text: context.user.googleRefreshToken
+              ? `:white_check_mark: ${t(context.locale, 'connected_google_calendar')}`
+              : `:calendar: ${t(context.locale, 'connect_google_calendar')}`,
             emoji: true,
           },
           style: 'primary',
-          url: `${process.env.APP_URL || 'http://localhost:3000'}/team-vacation-html?token=${token}`,
-        }
+          url: context.user.googleRefreshToken
+            ? `${process.env.APP_URL || 'http://localhost:3000'}/calendar-status?token=${token}`
+            : `${process.env.APP_URL || 'http://localhost:3000'}/googleauth?token=${token}`,
+        },
       ],
     },
     {

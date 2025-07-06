@@ -10,7 +10,7 @@ import jwt from 'jsonwebtoken';
 import { buildInstallMessage } from './listeners/events/slack-ui/build-install-message';
 import routes from './routes';
 import { organizationService, ptoService, userService } from './service';
-import { assert, HttpError } from './utils';
+import { assert, GoogleOAuthError, HttpError } from './utils';
 
 const receiver = new ExpressReceiver({
   logLevel: LogLevel.INFO,
@@ -155,6 +155,32 @@ const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
   // If headers already sent, delegate to default Express error handler
   if (res.headersSent) {
     return next(err);
+  }
+
+  // Handle Google OAuth errors specifically
+  if (err instanceof GoogleOAuthError) {
+    console.error(`Google OAuth error (${err.errorType}):`, err.message);
+
+    switch (err.errorType) {
+      case 'auth_failed':
+      case 'callback_failed':
+      case 'token_invalid':
+        res.status(400).render('pages/google-oauth-failure', {
+          token: err.token,
+          errorType: err.errorType,
+          errorMessage: err.message,
+        });
+        return;
+
+      case 'config_missing':
+        res.status(500).render('pages/error', {
+          error: {
+            message: '구글 OAuth 설정이 올바르지 않습니다. 관리자에게 문의하세요.',
+            statusCode: 500,
+          },
+        });
+        return;
+    }
   }
 
   // Determine if it's an HttpError or unexpected error

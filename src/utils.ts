@@ -14,6 +14,20 @@ export class HttpError extends Error {
   }
 }
 
+/**
+ * 구글 OAuth 관련 에러를 위한 커스텀 에러 클래스
+ */
+export class GoogleOAuthError extends Error {
+  constructor(
+    public errorType: 'auth_failed' | 'callback_failed' | 'token_invalid' | 'config_missing',
+    message: string,
+    public token?: string,
+  ) {
+    super(message);
+    this.name = 'GoogleOAuthError';
+  }
+}
+
 export function assert(condition: boolean, message: string): asserts condition {
   if (!condition) {
     throw new Error(message);

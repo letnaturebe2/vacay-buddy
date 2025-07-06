@@ -164,6 +164,7 @@ export default {
   download_user_template: '📊 Download User Template',
   view_team_vacation: '📅 View Team Vacation',
   connect_google_calendar: 'Connect Google Calendar',
+  connected_google_calendar: 'Google Calendar Connected',
 
   // excel file
   users_updated_success: '{{count}} users have been updated.',

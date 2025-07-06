@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <title>구글 캘린더 연동 관리</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      max-width: 600px;
+      width: 100%;
+      overflow: hidden;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #4285f4 0%, #34a853 100%);
+      color: white;
+      padding: 40px;
+      text-align: center;
+      position: relative;
+    }
+    
+    .header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="20" cy="20" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="40" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="40" cy="80" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100%" height="100%" fill="url(%23grain)"/></svg>');
+      opacity: 0.3;
+    }
+    
+    .header h1 {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .header .subtitle {
+      font-size: 18px;
+      opacity: 0.9;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .content {
+      padding: 40px;
+    }
+    
+    .status-card {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 32px;
+      text-align: center;
+      border: 2px solid #e9ecef;
+    }
+    
+    .status-icon {
+      font-size: 64px;
+      margin-bottom: 24px;
+      display: block;
+    }
+    
+    .status-connected .status-icon {
+      color: #28a745;
+    }
+    
+    .status-disconnected .status-icon {
+      color: #dc3545;
+    }
+    
+    .status-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: #212529;
+    }
+    
+    .status-description {
+      font-size: 16px;
+      color: #6c757d;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+    
+    .btn {
+      display: inline-block;
+      padding: 16px 32px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 16px;
+      text-align: center;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      margin: 8px;
+      min-width: 200px;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #4285f4 0%, #34a853 100%);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(66, 133, 244, 0.3);
+    }
+    
+    .btn-danger {
+      background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+      color: white;
+    }
+    
+    .btn-danger:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(220, 53, 69, 0.3);
+    }
+    
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+    
+    .btn-secondary:hover {
+      background: #5a6268;
+      transform: translateY(-2px);
+    }
+    
+    .features {
+      margin-top: 32px;
+    }
+    
+    .features h3 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: #212529;
+    }
+    
+    .feature-list {
+      list-style: none;
+      padding: 0;
+    }
+    
+    .feature-list li {
+      padding: 12px 0;
+      border-bottom: 1px solid #e9ecef;
+      display: flex;
+      align-items: center;
+    }
+    
+    .feature-list li:last-child {
+      border-bottom: none;
+    }
+    
+    .feature-icon {
+      margin-right: 12px;
+      font-size: 20px;
+    }
+    
+    .feature-text {
+      color: #495057;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    
+    .footer {
+      text-align: center;
+      padding: 24px;
+      border-top: 1px solid #e9ecef;
+      background: #f8f9fa;
+    }
+    
+    .footer a {
+      color: #6c757d;
+      text-decoration: none;
+      font-size: 14px;
+    }
+    
+    .footer a:hover {
+      text-decoration: underline;
+    }
+    
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 20px;
+    }
+    
+    .loading.active {
+      display: block;
+    }
+    
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #4285f4;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 16px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .alert {
+      padding: 16px;
+      margin-bottom: 24px;
+      border-radius: 8px;
+      display: none;
+    }
+    
+    .alert.show {
+      display: block;
+    }
+    
+    .alert-success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    
+    .alert-error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        margin: 10px;
+      }
+      
+      .header {
+        padding: 24px;
+      }
+      
+      .header h1 {
+        font-size: 24px;
+      }
+      
+      .header .subtitle {
+        font-size: 16px;
+      }
+      
+      .content {
+        padding: 24px;
+      }
+      
+      .status-card {
+        padding: 24px;
+      }
+      
+      .btn {
+        min-width: auto;
+        width: 100%;
+        margin: 8px 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🗓️ 구글 캘린더 연동</h1>
+      <p class="subtitle">연차 승인 시 자동으로 캘린더 이벤트 생성</p>
+    </div>
+    
+    <div class="content">
+      <div id="alertContainer"></div>
+      
+      <div class="loading" id="loadingSpinner">
+        <div class="spinner"></div>
+        <p>처리 중입니다...</p>
+      </div>
+      
+      <div class="status-card" id="statusCard">
+        <% if (connected) { %>
+          <div class="status-connected">
+            <span class="status-icon">✅</span>
+            <h2 class="status-title">연결됨</h2>
+            <p class="status-description">
+              구글 캘린더와 성공적으로 연결되었습니다.<br>
+              연차가 승인되면 자동으로 캘린더에 이벤트가 생성됩니다.
+            </p>
+            <button class="btn btn-danger" onclick="disconnectCalendar()">
+              🔓 연동 해제
+            </button>
+          </div>
+        <% } else { %>
+          <div class="status-disconnected">
+            <span class="status-icon">❌</span>
+            <h2 class="status-title">연결 안됨</h2>
+            <p class="status-description">
+              구글 캘린더와 연결되어 있지 않습니다.<br>
+              연결하면 연차 승인 시 자동으로 캘린더 이벤트가 생성됩니다.
+            </p>
+            <a href="/googleauth?token=<%= token %>" class="btn btn-primary">
+              🔗 구글 캘린더 연결
+            </a>
+          </div>
+        <% } %>
+      </div>
+      
+      <div class="features">
+        <h3>🎯 주요 기능</h3>
+        <ul class="feature-list">
+          <li>
+            <span class="feature-icon">🎯</span>
+            <span class="feature-text">연차 승인 시 자동으로 구글 캘린더에 이벤트 생성</span>
+          </li>
+          <li>
+            <span class="feature-icon">📅</span>
+            <span class="feature-text">종일 이벤트로 생성되어 하루 종일 휴가 표시</span>
+          </li>
+          <li>
+            <span class="feature-icon">🏷️</span>
+            <span class="feature-text">연차 유형, 사유, 소모 일수 등 상세 정보 포함</span>
+          </li>
+          <li>
+            <span class="feature-icon">🎨</span>
+            <span class="feature-text">휴가 전용 색상으로 구분하여 표시</span>
+          </li>
+          <li>
+            <span class="feature-icon">🔒</span>
+            <span class="feature-text">개인 정보 보호를 위한 비공개 이벤트</span>
+          </li>
+          <li>
+            <span class="feature-icon">🌍</span>
+            <span class="feature-text">사용자 시간대에 맞춰 정확한 날짜 설정</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="footer">
+      <a href="javascript:history.back()">← 슬랙으로 돌아가기</a>
+    </div>
+  </div>
+  
+  <script>
+    function showAlert(message, type = 'success') {
+      const alertContainer = document.getElementById('alertContainer');
+      const alert = document.createElement('div');
+      alert.className = `alert alert-${type} show`;
+      alert.textContent = message;
+      alertContainer.appendChild(alert);
+      
+      setTimeout(() => {
+        alert.remove();
+      }, 5000);
+    }
+    
+    function showLoading() {
+      document.getElementById('loadingSpinner').classList.add('active');
+    }
+    
+    function hideLoading() {
+      document.getElementById('loadingSpinner').classList.remove('active');
+    }
+    
+    async function disconnectCalendar() {
+      if (!confirm('구글 캘린더 연동을 해제하시겠습니까?\n\n해제하면 더 이상 연차 승인 시 자동으로 캘린더 이벤트가 생성되지 않습니다.')) {
+        return;
+      }
+      
+      showLoading();
+      
+      try {
+        const response = await fetch('/disconnect-calendar', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            token: '<%= token %>'
+          })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          showAlert('구글 캘린더 연동이 해제되었습니다.');
+          
+          // 상태 카드 업데이트
+          setTimeout(() => {
+            location.reload();
+          }, 1500);
+        } else {
+          showAlert('연동 해제 중 오류가 발생했습니다: ' + (result.message || '알 수 없는 오류'), 'error');
+        }
+      } catch (error) {
+        console.error('Disconnect error:', error);
+        showAlert('연동 해제 중 오류가 발생했습니다.', 'error');
+      } finally {
+        hideLoading();
+      }
+    }
+    
+    // 페이지 로드 시 애니메이션 효과
+    document.addEventListener('DOMContentLoaded', function() {
+      const container = document.querySelector('.container');
+      container.style.opacity = '0';
+      container.style.transform = 'translateY(20px)';
+      
+      setTimeout(() => {
+        container.style.transition = 'all 0.5s ease';
+        container.style.opacity = '1';
+        container.style.transform = 'translateY(0)';
+      }, 100);
+    });
+  </script>
+</body>
+</html> 

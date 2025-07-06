@@ -164,6 +164,7 @@ export default {
   download_user_template: '📊 사용자 정보 엑셀 다운로드',
   view_team_vacation: '📅 팀 휴가 현황',
   connect_google_calendar: '구글 캘린더 연결',
+  connected_google_calendar: '구글 캘린더 연결됨',
 
   // excel file
   users_updated_success: '{{count}}명의 사용자가 업데이트 되었습니다.',

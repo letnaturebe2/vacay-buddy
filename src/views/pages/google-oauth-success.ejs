@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <title>구글 캘린더 연동 성공</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #4285f4 0%, #34a853 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .container {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+      max-width: 500px;
+      width: 100%;
+      overflow: hidden;
+      text-align: center;
+      position: relative;
+    }
+    
+    .success-header {
+      background: linear-gradient(135deg, #4285f4 0%, #34a853 100%);
+      color: white;
+      padding: 60px 40px 40px;
+      position: relative;
+    }
+    
+    .success-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1.5" fill="rgba(255,255,255,0.2)"/></pattern></defs><rect width="100%" height="100%" fill="url(%23dots)"/></svg>');
+    }
+    
+    .success-icon {
+      font-size: 80px;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 1;
+      animation: bounce 2s infinite;
+    }
+    
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+      }
+      40% {
+        transform: translateY(-10px);
+      }
+      60% {
+        transform: translateY(-5px);
+      }
+    }
+    
+    .success-title {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .success-subtitle {
+      font-size: 16px;
+      opacity: 0.9;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .content {
+      padding: 40px;
+    }
+    
+    .message {
+      font-size: 18px;
+      color: #333;
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+    
+    .features {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 24px;
+      margin: 24px 0;
+      text-align: left;
+    }
+    
+    .features h3 {
+      color: #333;
+      margin-bottom: 16px;
+      text-align: center;
+      font-size: 18px;
+    }
+    
+    .feature-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+      font-size: 14px;
+      color: #666;
+    }
+    
+    .feature-item:last-child {
+      margin-bottom: 0;
+    }
+    
+    .feature-icon {
+      margin-right: 12px;
+      font-size: 16px;
+    }
+    
+    .actions {
+      margin-top: 32px;
+    }
+    
+    .btn {
+      display: inline-block;
+      padding: 16px 32px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 16px;
+      text-align: center;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      margin: 8px;
+      min-width: 200px;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #4285f4 0%, #34a853 100%);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(66, 133, 244, 0.3);
+    }
+    
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+    
+    .btn-secondary:hover {
+      background: #5a6268;
+      transform: translateY(-2px);
+    }
+    
+    .footer-text {
+      margin-top: 24px;
+      font-size: 14px;
+      color: #999;
+    }
+    
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      background: #f39c12;
+      animation: fall 3s linear infinite;
+    }
+    
+    .confetti:nth-child(odd) {
+      background: #e74c3c;
+      width: 8px;
+      height: 8px;
+      animation-duration: 2.5s;
+    }
+    
+    .confetti:nth-child(even) {
+      animation-duration: 3.5s;
+    }
+    
+    @keyframes fall {
+      to {
+        transform: translateY(100vh) rotate(360deg);
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        margin: 10px;
+      }
+      
+      .success-header {
+        padding: 40px 20px 30px;
+      }
+      
+      .success-icon {
+        font-size: 60px;
+      }
+      
+      .success-title {
+        font-size: 24px;
+      }
+      
+      .content {
+        padding: 30px 20px;
+      }
+      
+      .btn {
+        min-width: auto;
+        width: 100%;
+        margin: 8px 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="success-header">
+      <div class="success-icon">🎉</div>
+      <h1 class="success-title">연동 성공!</h1>
+      <p class="success-subtitle">구글 캘린더와 성공적으로 연결되었습니다</p>
+    </div>
+    
+    <div class="content">
+      <p class="message">
+        이제 연차가 승인되면 자동으로 구글 캘린더에<br>
+        이벤트가 생성됩니다! 🗓️
+      </p>
+      
+      <div class="features">
+        <h3>✨ 앞으로 이런 기능들을 사용할 수 있어요</h3>
+        <div class="feature-item">
+          <span class="feature-icon">🎯</span>
+          <span>연차 승인 시 자동으로 캘린더 이벤트 생성</span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">📅</span>
+          <span>종일 이벤트로 생성되어 명확한 휴가 표시</span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">🏷️</span>
+          <span>연차 유형, 사유 등 상세 정보 포함</span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">🎨</span>
+          <span>휴가 전용 색상으로 구분하여 표시</span>
+        </div>
+      </div>
+      
+      <div class="actions">
+        <a href="slack://open" class="btn btn-primary">
+          💬 슬랙으로 돌아가기
+        </a>
+        <a href="/calendar-status?token=<%= token %>" class="btn btn-secondary">
+          ⚙️ 연동 관리
+        </a>
+      </div>
+      
+      <p class="footer-text">
+        구글 캘린더 연동을 언제든지 해제할 수 있습니다
+      </p>
+    </div>
+  </div>
+  
+  <script>
+    // 축하 애니메이션
+    function createConfetti() {
+      for (let i = 0; i < 50; i++) {
+        setTimeout(() => {
+          const confetti = document.createElement('div');
+          confetti.className = 'confetti';
+          confetti.style.left = Math.random() * 100 + 'vw';
+          confetti.style.animationDelay = Math.random() * 3 + 's';
+          confetti.style.backgroundColor = ['#e74c3c', '#f39c12', '#2ecc71', '#3498db', '#9b59b6'][Math.floor(Math.random() * 5)];
+          document.body.appendChild(confetti);
+          
+          setTimeout(() => {
+            confetti.remove();
+          }, 4000);
+        }, i * 50);
+      }
+    }
+    
+    // 페이지 로드 시 애니메이션
+    document.addEventListener('DOMContentLoaded', function() {
+      const container = document.querySelector('.container');
+      container.style.opacity = '0';
+      container.style.transform = 'scale(0.9) translateY(20px)';
+      
+      setTimeout(() => {
+        container.style.transition = 'all 0.6s ease';
+        container.style.opacity = '1';
+        container.style.transform = 'scale(1) translateY(0)';
+      }, 100);
+      
+      // 축하 효과
+      setTimeout(createConfetti, 500);
+    });
+  </script>
+</body>
+</html> 

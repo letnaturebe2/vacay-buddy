@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <title>구글 캘린더 연동 실패</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .container {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+      max-width: 500px;
+      width: 100%;
+      overflow: hidden;
+      text-align: center;
+      position: relative;
+    }
+    
+    .error-header {
+      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+      color: white;
+      padding: 60px 40px 40px;
+      position: relative;
+    }
+    
+    .error-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1.5" fill="rgba(255,255,255,0.2)"/></pattern></defs><rect width="100%" height="100%" fill="url(%23dots)"/></svg>');
+    }
+    
+    .error-icon {
+      font-size: 80px;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 1;
+      animation: shake 1s ease-in-out infinite;
+    }
+    
+    @keyframes shake {
+      0%, 100% {
+        transform: translateX(0);
+      }
+      25% {
+        transform: translateX(-5px);
+      }
+      75% {
+        transform: translateX(5px);
+      }
+    }
+    
+    .error-title {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .error-subtitle {
+      font-size: 16px;
+      opacity: 0.9;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .content {
+      padding: 40px;
+    }
+    
+    .message {
+      font-size: 18px;
+      color: #333;
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+    
+    .error-details {
+      background: #fff5f5;
+      border: 1px solid #feb2b2;
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      text-align: left;
+    }
+    
+    .error-details h3 {
+      color: #c53030;
+      margin-bottom: 12px;
+      text-align: center;
+      font-size: 16px;
+    }
+    
+    .error-reason {
+      font-size: 14px;
+      color: #742a2a;
+      margin-bottom: 16px;
+    }
+    
+    .troubleshooting {
+      background: #f7fafc;
+      border-radius: 12px;
+      padding: 24px;
+      margin: 24px 0;
+      text-align: left;
+    }
+    
+    .troubleshooting h3 {
+      color: #333;
+      margin-bottom: 16px;
+      text-align: center;
+      font-size: 18px;
+    }
+    
+    .step-item {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 12px;
+      font-size: 14px;
+      color: #666;
+    }
+    
+    .step-item:last-child {
+      margin-bottom: 0;
+    }
+    
+    .step-number {
+      background: #4285f4;
+      color: white;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: bold;
+      margin-right: 12px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    
+    .actions {
+      margin-top: 32px;
+    }
+    
+    .btn {
+      display: inline-block;
+      padding: 16px 32px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 16px;
+      text-align: center;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      margin: 8px;
+      min-width: 200px;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #4285f4 0%, #34a853 100%);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(66, 133, 244, 0.3);
+    }
+    
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+    
+    .btn-secondary:hover {
+      background: #5a6268;
+      transform: translateY(-2px);
+    }
+    
+    .footer-text {
+      margin-top: 24px;
+      font-size: 14px;
+      color: #999;
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        margin: 10px;
+      }
+      
+      .error-header {
+        padding: 40px 20px 30px;
+      }
+      
+      .error-icon {
+        font-size: 60px;
+      }
+      
+      .error-title {
+        font-size: 24px;
+      }
+      
+      .content {
+        padding: 30px 20px;
+      }
+      
+      .btn {
+        min-width: auto;
+        width: 100%;
+        margin: 8px 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="error-header">
+      <div class="error-icon">😞</div>
+      <h1 class="error-title">연동 실패</h1>
+      <p class="error-subtitle">구글 캘린더 연동 중 문제가 발생했습니다</p>
+    </div>
+    
+    <div class="content">
+      <p class="message">
+        연동 과정에서 오류가 발생했습니다.<br>
+        아래 방법을 시도해보세요.
+      </p>
+      
+      <div class="error-details">
+        <h3>🚨 발생한 문제</h3>
+        <div class="error-reason">
+          구글 인증 과정에서 오류가 발생했거나, 권한 승인이 취소되었을 수 있습니다.
+        </div>
+      </div>
+      
+      <div class="troubleshooting">
+        <h3>🔧 해결 방법</h3>
+        <div class="step-item">
+          <span class="step-number">1</span>
+          <span>브라우저의 쿠키와 캐시를 삭제해보세요</span>
+        </div>
+        <div class="step-item">
+          <span class="step-number">2</span>
+          <span>구글 계정에 로그인이 되어있는지 확인하세요</span>
+        </div>
+        <div class="step-item">
+          <span class="step-number">3</span>
+          <span>팝업 차단이 설정되어 있지 않은지 확인하세요</span>
+        </div>
+        <div class="step-item">
+          <span class="step-number">4</span>
+          <span>구글 캘린더 접근 권한을 허용했는지 확인하세요</span>
+        </div>
+        <div class="step-item">
+          <span class="step-number">5</span>
+          <span>잠시 후 다시 시도해보세요</span>
+        </div>
+      </div>
+      
+      <div class="actions">
+        <% if (typeof token !== 'undefined' && token) { %>
+          <a href="/googleauth?token=<%= token %>" class="btn btn-primary">
+            🔄 다시 시도
+          </a>
+        <% } else { %>
+          <a href="javascript:history.back()" class="btn btn-primary">
+            🔄 다시 시도
+          </a>
+        <% } %>
+        <a href="slack://open" class="btn btn-secondary">
+          💬 슬랙으로 돌아가기
+        </a>
+      </div>
+      
+      <p class="footer-text">
+        문제가 계속 발생하면 관리자에게 문의해주세요
+      </p>
+    </div>
+  </div>
+  
+  <script>
+    // 페이지 로드 시 애니메이션
+    document.addEventListener('DOMContentLoaded', function() {
+      const container = document.querySelector('.container');
+      container.style.opacity = '0';
+      container.style.transform = 'scale(0.9) translateY(20px)';
+      
+      setTimeout(() => {
+        container.style.transition = 'all 0.6s ease';
+        container.style.opacity = '1';
+        container.style.transform = 'scale(1) translateY(0)';
+      }, 100);
+    });
+  </script>
+</body>
+</html> 
