@@ -4,9 +4,37 @@ import { PtoTemplate } from './entity/pto-template.model';
 import { User } from './entity/user.model';
 import { t } from './i18n';
 
+export class HttpError extends Error {
+  constructor(
+    public statusCode: number,
+    message: string,
+  ) {
+    super(message);
+    this.name = 'HttpError';
+  }
+}
+
 export function assert(condition: boolean, message: string): asserts condition {
   if (!condition) {
     throw new Error(message);
+  }
+}
+
+export function assert400(condition: boolean, message: string): asserts condition {
+  if (!condition) {
+    throw new HttpError(400, message);
+  }
+}
+
+export function assert401(condition: boolean, message: string): asserts condition {
+  if (!condition) {
+    throw new HttpError(401, message);
+  }
+}
+
+export function assert403(condition: boolean, message: string): asserts condition {
+  if (!condition) {
+    throw new HttpError(403, message);
   }
 }
 

@@ -1,11 +1,12 @@
 import { endOfMonth, startOfMonth } from 'date-fns';
-import { DataSource, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
+import { DataSource, EntityManager, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { PtoRequestStatus } from '../constants';
 import { Organization } from '../entity/organization.model';
 import { PtoApproval } from '../entity/pto-approval.model';
 import { PtoRequest } from '../entity/pto-request.model';
 import { PtoTemplate } from '../entity/pto-template.model';
 import { User } from '../entity/user.model';
+import { UserWithRequests } from '../types';
 import { assert, getDefaultTemplates, isSameDay } from '../utils';
 import { UserService } from './user.service';
 
@@ -126,8 +127,10 @@ export class PtoService {
     });
   }
 
-  async getApprovalWithRelations(id: number): Promise<PtoApproval> {
-    return this.ptoApprovalRepository.findOneOrFail({
+  async getApprovalWithRelations(id: number, manager?: EntityManager): Promise<PtoApproval> {
+    const repository = manager ? manager.getRepository(PtoApproval) : this.ptoApprovalRepository;
+
+    return repository.findOneOrFail({
       where: { id },
       relations: ['approver', 'ptoRequest', 'ptoRequest.user', 'ptoRequest.approvals', 'ptoRequest.approvals.approver'],
     });
@@ -173,6 +176,35 @@ export class PtoService {
     });
   }
 
+  async getPendingRequests(): Promise<Map<number, UserWithRequests>> {
+    const requestsByPendingApprover = new Map<number, UserWithRequests>();
+    const pendingRequests = await this.ptoRequestRepository.find({
+      where: { status: PtoRequestStatus.Pending },
+      relations: ['approvals', 'approvals.approver', 'approvals.approver.organization'],
+    });
+
+    for (const request of pendingRequests) {
+      const currentApproval = request.approvals.find((approval) => approval.id === request.currentApprovalId);
+      assert(currentApproval !== undefined, 'Current approval must exist for pending request');
+
+      const approver = currentApproval.approver;
+      const approverId = approver.id;
+
+      if (!requestsByPendingApprover.has(approverId)) {
+        requestsByPendingApprover.set(approverId, {
+          user: approver,
+          requests: [],
+        });
+      }
+
+      const userWithRequests = requestsByPendingApprover.get(approverId);
+      assert(userWithRequests !== undefined, 'User with requests must exist');
+      userWithRequests.requests.push(request);
+    }
+
+    return requestsByPendingApprover;
+  }
+
   private validatePendingApproval(approver: User, approval: PtoApproval): void {
     if (!approver.isAdmin) {
       assert(approver.id === approval.approver.id, 'You are not the approver for this request');
@@ -195,37 +227,43 @@ export class PtoService {
    * @throws Error if the user is not authorized or the approval is not in pending status
    */
   async approve(approver: User, approvalId: number, comment: string): Promise<PtoApproval> {
-    const approval = await this.getApprovalWithRelations(approvalId);
-    this.validatePendingApproval(approver, approval);
+    return this.dataSource.transaction(async (manager) => {
+      const approval = await this.getApprovalWithRelations(approvalId, manager);
+      this.validatePendingApproval(approver, approval);
 
-    const requestApprovals = approval.ptoRequest.approvals;
-    const ptoRequest = approval.ptoRequest;
+      const requestApprovals = approval.ptoRequest.approvals;
+      const ptoRequest = approval.ptoRequest;
 
-    const nextApproverIndex = requestApprovals.findIndex((a) => a.id === approvalId) + 1;
-    if (nextApproverIndex < requestApprovals.length) {
-      ptoRequest.currentApprovalId = requestApprovals[nextApproverIndex].id;
-    } else {
-      // All approvers have approved the request
-      ptoRequest.status = PtoRequestStatus.Approved;
-      // update user's used PTO days
-      await this.userService.updateUser(ptoRequest.user.userId, {
-        usedPtoDays: ptoRequest.user.usedPtoDays + ptoRequest.consumedDays,
-      });
-    }
+      const nextApproverIndex = requestApprovals.findIndex((a) => a.id === approvalId) + 1;
+      if (nextApproverIndex < requestApprovals.length) {
+        ptoRequest.currentApprovalId = requestApprovals[nextApproverIndex].id;
+      } else {
+        // All approvers have approved the request
+        ptoRequest.status = PtoRequestStatus.Approved;
+        // update user's used PTO days
+        await this.userService.updateUser(
+          ptoRequest.user.userId,
+          {
+            usedPtoDays: ptoRequest.user.usedPtoDays + ptoRequest.consumedDays,
+          },
+          manager,
+        );
+      }
 
-    await this.ptoRequestRepository.save(ptoRequest);
-    approval.status = PtoRequestStatus.Approved;
-    approval.comment = comment;
-    approval.actionDate = new Date();
-    await this.ptoApprovalRepository.save(approval);
+      await manager.save(ptoRequest);
+      approval.status = PtoRequestStatus.Approved;
+      approval.comment = comment;
+      approval.actionDate = new Date();
+      await manager.save(approval);
 
-    return await this.getApprovalWithRelations(approvalId);
+      return await this.getApprovalWithRelations(approvalId, manager);
+    });
   }
 
   /**
    * Rejects a PTO request approval.
    * The method validates that the user is the authorized approver and the approval is in pending status.
-   * When rejected, the entire PTO request is marked as rejected.
+   * When rejected, the entire PTO request is marked as rejected and all pending approvals are also rejected.
    * Returns the refreshed approval entity after processing.
    *
    * @param approver The user attempting to reject the request
@@ -235,19 +273,35 @@ export class PtoService {
    * @throws Error if the user is not authorized or the approval is not in pending status
    */
   async reject(approver: User, approvalId: number, comment: string): Promise<PtoApproval> {
-    const approval = await this.getApprovalWithRelations(approvalId);
-    this.validatePendingApproval(approver, approval);
+    return this.dataSource.transaction(async (manager) => {
+      const approval = await this.getApprovalWithRelations(approvalId, manager);
+      this.validatePendingApproval(approver, approval);
 
-    const ptoRequest = approval.ptoRequest;
-    ptoRequest.status = PtoRequestStatus.Rejected;
-    await this.ptoRequestRepository.save(ptoRequest);
+      const ptoRequest = approval.ptoRequest;
+      ptoRequest.status = PtoRequestStatus.Rejected;
+      await manager.save(ptoRequest);
 
-    approval.status = PtoRequestStatus.Rejected;
-    approval.comment = comment;
-    approval.actionDate = new Date();
-    await this.ptoApprovalRepository.save(approval);
+      // Update the current approval with rejection details
+      approval.status = PtoRequestStatus.Rejected;
+      approval.comment = comment;
+      approval.actionDate = new Date();
+      await manager.save(approval);
 
-    return await this.getApprovalWithRelations(approvalId);
+      // Mark all other pending approvals as rejected
+      const pendingApprovals = ptoRequest.approvals.filter(
+        (a) => a.id !== approvalId && a.status === PtoRequestStatus.Pending,
+      );
+
+      if (pendingApprovals.length > 0) {
+        const pendingApprovalIds = pendingApprovals.map((a) => a.id);
+        await manager.update(PtoApproval, pendingApprovalIds, {
+          status: PtoRequestStatus.Rejected,
+          actionDate: new Date(),
+        });
+      }
+
+      return await this.getApprovalWithRelations(approvalId, manager);
+    });
   }
 
   /**

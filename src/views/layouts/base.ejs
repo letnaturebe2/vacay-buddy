@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  
+  <!-- External CSS -->
+  <link rel="stylesheet" href="/assets/css/jquery.dataTables.min.css">
+  <link rel="stylesheet" href="/assets/css/responsive.dataTables.min.css">
+  <link rel="stylesheet" href="/assets/css/fontawesome.min.css">
+  
+  <!-- External JS -->
+  <script src="/assets/js/jquery.min.js"></script>
+  <script src="/assets/js/jquery.dataTables.min.js"></script>
+  <script src="/assets/js/dataTables.responsive.min.js"></script>
+  
+  <style>
+    <%= commonStyles %>
+    <%- additionalStyles || '' %>
+  </style>
+</head>
+<body>
+  <%- body %>
+  
+  <% if (additionalScripts) { %>
+    <script>
+      <%- additionalScripts %>
+    </script>
+  <% } %>
+</body>
+</html> 

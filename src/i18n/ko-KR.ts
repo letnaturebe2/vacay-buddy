@@ -121,6 +121,9 @@ export default {
   request_rejected_notification: '연차 요청이 거부되었습니다',
   request_pending_notification: '연차 요청이 {{approvers}}의 승인을 기다리고 있습니다',
   reminder_notification: '알림: 검토할 연차 요청이 있습니다',
+  pending_notification_title: '🔔 *알림*',
+  pending_notification_message: '{{count}}개의 승인 대기 중인 연차 요청이 있습니다.',
+  pending_notification_description: '요청을 검토하고 승인 또는 거부해 주세요.',
 
   // Dashboard
   upcoming_time_off: '예정된 휴가',
@@ -159,11 +162,11 @@ export default {
   install_connect:
     '시작하려면 아래 사용자 정보 엑셀 다운로드 버튼을 클릭하여 엑셀 파일을 다운로드하고 팀원들의 연차를 관리하세요:',
   download_user_template: '📊 사용자 정보 엑셀 다운로드',
-  view_team_vacation: '📅 팀 휴가 현황 보기',
+  view_team_vacation: '📅 팀 휴가 현황',
 
   // excel file
   users_updated_success: '{{count}}명의 사용자가 업데이트 되었습니다.',
-  file_shared_error: '파일 공유 처리 중 오류가 발생했습니다: {{error}}',
+  file_shared_error: '파일 처리 중 오류가 발생했습니다: {{message}}',
   excel_info_title: '엑셀 사용 안내',
   excel_info_content:
     '다운로드된 엑셀 파일을 작성하여 Slack 메시지로 업로드해주세요. 직원들의 연차 정보가 엑셀에 입력된 내용으로 자동 업데이트됩니다.',

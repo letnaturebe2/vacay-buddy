@@ -223,4 +223,174 @@ describe("UserService Tests", () => {
     });
   });
 
+  describe("bulkUpsertUsers", () => {
+    test("should insert new users and update existing users", async () => {
+      // Arrange
+      const existingUser = new User();
+      existingUser.userId = "existing-user";
+      existingUser.name = "Existing User";
+      existingUser.organization = testOrganization;
+      existingUser.annualPtoDays = 15;
+      existingUser.usedPtoDays = 0;
+      await userRepository.save(existingUser);
+
+      const userIds = ["existing-user", "new-user-1", "new-user-2"];
+      const usersData: Partial<User>[] = [
+        {
+          userId: "existing-user",
+          name: "Updated Existing User",
+          annualPtoDays: 20,
+          usedPtoDays: 5,
+          organization: testOrganization
+        },
+        {
+          userId: "new-user-1",
+          name: "New User 1",
+          annualPtoDays: 25,
+          usedPtoDays: 0,
+          organization: testOrganization
+        },
+        {
+          userId: "new-user-2",
+          name: "New User 2",
+          annualPtoDays: 30,
+          usedPtoDays: 2,
+          organization: testOrganization
+        }
+      ];
+
+      // Act
+      await userService.bulkUpsertUsers(userIds, usersData, testOrganization);
+
+      // Assert
+      const savedUsers = await userRepository.find({
+        where: { userId: In(userIds) },
+        relations: { organization: true }
+      });
+
+      expect(savedUsers.length).toBe(3);
+
+      // Check updated existing user
+      const updatedUser = savedUsers.find(u => u.userId === "existing-user");
+      expect(updatedUser).toBeDefined();
+      expect(updatedUser!.name).toBe("Updated Existing User");
+      expect(updatedUser!.annualPtoDays).toBe(20);
+      expect(updatedUser!.usedPtoDays).toBe(5);
+      expect(updatedUser!.organization.id).toBe(testOrganization.id);
+
+      // Check new users
+      const newUser1 = savedUsers.find(u => u.userId === "new-user-1");
+      expect(newUser1).toBeDefined();
+      expect(newUser1!.name).toBe("New User 1");
+      expect(newUser1!.annualPtoDays).toBe(25);
+      expect(newUser1!.usedPtoDays).toBe(0);
+      expect(newUser1!.organization.id).toBe(testOrganization.id);
+
+      const newUser2 = savedUsers.find(u => u.userId === "new-user-2");
+      expect(newUser2).toBeDefined();
+      expect(newUser2!.name).toBe("New User 2");
+      expect(newUser2!.annualPtoDays).toBe(30);
+      expect(newUser2!.usedPtoDays).toBe(2);
+      expect(newUser2!.organization.id).toBe(testOrganization.id);
+    });
+
+    test("should handle empty arrays", async () => {
+      // Act & Assert - should not throw
+      await expect(userService.bulkUpsertUsers([], [], testOrganization)).resolves.not.toThrow();
+    });
+
+    test("should handle only new users", async () => {
+      // Arrange
+      const userIds = ["new-user-1", "new-user-2"];
+      const usersData: Partial<User>[] = [
+        {
+          userId: "new-user-1",
+          name: "New User 1",
+          organization: testOrganization
+        },
+        {
+          userId: "new-user-2",
+          name: "New User 2",
+          organization: testOrganization
+        }
+      ];
+
+      // Act
+      await userService.bulkUpsertUsers(userIds, usersData, testOrganization);
+
+      // Assert
+      const savedUsers = await userRepository.find({
+        where: { userId: In(userIds) },
+        relations: { organization: true }
+      });
+
+      expect(savedUsers.length).toBe(2);
+      savedUsers.forEach(user => {
+        expect(user.organization.id).toBe(testOrganization.id);
+      });
+    });
+
+    test("should handle only existing users", async () => {
+      // Arrange
+      const existingUser1 = new User();
+      existingUser1.userId = "existing-user-1";
+      existingUser1.name = "Existing User 1";
+      existingUser1.organization = testOrganization;
+      existingUser1.annualPtoDays = 15;
+      await userRepository.save(existingUser1);
+
+      const existingUser2 = new User();
+      existingUser2.userId = "existing-user-2";
+      existingUser2.name = "Existing User 2";
+      existingUser2.organization = testOrganization;
+      existingUser2.annualPtoDays = 20;
+      await userRepository.save(existingUser2);
+
+      const userIds = ["existing-user-1", "existing-user-2"];
+      const usersData: Partial<User>[] = [
+        {
+          userId: "existing-user-1",
+          name: "Updated User 1",
+          annualPtoDays: 25
+        },
+        {
+          userId: "existing-user-2",
+          name: "Updated User 2",
+          annualPtoDays: 30
+        }
+      ];
+
+      // Act
+      await userService.bulkUpsertUsers(userIds, usersData, testOrganization);
+
+      // Assert
+      const updatedUsers = await userRepository.find({
+        where: { userId: In(userIds) },
+        relations: { organization: true }
+      });
+
+      expect(updatedUsers.length).toBe(2);
+      
+      const updatedUser1 = updatedUsers.find(u => u.userId === "existing-user-1");
+      expect(updatedUser1!.name).toBe("Updated User 1");
+      expect(updatedUser1!.annualPtoDays).toBe(25);
+
+      const updatedUser2 = updatedUsers.find(u => u.userId === "existing-user-2");
+      expect(updatedUser2!.name).toBe("Updated User 2");
+      expect(updatedUser2!.annualPtoDays).toBe(30);
+    });
+
+    test("should throw error when userIds and usersData length mismatch", async () => {
+      // Arrange
+      const userIds = ["user-1", "user-2"];
+      const usersData: Partial<User>[] = [
+        { userId: "user-1", name: "User 1", organization: testOrganization }
+      ];
+
+      // Act & Assert
+      await expect(userService.bulkUpsertUsers(userIds, usersData, testOrganization))
+        .rejects.toThrow('Number of userIds and usersData must match');
+    });
+  });
+
 });

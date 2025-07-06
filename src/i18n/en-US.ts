@@ -121,6 +121,9 @@ export default {
   request_rejected_notification: 'Your PTO request has been rejected',
   request_pending_notification: 'Your PTO request is pending approval from {{approvers}}',
   reminder_notification: 'Reminder: You have a pending PTO request to review',
+  pending_notification_title: '🔔 *Notification*',
+  pending_notification_message: 'You currently have {{count}} unapproved request(s).',
+  pending_notification_description: 'Please review and approve or reject the PTO requests.',
 
   // Dashboard
   upcoming_time_off: 'Upcoming Time Off',
@@ -163,7 +166,7 @@ export default {
 
   // excel file
   users_updated_success: '{{count}} users have been updated.',
-  file_shared_error: 'Error in file_shared handler: {{message}}',
+  file_shared_error: 'Error: {{message}}',
   excel_info_title: 'Excel Usage Guide',
   excel_info_content:
     'Download the Excel template, fill it out, and upload it as a Slack message. Employee vacation data will be automatically updated with the information entered in the Excel file.',

@@ -9,8 +9,16 @@ import {Organization} from "../../src/entity/organization.model";
 import {PtoRequestStatus} from "../../src/constants";
 import {UserService} from "../../src/service/user.service";
 import {OrganizationService} from "../../src/service/organization.service";
-import {TEST_INSTALLATION} from "../config/constants";
 import {getDefaultTemplates} from "../../src/utils";
+import {
+  createOrganization,
+  createUser,
+  createPtoTemplate,
+  getRepositories,
+  getServices,
+  clearAllTestData,
+  ensureTestDatabaseInitialized
+} from "../config/test-utils";
 
 describe("PtoService Tests", () => {
   let organizationService: OrganizationService;
@@ -23,54 +31,26 @@ describe("PtoService Tests", () => {
   let organizationRepository: Repository<Organization>;
 
   beforeAll(async () => {
-    ptoTemplateRepository = testDataSource.getRepository(PtoTemplate);
-    ptoRequestRepository = testDataSource.getRepository(PtoRequest);
-    ptoApprovalRepository = testDataSource.getRepository(PtoApproval);
-    userRepository = testDataSource.getRepository(User);
-    organizationRepository = testDataSource.getRepository(Organization);
+    // 데이터베이스가 초기화되어 있는지 확인 (setup.ts에서 이미 초기화됨)
+    await ensureTestDatabaseInitialized();
+    
+    const repositories = getRepositories();
+    const services = getServices();
+    
+    ptoTemplateRepository = repositories.ptoTemplateRepository;
+    ptoRequestRepository = repositories.ptoRequestRepository;
+    ptoApprovalRepository = repositories.ptoApprovalRepository;
+    userRepository = repositories.userRepository;
+    organizationRepository = repositories.organizationRepository;
 
-    userService = new UserService(testDataSource);
-    organizationService = new OrganizationService(testDataSource, userService);
+    userService = services.userService;
+    organizationService = services.organizationService;
     ptoService = new PtoService(testDataSource, userService);
   });
 
   beforeEach(async () => {
-    await ptoApprovalRepository.clear();
-    await ptoRequestRepository.clear();
-    await ptoTemplateRepository.clear();
-    await userRepository.clear();
-    await organizationRepository.clear();
+    await clearAllTestData();
   });
-
-  // Helper functions to reduce code duplication
-  const createOrganization = async (organizationId = "test-organization"): Promise<Organization> => {
-    return await organizationService.createOrganization(
-      organizationId,
-      false,
-      JSON.stringify(TEST_INSTALLATION)
-    )
-  };
-
-  const createUser = async (userId: string, organization?: Organization): Promise<User> => {
-    const user = new User();
-    user.userId = userId;
-    if (organization) user.organization = organization;
-    return userRepository.save(user);
-  };
-
-  const createPtoTemplate = async (
-    organization: Organization,
-    data: Partial<PtoTemplate> = {}
-  ): Promise<PtoTemplate> => {
-    const template = new PtoTemplate();
-    template.title = data.title || "Vacation";
-    template.description = data.description || "Vacation template";
-    template.content = data.content || "📋 Leave Request Details: \n - Reason:";
-    template.enabled = data.enabled ?? true;
-    template.daysConsumed = data.daysConsumed ?? 1;
-    template.organization = organization;
-    return ptoTemplateRepository.save(template);
-  };
 
   describe("createTemplate", () => {
     test("should create a new PTO template with all fields", async () => {
@@ -632,6 +612,59 @@ describe("PtoService Tests", () => {
         ptoService.reject(approver, approval.id, "Rejected again")
       ).rejects.toThrow("This request has already been processed");
     });
+
+    test("should reject all pending approvals when one approver rejects", async () => {
+      // Arrange
+      const organization = await createOrganization();
+      const user = await createUser("requester", organization);
+      const approver1 = await createUser("approver1", organization);
+      const approver2 = await createUser("approver2", organization);
+      const approver3 = await createUser("approver3", organization);
+      const template = await createPtoTemplate(organization);
+
+      const ptoRequest = await ptoService.createPtoRequest(
+        user,
+        template,
+        new Date("2025-04-01"),
+        new Date("2025-04-05"),
+        "Vacation time",
+        "Vacation time",
+        [approver1, approver2, approver3]
+      );
+
+      const firstApproval = ptoRequest.approvals.find(a => a.approver.userId === "approver1")!;
+
+      // Act - First approver rejects
+      const rejected = await ptoService.reject(approver1, firstApproval.id, "Not approved");
+
+      // Assert - Check the rejected approval
+      expect(rejected.status).toBe(PtoRequestStatus.Rejected);
+      expect(rejected.comment).toBe("Not approved");
+      expect(rejected.actionDate).toBeDefined();
+      expect(rejected.ptoRequest.status).toBe(PtoRequestStatus.Rejected);
+
+      // Assert - Check that all other approvals are also rejected
+      const updatedRequest = rejected.ptoRequest;
+
+      expect(updatedRequest!.status).toBe(PtoRequestStatus.Rejected);
+      expect(updatedRequest!.approvals).toHaveLength(3);
+
+      // All approvals should be rejected
+      updatedRequest!.approvals.forEach(approval => {
+        expect(approval.status).toBe(PtoRequestStatus.Rejected);
+        expect(approval.actionDate).toBeDefined();
+      });
+
+      // The first approval should have the comment
+      const rejectedApproval = updatedRequest!.approvals.find(a => a.id === firstApproval.id);
+      expect(rejectedApproval!.comment).toBe("Not approved");
+
+      // Other approvals should not have comments (they were auto-rejected)
+      const otherApprovals = updatedRequest!.approvals.filter(a => a.id !== firstApproval.id);
+      otherApprovals.forEach(approval => {
+        expect(approval.comment).toBeNull();
+      });
+    });
   });
 
   describe("getOrganizationPtoRequestsMonthly", () => {
@@ -818,6 +851,270 @@ describe("PtoService Tests", () => {
       // Assert
       expect(currentMonthRequests).toHaveLength(1);
       expect(currentMonthRequests[0].id).toBe(currentMonthPto.id);
+    });
+  });
+
+  describe("getPendingRequests", () => {
+    test("should return empty map when no pending requests exist", async () => {
+      // Arrange
+      await createOrganization();
+
+      // Act
+      const pendingRequestsMap = await ptoService.getPendingRequests();
+
+      // Assert
+      expect(pendingRequestsMap.size).toBe(0);
+    });
+
+    test("should group pending requests by current approver", async () => {
+      // Arrange
+      const organization = await createOrganization();
+      const user1 = await createUser("user1", organization);
+      const user2 = await createUser("user2", organization);
+      const approver1 = await createUser("approver1", organization);
+      const approver2 = await createUser("approver2", organization);
+      const template = await createPtoTemplate(organization);
+
+      // Create 2 requests for approver1
+      await ptoService.createPtoRequest(
+        user1,
+        template,
+        new Date("2025-04-01"),
+        new Date("2025-04-02"),
+        "Request 1",
+        "Request 1 reason",
+        [approver1]
+      );
+
+      await ptoService.createPtoRequest(
+        user2,
+        template,
+        new Date("2025-04-03"),
+        new Date("2025-04-04"),
+        "Request 2",
+        "Request 2 reason",
+        [approver1]
+      );
+
+      // Create 1 request for approver2
+      await ptoService.createPtoRequest(
+        user1,
+        template,
+        new Date("2025-04-05"),
+        new Date("2025-04-06"),
+        "Request 3",
+        "Request 3 reason",
+        [approver2]
+      );
+
+      // Act
+      const pendingRequestsMap = await ptoService.getPendingRequests();
+
+      // Assert
+      expect(pendingRequestsMap.size).toBe(2);
+
+      const approver1Data = pendingRequestsMap.get(approver1.id);
+      expect(approver1Data).toBeDefined();
+      expect(approver1Data?.user.id).toBe(approver1.id);
+      expect(approver1Data?.requests).toHaveLength(2);
+
+      const approver2Data = pendingRequestsMap.get(approver2.id);
+      expect(approver2Data).toBeDefined();
+      expect(approver2Data?.user.id).toBe(approver2.id);
+      expect(approver2Data?.requests).toHaveLength(1);
+    });
+
+    test("should only include requests where approver is the current approver in approval chain", async () => {
+      // Arrange
+      const organization = await createOrganization();
+      const user = await createUser("user", organization);
+      const approver1 = await createUser("approver1", organization);
+      const approver2 = await createUser("approver2", organization);
+      const approver3 = await createUser("approver3", organization);
+      const template = await createPtoTemplate(organization);
+
+      // Create request with 3 approvers
+      const request = await ptoService.createPtoRequest(
+        user,
+        template,
+        new Date("2025-04-01"),
+        new Date("2025-04-02"),
+        "Multi-approver request",
+        "Request reason",
+        [approver1, approver2, approver3]
+      );
+
+      // Act - Initially only approver1 should see the request
+      let pendingRequestsMap = await ptoService.getPendingRequests();
+
+      // Assert
+      expect(pendingRequestsMap.size).toBe(1);
+      expect(pendingRequestsMap.has(approver1.id)).toBe(true);
+      expect(pendingRequestsMap.has(approver2.id)).toBe(false);
+      expect(pendingRequestsMap.has(approver3.id)).toBe(false);
+
+      // Approve by approver1
+      const approval1 = request.approvals.find(a => a.approver.id === approver1.id)!;
+      await ptoService.approve(approver1, approval1.id, "Approved by approver1");
+
+      // Act - Now only approver2 should see the request
+      pendingRequestsMap = await ptoService.getPendingRequests();
+
+      // Assert
+      expect(pendingRequestsMap.size).toBe(1);
+      expect(pendingRequestsMap.has(approver1.id)).toBe(false);
+      expect(pendingRequestsMap.has(approver2.id)).toBe(true);
+      expect(pendingRequestsMap.has(approver3.id)).toBe(false);
+    });
+
+    test("should exclude approved and rejected requests", async () => {
+      // Arrange
+      const organization = await createOrganization();
+      const user = await createUser("user", organization);
+      const approver = await createUser("approver", organization);
+      const template = await createPtoTemplate(organization);
+
+      // Create 3 requests
+      const pendingRequest = await ptoService.createPtoRequest(
+        user,
+        template,
+        new Date("2025-04-01"),
+        new Date("2025-04-02"),
+        "Pending request",
+        "Pending reason",
+        [approver]
+      );
+
+      const approvedRequest = await ptoService.createPtoRequest(
+        user,
+        template,
+        new Date("2025-04-03"),
+        new Date("2025-04-04"),
+        "Approved request",
+        "Approved reason",
+        [approver]
+      );
+
+      const rejectedRequest = await ptoService.createPtoRequest(
+        user,
+        template,
+        new Date("2025-04-05"),
+        new Date("2025-04-06"),
+        "Rejected request",
+        "Rejected reason",
+        [approver]
+      );
+
+      // Approve one request
+      await ptoService.approve(
+        approver,
+        approvedRequest.approvals[0].id,
+        "Approved"
+      );
+
+      // Reject one request
+      await ptoService.reject(
+        approver,
+        rejectedRequest.approvals[0].id,
+        "Rejected"
+      );
+
+      // Act
+      const pendingRequestsMap = await ptoService.getPendingRequests();
+
+      // Assert
+      expect(pendingRequestsMap.size).toBe(1);
+      const approverData = pendingRequestsMap.get(approver.id);
+      expect(approverData?.requests).toHaveLength(1);
+      expect(approverData?.requests[0].id).toBe(pendingRequest.id);
+    });
+
+    test("should handle multiple requests with different approvers correctly", async () => {
+      // Arrange
+      const organization = await createOrganization();
+      const user1 = await createUser("user1", organization);
+      const user2 = await createUser("user2", organization);
+      const user3 = await createUser("user3", organization);
+      const approver1 = await createUser("approver1", organization);
+      const approver2 = await createUser("approver2", organization);
+      const template = await createPtoTemplate(organization);
+
+      // Create various requests
+      await ptoService.createPtoRequest(
+        user1,
+        template,
+        new Date("2025-04-01"),
+        new Date("2025-04-02"),
+        "Request 1",
+        "Reason 1",
+        [approver1, approver2] // Multi-approver
+      );
+
+      await ptoService.createPtoRequest(
+        user2,
+        template,
+        new Date("2025-04-03"),
+        new Date("2025-04-04"),
+        "Request 2",
+        "Reason 2",
+        [approver1]
+      );
+
+      await ptoService.createPtoRequest(
+        user3,
+        template,
+        new Date("2025-04-05"),
+        new Date("2025-04-06"),
+        "Request 3",
+        "Reason 3",
+        [approver2, approver1] // Different order
+      );
+
+      // Act
+      const pendingRequestsMap = await ptoService.getPendingRequests();
+
+      // Assert
+      expect(pendingRequestsMap.size).toBe(2);
+
+      // approver1 should have 2 requests (one direct, one from multi-approver chain)
+      const approver1Data = pendingRequestsMap.get(approver1.id);
+      expect(approver1Data?.requests).toHaveLength(2);
+
+      // approver2 should have 1 request
+      const approver2Data = pendingRequestsMap.get(approver2.id);
+      expect(approver2Data?.requests).toHaveLength(1);
+    });
+
+    test("should include user and organization relations in the result", async () => {
+      // Arrange
+      const organization = await createOrganization();
+      const user = await createUser("user", organization);
+      const approver = await createUser("approver", organization);
+      approver.name = "Approver Name";
+      await userRepository.save(approver);
+
+      const template = await createPtoTemplate(organization);
+
+      await ptoService.createPtoRequest(
+        user,
+        template,
+        new Date("2025-04-01"),
+        new Date("2025-04-02"),
+        "Request",
+        "Reason",
+        [approver]
+      );
+
+      // Act
+      const pendingRequestsMap = await ptoService.getPendingRequests();
+
+      // Assert
+      const approverData = pendingRequestsMap.get(approver.id);
+      expect(approverData).toBeDefined();
+      expect(approverData?.user.userId).toBe("approver");
+      expect(approverData?.user.name).toBe("Approver Name");
+      expect(approverData?.user.organization).toBeDefined();
+      expect(approverData?.user.organization.organizationId).toBe("test-organization");
     });
   });
 });

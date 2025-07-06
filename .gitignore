@@ -2,3 +2,24 @@ node_modules
 .DS_Store
 .env*
 dist
+
+# IDE 설정
+.idea/
+
+# 코드 분석 도구
+qodana.yaml
+
+# 개발 스크립트
+start-ngork.sh
+
+# 데이터베이스
+database.sqlite
+
+firebase.json
+
+# Firebase 및 호스팅 관련 파일
+.firebaserc
+404.html
+claude.md
+hosting.cHV*
+index.html

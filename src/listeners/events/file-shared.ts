@@ -53,9 +53,9 @@ const fileShared = async ({
 
     logger.info('Parsed Excel Data:', users);
 
-    let updatedCount = 0;
+    // Validate all users before processing
     for (const user of users) {
-      const { slack_id, name, annual_pto_days, remaining_pto_days } = user;
+      const { name, annual_pto_days, remaining_pto_days } = user;
 
       if (annual_pto_days < remaining_pto_days) {
         assert(
@@ -68,18 +68,21 @@ const fileShared = async ({
           }),
         );
       }
-
-      const userData = {
-        userId: slack_id,
-        name,
-        organization: context.organization,
-        annualPtoDays: annual_pto_days,
-        usedPtoDays: annual_pto_days - remaining_pto_days,
-      } as Partial<User>;
-
-      await userService.upsertUser(slack_id, userData);
-      updatedCount++;
     }
+
+    // Prepare bulk data
+    const userIds = users.map((user) => user.slack_id);
+    const usersData: Partial<User>[] = users.map((user) => ({
+      userId: user.slack_id,
+      name: user.name,
+      organization: context.organization,
+      annualPtoDays: user.annual_pto_days,
+      usedPtoDays: user.annual_pto_days - user.remaining_pto_days,
+    }));
+
+    // Bulk upsert all users
+    await userService.bulkUpsertUsers(userIds, usersData, context.organization);
+    const updatedCount = users.length;
 
     await client.chat.postMessage({
       channel: event.channel_id,

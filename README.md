@@ -1,81 +1,132 @@
-# 연차관리 슬랙으로 쉽게!
+# PTO Management Made Easy with Slack!
 
-####  VacayBuddy는 연차 신청부터 승인, 현황 확인까지 전부 슬랙 안에서 해결할 수 있는 스마트한 연차 관리 도우미입니다.<a href="https://vacaybuddy-server-1080165942907.asia-northeast3.run.app//slack/install">
+*[한국어 문서](README.ko.md)*
+
+#### VacayBuddy is a smart PTO management assistant that handles everything from requesting time off to approvals and status tracking directly within Slack.<a href="https://vacaybuddy-server-1080165942907.asia-northeast3.run.app//slack/install">
 
 <div> 
-설치하기 
 <a href="https://vacaybuddy-server-1080165942907.asia-northeast3.run.app//slack/install">
+Install 
 <img src="assets/logo/slack_icon.png" alt="Slack logo" width="15">
 </a>
 </div>
 
-## 간편한 연차 신청
+## Simple PTO Requests
 
-<img src="./assets/gifs/pto-request.gif" alt="PTO 요청 화면">
+<img src="./assets/gifs/pto-request.gif" alt="PTO request screen">
 
-- **슬랙에서 바로 신청**: 슬랙 앱 홈에서 몇 번의 클릭으로 간편하게 연차를 신청하세요.
-- **남은 연차 확인**: 봇 설치 후 홈탭에서 바로 내 남은 연차를 한눈에 확인할 수 있습니다.
-- **이전 연차 내역**: 신청한 연차 내역을 상세히 확인할 수 있습니다.
+- **Request Directly in Slack**: Request time off with just a few clicks in the Slack app home.
+- **Check Remaining PTO**: View your remaining PTO balance at a glance from the home tab after installing the bot.
+- **Previous PTO History**: Check detailed history of your submitted PTO requests.
 
-## 편리한 승인 및 검토
+## Convenient Approval and Review
 
-<img src="./assets/gifs/pto-approve.gif" alt="PTO 검토 화면">
+<img src="./assets/gifs/pto-approve.gif" alt="PTO review screen">
 
-- **알림 및 승인**: 연차 신청 시 메시지 알림이 오고, 버튼을 눌러 모달창에서 승인 또는 거절할 수 있습니다.
-- **간편한 승인 처리**: 슬랙 메시지에서 바로 모달창을 열어 승인 또는 거절할 수 있습니다.
+- **Notifications and Approvals**: Receive message notifications for PTO requests and approve or reject through a modal window.
+- **Easy Approval Process**: Open a modal window directly from Slack messages or the home tab to approve or reject requests.
 
-## 관리자 기능
+## Admin Features
 
-<img src="./assets/screens/admin-page.png" alt="관리자 페이지">
+<img src="./assets/gifs/admin.gif" alt="Admin page">
 
-- **맞춤형 휴가 템플릿 관리**: 연차, 오후반차, 포상휴가 등 다양한 휴가 유형을 자유롭게 설정하고 관리할 수 있습니다.
-- **팀원 휴가 관리 대시보드**: 모든 팀원의 휴가 신청 내역과 남은 연차를 한 눈에 확인하고 관리할 수 있습니다.
-- **관리자 설정**: 홈탭에서 관리자 지정, 휴가 템플릿 관리, 팀원 연차 확인이 가능합니다.
+- **Custom PTO Template Management**: Freely configure and manage various types of leave such as annual leave, half-day leave, and reward leave.
+- **Team PTO Management Dashboard**: View and manage all team members' PTO requests and remaining balances at a glance.
 
-## 스마트한 연차 데이터 관리
+## Smart PTO Data Management
 
-<img src="./assets/screens/excel-format.png" alt="엑셀 데이터 화면">
+<img src="./assets/gifs/user-excel-upload.gif" alt="Excel data screen">
 
-- **엑셀 데이터 연동**: 기존 엑셀 파일로 관리하던 팀원들의 연차 데이터를 한 번에 업로드하여 자동으로 동기화합니다.
-- **원활한 연차 전환**: 기존 시스템에서 VacayBuddy로 손쉽게 마이그레이션하여 연차 관리 시스템 전환이 가능합니다.
-- **실시간 연차 현황**: 업로드된 데이터는 실시간으로 업데이트되어 항상 최신 연차 현황을 유지합니다.
+- **Excel Data Integration**: Upload and automatically synchronize PTO data for team members previously managed in Excel files.
+- **Smooth PTO Transition**: Easily migrate from existing systems to VacayBuddy for seamless PTO management system transition.
 
-## 팀 현황 대시보드
+## Installation Guide
 
-<img src="./assets/screens/team-status-html.png" alt="팀 현황 대시보드">
+### Creating a Slack App
 
-- **팀원 연차 관리**: 팀원들의 연차 및 휴가 현황을 한눈에 확인할 수 있는 페이지를 제공합니다.
+1. Go to [https://api.slack.com/apps/new](https://api.slack.com/apps/new) and select "From an app manifest"
+2. Choose the workspace where you want to install the app
+3. Copy the `manifest.json` content into the text box and click "Next"
+4. Review the configuration and click "Create"
+5. Click "Install to Workspace" and select "Allow"
 
-## 설치 방법
+### Setting Environment Variables
 
-### Slack 앱 생성하기
+1. Copy `env.sample` to `.env`
+2. Configure the environment variables as follows:
 
-1. [https://api.slack.com/apps/new](https://api.slack.com/apps/new)로 이동하여 "From an app manifest" 선택
-2. 앱을 설치할 워크스페이스 선택
-3. `manifest.json` 내용을 텍스트 상자에 복사하고 "Next" 클릭
-4. 구성을 검토하고 "Create" 클릭
-5. "Install to Workspace"를 클릭하고 "Allow" 선택
+```
+# Socket Mode Configuration (Required for Socket Mode)
+SLACK_BOT_TOKEN=xoxb-ababa
+SLACK_APP_TOKEN=xapp-1abab
 
-### 환경 변수 설정
+# HTTP Mode Configuration (Required for HTTP Mode)
+SLACK_SIGNING_SECRET=...
+SLACK_CLIENT_ID=...
+SLACK_CLIENT_SECRET=...
+SLACK_STATE_SECRET=...
 
-1. `env.sample`을 `.env`로 복사
-2. [앱 설정 페이지](https://api.slack.com/apps)에서 "OAuth & Permissions"를 클릭하고 Bot User OAuth Token을 복사하여 `.env` 파일의 `SLACK_BOT_TOKEN`에 추가
-3. "Basic Information"에서 "App-Level Tokens" 섹션의 지침에 따라 `connections:write` 범위로 토큰을 생성하고 `.env`의 `SLACK_APP_TOKEN`에 추가
-4. 필요에 따라 데이터베이스 연결을 위한 추가 환경 변수 구성
+# Slack OAuth Scopes
+SLACK_SCOPES=files:read,im:history,im:write,users:read,users:read.email,chat:write,chat:write.public,channels:read
 
-### 로컬 실행 방법
+# Application Settings
+APP_URL=...  # Required for HTTP Mode, enter ngrok address for local development
+JWT_SECRET=JWT_SECRET
+
+# Database Configuration (Default: SQLite)
+# SQLite is used by default and can be run locally without additional configuration.
+# To use MySQL, uncomment and fill in the following settings (optional)
+#DB_TYPE=mysql
+#DB_HOST=
+#DB_PORT=3306
+#DB_USERNAME=
+#DB_PASSWORD=
+#DB_DATABASE=
+#DB_SYNC=true
+#DB_LOGGING=false
+```
+
+3. Check the required tokens and secrets from your [app settings page](https://api.slack.com/apps) and enter them.
+4. By default, a SQLite database is used, so you can run the app without additional database configuration.
+
+### Local Execution Methods
+
+VacayBuddy can be run in two modes:
+
+#### 1. Socket Mode (For Development)
+Communicate with Slack without tunneling in a local development environment. Recommended for initial development stages.
+Required environment variables: `SLACK_BOT_TOKEN`, `SLACK_APP_TOKEN`
 
 ```bash
 npm install
+npm run dev-socket
+```
+
+#### 2. HTTP Mode (For Production)
+Communicate with Slack through HTTP endpoints, identical to the actual production environment.
+Required environment variables: `SLACK_SIGNING_SECRET`, `SLACK_CLIENT_ID`, `SLACK_CLIENT_SECRET`, `SLACK_STATE_SECRET`, `APP_URL`
+
+To test HTTP Mode locally:
+1. Install [ngrok](https://ngrok.com/) and create a tunnel with the command `ngrok http 3000`
+2. Set the generated ngrok URL in the `APP_URL` field of your `.env` file
+3. Update the Redirect URLs and Event Subscriptions URL in your Slack app settings to match the ngrok URL
+
+```bash
+npm install
+npm run dev-http
+```
+
+#### Production Deployment
+```bash
 npm start
 ```
 
-## 슬랙 커뮤니티
-슬랙 채널에서 궁금한 점이나 피드백을 남겨주세요. 여러분의 의견을 기다립니다!
-[채널 참여하기](https://join.slack.com/t/vacay-buddy/shared_invite/zt-328y00o5z-HoneR_Gl4iNlg9sNMMgrNg)
+## Slack Community
+Leave your questions or feedback in our Slack channel. We look forward to your input!
+[Join the Channel](https://join.slack.com/t/vacay-buddy/shared_invite/zt-328y00o5z-HoneR_Gl4iNlg9sNMMgrNg)
 
 ## LICENSE
-MIT 라이센스에 따라 배포됩니다. 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세요.
+Distributed under the MIT License. See [LICENSE](LICENSE) file for more information.
 
-## 연락처
-PTO 관련 문의는 letnaturebe2@gmail.com으로 연락하세요.
+## Contact
+For PTO related inquiries, please contact letnaturebe2@gmail.com. 

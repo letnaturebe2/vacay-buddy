@@ -2,11 +2,11 @@ import { Application, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { ptoService, userService } from '../service';
 import { getRequestStatus } from '../utils';
-import { commonStyles, expiredTokenStyles } from './css';
+import { commonStyles } from './css';
 
 export default (app: Application) => {
   app.get('/user-vacation-html', async (req: Request, res: Response) => {
-    const { token } = req.query;
+    const { token, year } = req.query;
 
     if (!token || typeof token !== 'string') {
       res.status(400).send('Invalid token');
@@ -21,32 +21,14 @@ export default (app: Application) => {
       };
     } catch (error) {
       if (error instanceof jwt.TokenExpiredError) {
-        const html = `
-    <!DOCTYPE html>
-    <html lang="ko">
-    <head>
-      <meta charset="UTF-8">
-      <title>만료된 접근</title>
-      <style>${expiredTokenStyles}</style>
-    </head>
-    <body>
-      <div class="container">
-        <h1>접근 시간이 만료되었습니다</h1>
-        <div class="message">
-          <p>보안상의 이유로 접근 링크가 1시간 후에 만료됩니다.</p>
-          <p>슬랙에서 다시 접근해 주세요.</p>
-        </div>
-      </div>
-    </body>
-    </html>
-    `;
-        res.set('Content-Type', 'text/html');
-        res.status(401).send(html);
+        res.status(401).render('pages/expired-token', {
+          redirectMessage: '슬랙에서 다시 접근해 주세요.',
+        });
         return;
       }
 
-      // 그 외 다른 토큰 에러의 경우
-      res.status(401).send('유효하지 않은 토큰입니다');
+      // For other token errors
+      res.status(401).send('Invalid token');
       return;
     }
 
@@ -57,68 +39,34 @@ export default (app: Application) => {
       return;
     }
 
-    // 사용자의 모든 휴가 요청을 가져오기
+    // Get all vacation requests for the user
     const user = await userService.getUser(userId);
     const userRequests = await ptoService.getMyPtoRequests(user);
 
-    const html = `
-    <!DOCTYPE html>
-    <html lang="ko">
-    <head>
-      <meta charset="UTF-8">
-      <title>내 연차 요약</title>
-      <style>${commonStyles}</style>
-    </head>
-    <body>
-      <h1>내 연차 요약</h1>
+    // Prepare for year filtering
+    const currentYear = new Date().getFullYear();
+    const yearNum = year ? Number(year) : Number.NaN;
+    const selectedYear = !Number.isNaN(yearNum) ? yearNum : currentYear;
 
-      <div class="summary">
-        <h2>휴가 정보</h2>
-        <p>사용한 연차: ${user.usedPtoDays}/${user.annualPtoDays} 일</p>
-        <p>남은 일수: ${user.annualPtoDays - user.usedPtoDays} 일</p>
-      </div>
+    // Create list of available years (current year and 3 previous years)
+    const availableYears = [];
+    for (let i = 0; i < 4; i++) {
+      availableYears.push(currentYear - i);
+    }
 
-      <h2>내 연차 요청 목록</h2>
-      ${
-        userRequests.length === 0
-          ? '<p>등록된 연차 요청이 없습니다.</p>'
-          : `
-          <table>
-            <thead>
-              <tr>
-                <th>제목</th>
-                <th>시작일</th>
-                <th>종료일</th>
-                <th>소모 일수</th>
-                <th>유형</th>
-                <th>상태</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${userRequests
-                .map((request) => {
-                  const [statusClass, statusText] = getRequestStatus(request);
-                  return `
-                  <tr class="request-row">
-                    <td>${request.title}</td>
-                    <td>${request.startDate.toLocaleDateString('ko-KR')}</td>
-                    <td>${request.endDate.toLocaleDateString('ko-KR')}</td>
-                    <td>${request.consumedDays}</td>
-                    <td>${request.template.title}</td>
-                    <td class="${statusClass}">${statusText}</td>
-                  </tr>
-                `;
-                })
-                .join('')}
-            </tbody>
-          </table>
-        `
-      }
-    </body>
-    </html>
-    `;
+    // Filter requests for the selected year
+    const filteredRequests = userRequests.filter((request) => {
+      const requestYear = request.startDate.getFullYear();
+      return selectedYear === requestYear;
+    });
 
-    res.set('Content-Type', 'text/html');
-    res.send(html);
+    res.render('pages/user-vacation', {
+      user,
+      availableYears,
+      selectedYear,
+      filteredRequests,
+      commonStyles,
+      getRequestStatus,
+    });
   });
 };

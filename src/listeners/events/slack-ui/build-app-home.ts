@@ -96,6 +96,15 @@ export const buildAppHome = async (context: AppContext, showAdminSection: boolea
             style: 'primary',
             value: ActionId.UPDATE_ADMIN_PAGE,
           },
+          {
+            type: 'button',
+            text: {
+              type: 'plain_text',
+              text: t(context.locale, 'view_team_vacation'),
+              emoji: true,
+            },
+            url: `${process.env.APP_URL || 'http://localhost:3000'}/team-vacation-html?token=${token}`,
+          },
         ],
       },
       {

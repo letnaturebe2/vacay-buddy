@@ -3,6 +3,7 @@ import { DataSource, Repository } from 'typeorm';
 import { INVALID_USER_IDS } from '../constants';
 import { Organization } from '../entity/organization.model';
 import { User } from '../entity/user.model';
+import { assert } from '../utils';
 import { UserService } from './user.service';
 
 export class OrganizationService {
@@ -38,8 +39,34 @@ export class OrganizationService {
   public async deleteOrganization(organizationId: string): Promise<void> {
     const organization = await this.getOrganization(organizationId);
     if (organization) {
-      await this.organizationRepository.remove(organization);
+      await this.organizationRepository.softDelete({ organizationId });
     }
+  }
+
+  public async getOrganizationWithDeleted(organizationId: string): Promise<Organization | null> {
+    return await this.organizationRepository.findOne({
+      where: { organizationId },
+      withDeleted: true,
+    });
+  }
+
+  public async restoreOrganization(
+    organizationId: string,
+    isEnterprise: boolean,
+    installation: string,
+  ): Promise<Organization> {
+    await this.organizationRepository.update(
+      { organizationId },
+      {
+        deletedAt: null,
+        isEnterprise,
+        installation,
+      },
+    );
+
+    const organization = await this.getOrganization(organizationId);
+    assert(organization !== null, 'Organization not found');
+    return organization;
   }
 
   public async createOrganization(
