@@ -52,11 +52,11 @@ export async function createCalendarEvent(user: User, ptoRequest: PtoRequest): P
       description: `연차 유형: ${ptoRequest.template.title}\n사유: ${ptoRequest.reason}\n소모 일수: ${ptoRequest.consumedDays}일`,
       start: {
         date: startDate,
-        timeZone: user.tz
+        timeZone: user.tz,
       },
       end: {
         date: endDate,
-        timeZone: user.tz
+        timeZone: user.tz,
       },
       transparency: 'transparent', // 바쁜 시간으로 표시하지 않음
       // visibility: 'private',
@@ -175,16 +175,16 @@ export default (app: Application) => {
       throw new GoogleOAuthError('token_invalid', '유효하지 않은 토큰입니다.');
     }
 
-    let decoded : {
-      organizationId: string
-      userId: string
+    let decoded: {
+      organizationId: string;
+      userId: string;
     };
 
     try {
       decoded = jwt.verify(token, process.env.JWT_SECRET || 'default-secret-key') as {
         organizationId: string;
         userId: string;
-      }
+      };
     } catch (error) {
       throw new GoogleOAuthError('token_invalid', '토큰이 유효하지 않습니다.', token);
     }
