@@ -163,6 +163,7 @@ export default {
     '시작하려면 아래 사용자 정보 엑셀 다운로드 버튼을 클릭하여 엑셀 파일을 다운로드하고 팀원들의 연차를 관리하세요:',
   download_user_template: '📊 사용자 정보 엑셀 다운로드',
   view_team_vacation: '📅 팀 휴가 현황',
+  connect_google_calendar: '구글 캘린더 연결',
 
   // excel file
   users_updated_success: '{{count}}명의 사용자가 업데이트 되었습니다.',

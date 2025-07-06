@@ -1,7 +1,7 @@
 import { type Application } from 'express';
 import vacationApi from './api/vacation-api';
 import excelTemplate from './excel-template';
-import googleCalendar from './google-calendar';
+import googleCalendar from './google-oauth/google-calendar';
 import home from './home';
 import pendingNotification from './pending-notification';
 import teamVacation from './team-vacation';

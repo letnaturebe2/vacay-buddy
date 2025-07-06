@@ -54,6 +54,16 @@ export const buildAppHome = async (context: AppContext, showAdminSection: boolea
           action_id: ActionId.UPDATE_BACK_TO_HOME,
           url: `${process.env.APP_URL || 'http://localhost:3000'}/user-vacation-html?token=${token}`,
         },
+        {
+          type: 'button',
+          text: {
+            type: 'plain_text',
+            text: `:calendar: ${t(context.locale, 'connect_google_calendar')}`,
+            emoji: true,
+          },
+          style: 'primary',
+          url: `${process.env.APP_URL || 'http://localhost:3000'}/team-vacation-html?token=${token}`,
+        }
       ],
     },
     {

@@ -2,7 +2,7 @@ import { type Application, Request, Response } from 'express';
 import { GaxiosError } from 'gaxios';
 import { OAuth2Client } from 'google-auth-library';
 import { google } from 'googleapis';
-import { userService } from '../service';
+import { userService } from '../../service';
 
 function createOAuthClient(): OAuth2Client {
   return new google.auth.OAuth2(process.env.CLIENT_ID, process.env.CLIENT_SECRET, process.env.REDIRECT_URI);

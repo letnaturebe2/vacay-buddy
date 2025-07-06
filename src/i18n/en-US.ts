@@ -163,6 +163,7 @@ export default {
     'To get started, click the Download User Template button below to download and upload the Excel file to manage PTO for your team:',
   download_user_template: '📊 Download User Template',
   view_team_vacation: '📅 View Team Vacation',
+  connect_google_calendar: 'Connect Google Calendar',
 
   // excel file
   users_updated_success: '{{count}} users have been updated.',
