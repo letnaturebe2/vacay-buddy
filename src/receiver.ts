@@ -34,6 +34,7 @@ const receiver = new ExpressReceiver({
       });
 
       const locale = result.user?.locale || 'en-US';
+      const name = result.user?.real_name ?? '';
       const isEnterprise = installation.isEnterpriseInstall !== undefined;
       const installationJson = JSON.stringify(installation);
 
@@ -46,7 +47,7 @@ const receiver = new ExpressReceiver({
         await ptoService.createDefaultPtoTemplates(locale, organization);
       }
 
-      const installer = await userService.getOrCreateUser(installation.user.id, organization, true);
+      const installer = await userService.getOrCreateUser(installation.user.id, organization, true, name);
 
       // ensure installer is saved and admin, if organization is restored, it might not be admin
       if (!installer.isAdmin) {

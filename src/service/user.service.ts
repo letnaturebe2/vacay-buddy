@@ -30,10 +30,10 @@ export class UserService {
     return await repository.save(user);
   }
 
-  public async getOrCreateUser(userId: string, organization: Organization, isAdmin = false): Promise<User> {
+  public async getOrCreateUser(userId: string, organization: Organization, isAdmin = false, name = ''): Promise<User> {
     let user = await this.userRepository.findOne({ where: { userId: userId } });
     if (user === null) {
-      user = await this.createUser(userId, organization, isAdmin);
+      user = await this.createUser(userId, name, organization, isAdmin);
     }
     return user;
   }
@@ -108,11 +108,12 @@ export class UserService {
     return await this.userRepository.save(user);
   }
 
-  private async createUser(userId: string, organization: Organization, isAdmin = false): Promise<User> {
+  private async createUser(userId: string, name: string, organization: Organization, isAdmin = false): Promise<User> {
     const user = new User();
     user.userId = userId;
     user.organization = organization;
     user.isAdmin = isAdmin;
+    user.name = name;
     return await this.userRepository.save(user);
   }
 
