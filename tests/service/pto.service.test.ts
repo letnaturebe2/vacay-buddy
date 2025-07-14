@@ -140,6 +140,83 @@ describe("PtoService Tests", () => {
     });
   });
 
+  describe("deleteTemplate", () => {
+    test("should soft delete a PTO template", async () => {
+      // Arrange
+      const organization = await createOrganization();
+      const template = await createPtoTemplate(organization);
+
+      // Verify template exists before deletion
+      const templatesBeforeDelete = await ptoService.getTemplates(organization);
+      expect(templatesBeforeDelete).toHaveLength(1);
+
+      // Act
+      await ptoService.deleteTemplate(template.id);
+
+      // Assert
+      const templatesAfterDelete = await ptoService.getTemplates(organization);
+      expect(templatesAfterDelete).toHaveLength(0);
+
+      // Verify template is soft deleted (not hard deleted)
+      const softDeletedTemplate = await ptoTemplateRepository.findOne({
+        where: { id: template.id },
+        withDeleted: true
+      });
+      expect(softDeletedTemplate).toBeDefined();
+      expect(softDeletedTemplate?.deletedAt).toBeDefined();
+    });
+
+    test("should preserve template_id in PTO requests after template deletion", async () => {
+      // Arrange
+      const organization = await createOrganization();
+      const user = await createUser("test-user", organization);
+      const approver = await createUser("approver", organization);
+      const template = await createPtoTemplate(organization);
+
+      // Create PTO request
+      const ptoRequest = await ptoService.createPtoRequest(
+        user,
+        template,
+        new Date("2025-04-01"),
+        new Date("2025-04-01"),
+        "Vacation time",
+        "Vacation time",
+        [approver]
+      );
+
+      // Approve the request
+      const approval = ptoRequest.approvals[0];
+      await ptoService.approve(approver, approval.id, "Approved");
+
+      // Act - Delete the template
+      await ptoService.deleteTemplate(template.id);
+
+      // Assert - Verify that template_id foreign key is preserved in the database
+      const rawPtoRequest = await ptoRequestRepository
+        .createQueryBuilder('ptoRequest')
+        .select(['ptoRequest.id', 'ptoRequest.template_id'])
+        .where('ptoRequest.id = :id', { id: ptoRequest.id })
+        .getRawOne();
+      
+      expect(rawPtoRequest?.template_id).toBe(template.id);
+      expect(rawPtoRequest?.template_id).not.toBeNull();
+      
+      // Verify the template is soft deleted but still exists in database
+      const templateWithDeleted = await ptoTemplateRepository.findOne({
+        where: { id: template.id },
+        withDeleted: true
+      });
+      expect(templateWithDeleted?.deletedAt).toBeDefined();
+      expect(templateWithDeleted?.id).toBe(template.id);
+      
+      // Verify template is not accessible through normal queries
+      const normalTemplate = await ptoTemplateRepository.findOne({
+        where: { id: template.id }
+      });
+      expect(normalTemplate).toBeNull();
+    });
+  });
+
   describe("createPtoRequest", () => {
     test("should create a PTO request with approvals", async () => {
       // Arrange

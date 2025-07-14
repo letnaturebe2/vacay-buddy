@@ -1,4 +1,4 @@
-import { Check, Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Check, Column, DeleteDateColumn, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { BaseEntity } from './base';
 import { Organization } from './organization.model';
 
@@ -29,4 +29,7 @@ export class PtoTemplate extends BaseEntity {
   @Column({ type: 'float', default: 1 })
   @Check('days_consumed >= 0 AND days_consumed <= 1')
   daysConsumed: number;
+
+  @DeleteDateColumn()
+  deletedAt?: Date | null;
 }

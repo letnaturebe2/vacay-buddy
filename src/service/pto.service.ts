@@ -45,7 +45,7 @@ export class PtoService {
   }
 
   async deleteTemplate(id: number): Promise<void> {
-    await this.ptoTemplateRepository.delete(id);
+    await this.ptoTemplateRepository.softDelete(id);
   }
 
   private async createTemplate(template: Partial<PtoTemplate>, organization: Organization): Promise<PtoTemplate> {
@@ -173,6 +173,7 @@ export class PtoService {
       order: {
         startDate: 'DESC',
       },
+      withDeleted: true,
     });
   }
 
