@@ -40,7 +40,9 @@ export default (app: Application) => {
     const users = await organizationService.getUsers(organizationId);
     const monthlyRequests = await ptoService.getOrganizationPtoRequestsMonthly(organizationId);
     const onGoingRequests = monthlyRequests.filter((monthlyRequest) => monthlyRequest.onGoing);
+    const pendingRequests = monthlyRequests.filter((monthlyRequest) => monthlyRequest.status === 'pending');
     const onVacationUsers: Set<string> = new Set(onGoingRequests.map((request) => request.user.userId));
+    const pendingUsers: Set<string> = new Set(pendingRequests.map((request) => request.user.userId));
 
     // Generate tokens for each user
     const usersWithTokens = users.map((user) => ({
@@ -58,7 +60,9 @@ export default (app: Application) => {
     res.render('pages/team-vacation', {
       users: usersWithTokens,
       onVacationUsers,
+      pendingUsers,
       onVacationCount: onVacationUsers.size,
+      pendingCount: pendingUsers.size,
       commonStyles,
       token: token,
       isFromInstallation: from === 'installation',

@@ -67,6 +67,9 @@ export class PtoRequest extends BaseEntity {
   }
 
   get onGoing(): boolean {
+    if (this.status !== PtoRequestStatus.Approved) {
+      return false;
+    }
     const today = startOfDay(new Date());
     return startOfDay(this.startDate) <= today && endOfDay(this.endDate) >= today;
   }

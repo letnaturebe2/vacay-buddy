@@ -217,6 +217,168 @@ describe("PtoService Tests", () => {
     });
   });
 
+  describe("onGoing getter", () => {
+    test("should return true for approved requests within date range", async () => {
+      // Arrange
+      const organization = await createOrganization();
+      const user = await createUser("test-user", organization);
+      const approver = await createUser("approver", organization);
+      const template = await createPtoTemplate(organization);
+      
+      // Create a request for today
+      const today = new Date();
+      const ptoRequest = await ptoService.createPtoRequest(
+        user,
+        template,
+        today,
+        today,
+        "Today vacation",
+        "Vacation today",
+        [approver]
+      );
+
+      // Assert - Initially onGoing should be false
+      expect(ptoRequest.onGoing).toBe(false);
+
+      // Approve the request
+      const approval = ptoRequest.approvals[0];
+      await ptoService.approve(approver, approval.id, "Approved");
+
+      // Act - Refresh the request from database
+      const updatedRequest = await ptoRequestRepository.findOneOrFail({
+        where: { id: ptoRequest.id },
+        relations: ['template']
+      });
+
+      // Assert
+      expect(updatedRequest.onGoing).toBe(true);
+    });
+
+    test("should return false for pending requests even within date range", async () => {
+      // Arrange
+      const organization = await createOrganization();
+      const user = await createUser("test-user", organization);
+      const approver = await createUser("approver", organization);
+      const template = await createPtoTemplate(organization);
+      
+      // Create a pending request for today
+      const today = new Date();
+      const ptoRequest = await ptoService.createPtoRequest(
+        user,
+        template,
+        today,
+        today,
+        "Today vacation",
+        "Vacation today",
+        [approver]
+      );
+
+      // Act
+      expect(ptoRequest.onGoing).toBe(false);
+    });
+
+    test("should return false for rejected requests even within date range", async () => {
+      // Arrange
+      const organization = await createOrganization();
+      const user = await createUser("test-user", organization);
+      const approver = await createUser("approver", organization);
+      const template = await createPtoTemplate(organization);
+      
+      // Create a request for today
+      const today = new Date();
+      const ptoRequest = await ptoService.createPtoRequest(
+        user,
+        template,
+        today,
+        today,
+        "Today vacation",
+        "Vacation today",
+        [approver]
+      );
+
+      // Reject the request
+      const approval = ptoRequest.approvals[0];
+      await ptoService.reject(approver, approval.id, "Rejected");
+
+      // Act - Refresh the request from database
+      const updatedRequest = await ptoRequestRepository.findOneOrFail({
+        where: { id: ptoRequest.id },
+        relations: ['template']
+      });
+
+      // Assert
+      expect(updatedRequest.onGoing).toBe(false);
+    });
+
+    test("should return false for approved requests outside date range", async () => {
+      // Arrange
+      const organization = await createOrganization();
+      const user = await createUser("test-user", organization);
+      const approver = await createUser("approver", organization);
+      const template = await createPtoTemplate(organization);
+      
+      // Create a request for next week
+      const nextWeek = new Date();
+      nextWeek.setDate(nextWeek.getDate() + 7);
+      const ptoRequest = await ptoService.createPtoRequest(
+        user,
+        template,
+        nextWeek,
+        nextWeek,
+        "Future vacation",
+        "Vacation next week",
+        [approver]
+      );
+
+      // Approve the request
+      const approval = ptoRequest.approvals[0];
+      await ptoService.approve(approver, approval.id, "Approved");
+
+      // Act - Refresh the request from database
+      const updatedRequest = await ptoRequestRepository.findOneOrFail({
+        where: { id: ptoRequest.id },
+        relations: ['template']
+      });
+
+      // Assert
+      expect(updatedRequest.onGoing).toBe(false);
+    });
+
+    test("should return false for approved requests in the past", async () => {
+      // Arrange
+      const organization = await createOrganization();
+      const user = await createUser("test-user", organization);
+      const approver = await createUser("approver", organization);
+      const template = await createPtoTemplate(organization);
+      
+      // Create a request for last week
+      const lastWeek = new Date();
+      lastWeek.setDate(lastWeek.getDate() - 7);
+      const ptoRequest = await ptoService.createPtoRequest(
+        user,
+        template,
+        lastWeek,
+        lastWeek,
+        "Past vacation",
+        "Vacation last week",
+        [approver]
+      );
+
+      // Approve the request
+      const approval = ptoRequest.approvals[0];
+      await ptoService.approve(approver, approval.id, "Approved");
+
+      // Act - Refresh the request from database
+      const updatedRequest = await ptoRequestRepository.findOneOrFail({
+        where: { id: ptoRequest.id },
+        relations: ['template']
+      });
+
+      // Assert
+      expect(updatedRequest.onGoing).toBe(false);
+    });
+  });
+
   describe("createPtoRequest", () => {
     test("should create a PTO request with approvals", async () => {
       // Arrange

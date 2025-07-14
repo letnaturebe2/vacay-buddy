@@ -186,6 +186,12 @@
       color: #004085;
       border-color: #b3d9ff;
     }
+    
+    .status-pending {
+      background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+      color: #856404;
+      border-color: #ffeaa7;
+    }
     .user-link {
       cursor: pointer;
       transition: background-color 0.2s ease;
@@ -903,6 +909,11 @@
         <h3>현재 연차 중</h3>
         <div class="value"><%= onVacationCount %>명</div>
       </div>
+      <div class="stat-item">
+        <div class="icon"><i class="fas fa-clock"></i></div>
+        <h3>연차 요청 중</h3>
+        <div class="value"><%= pendingCount %>명</div>
+      </div>
     </div>
   </div>
   
@@ -936,6 +947,18 @@
       <tbody>
         <% users.forEach(function(user) { %>
           <% const isOnVacation = onVacationUsers.has(user.userId); %>
+          <% const isPending = pendingUsers.has(user.userId); %>
+          <% let statusClass, statusText; %>
+          <% if (isOnVacation) { %>
+            <% statusClass = 'status-on-vacation'; %>
+            <% statusText = '🏖️ 연차 중'; %>
+          <% } else if (isPending) { %>
+            <% statusClass = 'status-pending'; %>
+            <% statusText = '⏳ 요청 중'; %>
+          <% } else { %>
+            <% statusClass = 'status-working'; %>
+            <% statusText = '🏢 근무 중'; %>
+          <% } %>
           <tr class="member-row" data-user-id="<%= user.userId %>">
             <td class="user-name-cell">
               <span class="user-name-text">
@@ -957,8 +980,8 @@
               <span class="cell-value"><%= user.annualPtoDays - user.usedPtoDays %>일</span>
             </td>
             <td class="status-cell">
-              <span class="status-badge <%= isOnVacation ? 'status-on-vacation' : 'status-working' %>">
-                <%= isOnVacation ? '🏖️ 연차 중' : '🏢 근무 중' %>
+              <span class="status-badge <%= statusClass %>">
+                <%= statusText %>
               </span>
             </td>
           </tr>
