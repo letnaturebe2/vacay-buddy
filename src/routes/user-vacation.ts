@@ -13,11 +13,12 @@ export default (app: Application) => {
       return;
     }
 
-    let decoded: { organizationId: string; userId: string };
+    let decoded: { organizationId: string; userId: string; adminUserId?: string };
     try {
       decoded = jwt.verify(token, process.env.JWT_SECRET || 'default-secret-key') as {
         organizationId: string;
         userId: string;
+        adminUserId?: string;
       };
     } catch (error) {
       if (error instanceof jwt.TokenExpiredError) {
@@ -44,7 +45,9 @@ export default (app: Application) => {
     const userRequests = await ptoService.getMyPtoRequests(user);
 
     // Check if the current user is an admin
-    const currentUser = await userService.getUser(decoded.userId);
+    // adminUserId가 있으면 해당 사용자로 권한 체크, 없으면 기존 로직 사용
+    const adminUserId = decoded.adminUserId || decoded.userId;
+    const currentUser = await userService.getUser(adminUserId);
     const isAdmin = currentUser.isAdmin;
 
     // Prepare for year filtering

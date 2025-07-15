@@ -27,11 +27,12 @@ export default (app: Application) => {
       }
     }
 
-    let decoded: { organizationId: string; userId: string };
+    let decoded: { organizationId: string; userId: string; adminUserId?: string };
     try {
       decoded = jwt.verify(token, process.env.JWT_SECRET || 'default-secret-key') as {
         organizationId: string;
         userId: string;
+        adminUserId?: string;
       };
     } catch (error) {
       assert401(false, `Invalid·token:·${String(error)}`);
@@ -40,7 +41,9 @@ export default (app: Application) => {
     const organization = await organizationService.getOrganization(decoded.organizationId);
     assert400(organization !== null, '조직을 찾을 수 없습니다.');
 
-    const requestUser = await userService.getUser(decoded.userId);
+    // adminUserId가 있으면 해당 사용자로 권한 체크, 없으면 기존 로직 사용
+    const adminUserId = decoded.adminUserId || decoded.userId;
+    const requestUser = await userService.getUser(adminUserId);
     assert400(requestUser.isAdmin, '관리자 권한이 없습니다.');
 
     const results = [];
@@ -82,17 +85,20 @@ export default (app: Application) => {
     assert400(!!token && typeof token === 'string', 'Invalid token');
     assert400(!!requestId, 'Request ID is required');
 
-    let decoded: { organizationId: string; userId: string };
+    let decoded: { organizationId: string; userId: string; adminUserId?: string };
     try {
       decoded = jwt.verify(token, process.env.JWT_SECRET || 'default-secret-key') as {
         organizationId: string;
         userId: string;
+        adminUserId?: string;
       };
     } catch (error) {
       assert401(false, `Invalid token: ${String(error)}`);
     }
 
-    const requestUser = await userService.getUser(decoded.userId);
+    // adminUserId가 있으면 해당 사용자로 권한 체크, 없으면 기존 로직 사용
+    const adminOrRequestUserId = decoded.adminUserId || decoded.userId;
+    const requestUser = await userService.getUser(adminOrRequestUserId);
     assert400(requestUser.isAdmin, '관리자 권한이 없습니다.');
 
     // Delete PTO request and update user's PTO days atomically

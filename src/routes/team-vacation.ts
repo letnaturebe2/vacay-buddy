@@ -11,11 +11,12 @@ export default (app: Application) => {
       return;
     }
 
-    let decoded: { organizationId: string; userId?: string };
+    let decoded: { organizationId: string; userId?: string; adminUserId?: string };
     try {
       decoded = jwt.verify(token, process.env.JWT_SECRET || 'default-secret-key') as {
         organizationId: string;
         userId?: string;
+        adminUserId?: string;
       };
     } catch (error) {
       if (error instanceof jwt.TokenExpiredError) {
@@ -51,6 +52,7 @@ export default (app: Application) => {
         {
           organizationId: organizationId,
           userId: user.userId,
+          adminUserId: decoded.userId,
         },
         process.env.JWT_SECRET || 'default-secret-key',
         { expiresIn: '1h' },
