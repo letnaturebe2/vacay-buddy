@@ -1,7 +1,7 @@
 import { Application, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { User } from '../../entity/user.model';
-import { organizationService, userService } from '../../service';
+import { organizationService, ptoService, userService } from '../../service';
 import { assert400, assert401 } from '../../utils';
 
 type RequestBody = {
@@ -72,6 +72,36 @@ export default (app: Application) => {
     res.json({
       success: true,
       results,
+    });
+  });
+
+  app.delete('/api/pto-request/:requestId', async (req: Request, res: Response) => {
+    const { token } = req.query;
+    const { requestId } = req.params;
+
+    assert400(!!token && typeof token === 'string', 'Invalid token');
+    assert400(!!requestId, 'Request ID is required');
+
+    let decoded: { organizationId: string; userId: string };
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET || 'default-secret-key') as {
+        organizationId: string;
+        userId: string;
+      };
+    } catch (error) {
+      assert401(false, `Invalid token: ${String(error)}`);
+    }
+
+    const requestUser = await userService.getUser(decoded.userId);
+    assert400(requestUser.isAdmin, '관리자 권한이 없습니다.');
+
+    // Delete PTO request and update user's PTO days atomically
+    const result = await ptoService.deletePtoRequestWithUserUpdate(Number(requestId));
+
+    res.json({
+      success: true,
+      message: '연차 요청이 삭제되었습니다.',
+      decrementedDays: result.decrementedDays,
     });
   });
 };

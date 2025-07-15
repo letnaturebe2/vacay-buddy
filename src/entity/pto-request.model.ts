@@ -1,5 +1,5 @@
 import { differenceInCalendarDays, endOfDay, startOfDay } from 'date-fns';
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import { Column, DeleteDateColumn, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { PtoRequestStatus } from '../constants';
 import { BaseEntity } from './base';
 import { PtoApproval } from './pto-approval.model';
@@ -60,6 +60,9 @@ export class PtoRequest extends BaseEntity {
 
   @Column({ type: 'integer', nullable: true })
   currentApprovalId: number | null;
+
+  @DeleteDateColumn()
+  deletedAt?: Date | null;
 
   get consumedDays(): number {
     const daysDifference = differenceInCalendarDays(this.endDate, this.startDate) + 1;

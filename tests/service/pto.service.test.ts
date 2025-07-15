@@ -1356,4 +1356,311 @@ describe("PtoService Tests", () => {
       expect(approverData?.user.organization.organizationId).toBe("test-organization");
     });
   });
+
+  describe("deletePtoRequestWithUserUpdate", () => {
+    test("should delete PTO request and decrement user PTO days for approved request", async () => {
+      // Arrange
+      const organization = await createOrganization();
+      let user = await createUser("test-user", organization);
+      const approver = await createUser("approver", organization);
+      const template = await createPtoTemplate(organization);
+
+      // Set initial PTO days
+      user.annualPtoDays = 20;
+      user.usedPtoDays = 5;
+      user = await userRepository.save(user);
+
+      // Create and approve a request (1 day)
+      const ptoRequest = await ptoService.createPtoRequest(
+        user,
+        template,
+        new Date("2025-04-01"),
+        new Date("2025-04-01"), // Single day
+        "Vacation time",
+        "Vacation time",
+        [approver]
+      );
+
+      const approval = ptoRequest.approvals[0];
+      await ptoService.approve(approver, approval.id, "Approved");
+
+      // Verify user's used PTO days increased
+      user = await userRepository.findOneOrFail({ where: { userId: user.userId } });
+      expect(user.usedPtoDays).toBe(6); // 5 + 1 consumed day
+
+      // Act
+      const result = await ptoService.deletePtoRequestWithUserUpdate(ptoRequest.id);
+
+      // Assert
+      expect(result.decrementedDays).toBe(1);
+
+      // Verify user's used PTO days were decremented
+      user = await userRepository.findOneOrFail({ where: { userId: user.userId } });
+      expect(user.usedPtoDays).toBe(5); // Back to original
+
+      // Verify PTO request is soft deleted
+      const deletedRequest = await ptoRequestRepository.findOne({
+        where: { id: ptoRequest.id }
+      });
+      expect(deletedRequest).toBeNull();
+
+      const softDeletedRequest = await ptoRequestRepository.findOne({
+        where: { id: ptoRequest.id },
+        withDeleted: true
+      });
+      expect(softDeletedRequest).toBeDefined();
+      expect(softDeletedRequest?.deletedAt).toBeDefined();
+
+      // Verify approvals are soft deleted
+      const deletedApprovals = await ptoApprovalRepository.find({
+        where: { ptoRequest: { id: ptoRequest.id } }
+      });
+      expect(deletedApprovals).toHaveLength(0);
+
+      const softDeletedApprovals = await ptoApprovalRepository.find({
+        where: { ptoRequest: { id: ptoRequest.id } },
+        withDeleted: true
+      });
+      expect(softDeletedApprovals).toHaveLength(1);
+      expect(softDeletedApprovals[0].deletedAt).toBeDefined();
+    });
+
+    test("should delete PTO request without changing user PTO days for pending request", async () => {
+      // Arrange
+      const organization = await createOrganization();
+      let user = await createUser("test-user", organization);
+      const approver = await createUser("approver", organization);
+      const template = await createPtoTemplate(organization);
+
+      // Set initial PTO days
+      user.annualPtoDays = 20;
+      user.usedPtoDays = 5;
+      user = await userRepository.save(user);
+
+      // Create a pending request (don't approve)
+      const ptoRequest = await ptoService.createPtoRequest(
+        user,
+        template,
+        new Date("2025-04-01"),
+        new Date("2025-04-01"), // Single day
+        "Vacation time",
+        "Vacation time",
+        [approver]
+      );
+
+      // Act
+      const result = await ptoService.deletePtoRequestWithUserUpdate(ptoRequest.id);
+
+      // Assert
+      expect(result.decrementedDays).toBe(0);
+
+      // Verify user's used PTO days unchanged
+      user = await userRepository.findOneOrFail({ where: { userId: user.userId } });
+      expect(user.usedPtoDays).toBe(5); // Unchanged
+
+      // Verify PTO request is soft deleted
+      const deletedRequest = await ptoRequestRepository.findOne({
+        where: { id: ptoRequest.id }
+      });
+      expect(deletedRequest).toBeNull();
+    });
+
+    test("should delete PTO request without changing user PTO days for rejected request", async () => {
+      // Arrange
+      const organization = await createOrganization();
+      let user = await createUser("test-user", organization);
+      const approver = await createUser("approver", organization);
+      const template = await createPtoTemplate(organization);
+
+      // Set initial PTO days
+      user.annualPtoDays = 20;
+      user.usedPtoDays = 5;
+      user = await userRepository.save(user);
+
+      // Create and reject a request
+      const ptoRequest = await ptoService.createPtoRequest(
+        user,
+        template,
+        new Date("2025-04-01"),
+        new Date("2025-04-01"), // Single day
+        "Vacation time",
+        "Vacation time",
+        [approver]
+      );
+
+      const approval = ptoRequest.approvals[0];
+      await ptoService.reject(approver, approval.id, "Rejected");
+
+      // Act
+      const result = await ptoService.deletePtoRequestWithUserUpdate(ptoRequest.id);
+
+      // Assert
+      expect(result.decrementedDays).toBe(0);
+
+      // Verify user's used PTO days unchanged
+      user = await userRepository.findOneOrFail({ where: { userId: user.userId } });
+      expect(user.usedPtoDays).toBe(5); // Unchanged
+
+      // Verify PTO request is soft deleted
+      const deletedRequest = await ptoRequestRepository.findOne({
+        where: { id: ptoRequest.id }
+      });
+      expect(deletedRequest).toBeNull();
+    });
+
+
+    test("should throw error when PTO request does not exist", async () => {
+      // Act & Assert
+      await expect(
+        ptoService.deletePtoRequestWithUserUpdate(99999)
+      ).rejects.toThrow("연차 요청을 찾을 수 없습니다.");
+    });
+
+    test("should handle half-day request deletion correctly", async () => {
+      // Arrange
+      const organization = await createOrganization();
+      let user = await createUser("test-user", organization);
+      const approver = await createUser("approver", organization);
+      const template = await createPtoTemplate(organization, { daysConsumed: 0.5 });
+
+      user.annualPtoDays = 20;
+      user.usedPtoDays = 5;
+      user = await userRepository.save(user);
+
+      // Create and approve a half-day request
+      const ptoRequest = await ptoService.createPtoRequest(
+        user,
+        template,
+        new Date("2025-04-01"),
+        new Date("2025-04-01"),
+        "Half day off",
+        "Half day off",
+        [approver]
+      );
+
+      const approval = ptoRequest.approvals[0];
+      await ptoService.approve(approver, approval.id, "Approved");
+
+      // Verify user's used PTO days increased by 0.5
+      user = await userRepository.findOneOrFail({ where: { userId: user.userId } });
+      expect(user.usedPtoDays).toBe(5.5); // 5 + 0.5 consumed days
+
+      // Act
+      const result = await ptoService.deletePtoRequestWithUserUpdate(ptoRequest.id);
+
+      // Assert
+      expect(result.decrementedDays).toBe(0.5);
+
+      // Verify user's used PTO days were decremented by 0.5
+      user = await userRepository.findOneOrFail({ where: { userId: user.userId } });
+      expect(user.usedPtoDays).toBe(5); // Back to original
+    });
+
+    test("should ensure used PTO days never exceeds annual PTO days after deletion", async () => {
+      // Arrange
+      const organization = await createOrganization();
+      let user = await createUser("test-user", organization);
+      const approver = await createUser("approver", organization);
+      const template = await createPtoTemplate(organization);
+
+      // Set user with low annual PTO days
+      user.annualPtoDays = 10;
+      user.usedPtoDays = 8;
+      user = await userRepository.save(user);
+
+      // Create and approve a request
+      const ptoRequest = await ptoService.createPtoRequest(
+        user,
+        template,
+        new Date("2025-04-01"),
+        new Date("2025-04-01"), // Single day = 1 consumed day
+        "Vacation time",
+        "Vacation time",
+        [approver]
+      );
+
+      const approval = ptoRequest.approvals[0];
+      await ptoService.approve(approver, approval.id, "Approved");
+
+      // Verify user's used PTO days increased
+      user = await userRepository.findOneOrFail({ where: { userId: user.userId } });
+      expect(user.usedPtoDays).toBe(9); // 8 + 1 consumed day
+
+      // Manually increase annual PTO days to be less than current used days after deletion
+      // This simulates a scenario where admin reduced annual PTO days after approval
+      user.annualPtoDays = 6; // Less than the 8 - 1 = 7 that would result from deletion
+      user = await userRepository.save(user);
+
+      // Act
+      const result = await ptoService.deletePtoRequestWithUserUpdate(ptoRequest.id);
+
+      // Assert
+      expect(result.decrementedDays).toBe(1);
+
+      // Verify used PTO days were capped at annual PTO days
+      user = await userRepository.findOneOrFail({ where: { userId: user.userId } });
+      expect(user.usedPtoDays).toBe(6); // Math.min(Math.max(0, 9 - 1), 6) = Math.min(8, 6) = 6
+      expect(user.usedPtoDays).toBeLessThanOrEqual(user.annualPtoDays);
+    });
+
+    test("should be atomic - if user update fails, deletion should also fail", async () => {
+      // Arrange
+      const organization = await createOrganization();
+      let user = await createUser("test-user", organization);
+      const approver = await createUser("approver", organization);
+      const template = await createPtoTemplate(organization);
+
+      user.annualPtoDays = 20;
+      user.usedPtoDays = 5;
+      user = await userRepository.save(user);
+
+      const ptoRequest = await ptoService.createPtoRequest(
+        user,
+        template,
+        new Date("2025-04-01"),
+        new Date("2025-04-01"), // Single day
+        "Vacation time",
+        "Vacation time",
+        [approver]
+      );
+
+      const approval = ptoRequest.approvals[0];
+      await ptoService.approve(approver, approval.id, "Approved");
+
+      // Mock userService.updateUser to throw an error
+      const updateUserSpy = jest.spyOn(userService, 'updateUser').mockRejectedValue(
+        new Error('Database connection failed')
+      );
+
+      try {
+        // Act - This should fail and rollback the transaction
+        await expect(
+          ptoService.deletePtoRequestWithUserUpdate(ptoRequest.id)
+        ).rejects.toThrow('Database connection failed');
+
+        // Assert - Both operations should have been rolled back
+        // 1. PTO request should still exist (not deleted)
+        const ptoRequestAfterFailure = await ptoRequestRepository.findOne({
+          where: { id: ptoRequest.id }
+        });
+        expect(ptoRequestAfterFailure).not.toBeNull();
+        expect(ptoRequestAfterFailure?.deletedAt).toBeNull();
+
+        // 2. Approvals should still exist (not deleted)
+        const approvalsAfterFailure = await ptoApprovalRepository.find({
+          where: { ptoRequest: { id: ptoRequest.id } }
+        });
+        expect(approvalsAfterFailure).toHaveLength(1);
+        expect(approvalsAfterFailure[0].deletedAt).toBeNull();
+
+        // 3. User's PTO days should remain unchanged
+        user = await userRepository.findOneOrFail({ where: { userId: user.userId } });
+        expect(user.usedPtoDays).toBe(6); // Still 5 + 1 from approval (not rolled back to 5)
+
+      } finally {
+        // Restore the original method
+        updateUserSpy.mockRestore();
+      }
+    });
+  });
 });

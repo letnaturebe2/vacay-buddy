@@ -7,7 +7,7 @@ import { PtoRequest } from '../entity/pto-request.model';
 import { PtoTemplate } from '../entity/pto-template.model';
 import { User } from '../entity/user.model';
 import { UserWithRequests } from '../types';
-import { assert, getDefaultTemplates, isSameDay } from '../utils';
+import { assert, assert400, getDefaultTemplates, isSameDay } from '../utils';
 import { UserService } from './user.service';
 
 export class PtoService {
@@ -131,6 +131,13 @@ export class PtoService {
     const repository = manager ? manager.getRepository(PtoApproval) : this.ptoApprovalRepository;
 
     return repository.findOneOrFail({
+      where: { id },
+      relations: ['approver', 'ptoRequest', 'ptoRequest.user', 'ptoRequest.approvals', 'ptoRequest.approvals.approver'],
+    });
+  }
+
+  async getApprovalOrNullWithRelations(id: number): Promise<PtoApproval | null> {
+    return this.ptoApprovalRepository.findOne({
       where: { id },
       relations: ['approver', 'ptoRequest', 'ptoRequest.user', 'ptoRequest.approvals', 'ptoRequest.approvals.approver'],
     });
@@ -320,5 +327,64 @@ export class PtoService {
     });
 
     return approvals.filter((approval) => approval.ptoRequest.currentApprovalId === approval.id);
+  }
+
+  /**
+   * Retrieves a single PTO request by ID with related data
+   */
+  async getPtoRequest(id: number): Promise<PtoRequest | null> {
+    return this.ptoRequestRepository.findOne({
+      where: { id },
+      relations: ['user', 'template', 'approvals', 'approvals.approver'],
+    });
+  }
+
+  /**
+   * Soft deletes a PTO request by ID and all related approvals
+   */
+  async deletePtoRequest(id: number): Promise<void> {
+    await this.dataSource.transaction(async (manager) => {
+      // First, soft delete all related approvals
+      await manager.update(PtoApproval, { ptoRequest: { id } }, { deletedAt: new Date() });
+
+      // Then, soft delete the PTO request
+      await manager.softDelete(PtoRequest, id);
+    });
+  }
+
+  /**
+   * Soft deletes a PTO request and updates user's PTO days if the request was approved
+   * This method ensures both operations happen atomically within a single transaction
+   */
+  async deletePtoRequestWithUserUpdate(id: number): Promise<{ decrementedDays: number }> {
+    return this.dataSource.transaction(async (manager) => {
+      // Get the PTO request with user data
+      const ptoRequest = await manager.findOne(PtoRequest, {
+        where: { id },
+        relations: ['user'],
+      });
+
+      assert400(ptoRequest !== null, '연차 요청을 찾을 수 없습니다.');
+
+      const user = ptoRequest.user;
+      let decrementedDays = 0;
+
+      // If the request was approved, decrement the user's used PTO days
+      if (ptoRequest.status === PtoRequestStatus.Approved) {
+        decrementedDays = ptoRequest.consumedDays;
+        let newUsedDays = Math.max(0, user.usedPtoDays - ptoRequest.consumedDays);
+        // Ensure it doesn't exceed total PTO days
+        newUsedDays = Math.min(newUsedDays, user.annualPtoDays);
+        await this.userService.updateUser(user.userId, { usedPtoDays: newUsedDays }, manager);
+      }
+
+      // Soft delete all related approvals
+      await manager.update(PtoApproval, { ptoRequest: { id } }, { deletedAt: new Date() });
+
+      // Soft delete the PTO request
+      await manager.softDelete(PtoRequest, id);
+
+      return { decrementedDays };
+    });
   }
 }

@@ -183,4 +183,9 @@ export default {
   template_sick_leave_desc: 'Leave due to illness',
   template_reward_leave_title: 'Reward Leave',
   template_reward_leave_desc: 'Special leave granted as a reward',
+
+  // Deleted Request Modal
+  request_deleted_title: 'Deleted Request',
+  request_deleted_message: 'This leave request has been deleted by an administrator.',
+  request_deleted_info: 'Deleted requests cannot be approved or rejected.',
 };

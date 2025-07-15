@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, DeleteDateColumn, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { PtoRequestStatus } from '../constants';
 import { BaseEntity } from './base';
 import { PtoRequest } from './pto-request.model';
@@ -37,4 +37,7 @@ export class PtoApproval extends BaseEntity {
 
   @Column({ nullable: true })
   actionDate: Date;
+
+  @DeleteDateColumn()
+  deletedAt?: Date | null;
 }

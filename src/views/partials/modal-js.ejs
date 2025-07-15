@@ -1,0 +1,101 @@
+// Custom Modal Functions
+function showModal(options) {
+  const {
+    type = 'info',
+    title = '알림',
+    message = '',
+    buttons = [{ text: '확인', class: 'primary', callback: null }],
+    onClose = null
+  } = options;
+
+  const modal = document.getElementById('customModal');
+  const modalIcon = document.getElementById('modalIcon');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalMessage = document.getElementById('modalMessage');
+  const modalButtons = document.getElementById('modalButtons');
+
+  // Set icon based on type
+  const icons = {
+    success: 'fas fa-check-circle',
+    error: 'fas fa-exclamation-circle',
+    warning: 'fas fa-exclamation-triangle',
+    info: 'fas fa-info-circle'
+  };
+
+  modalIcon.className = `modal-icon ${type}`;
+  modalIcon.innerHTML = `<i class="${icons[type]}"></i>`;
+  modalTitle.textContent = title;
+  modalMessage.innerHTML = message.replace(/\n/g, '<br>');
+
+  // Clear previous buttons
+  modalButtons.innerHTML = '';
+
+  // Add buttons
+  buttons.forEach(button => {
+    const btn = document.createElement('button');
+    btn.className = `modal-btn ${button.class || 'primary'}`;
+    btn.textContent = button.text;
+    btn.onclick = () => {
+      hideModal();
+      if (button.callback) {
+        button.callback();
+      }
+    };
+    modalButtons.appendChild(btn);
+  });
+
+  // Show modal
+  modal.classList.add('show');
+
+  // Close on background click
+  modal.onclick = (e) => {
+    if (e.target === modal) {
+      hideModal();
+      if (onClose) onClose();
+    }
+  };
+}
+
+function hideModal() {
+  const modal = document.getElementById('customModal');
+  modal.classList.remove('show');
+}
+
+function showSuccessModal(message, callback = null) {
+  showModal({
+    type: 'success',
+    title: '성공',
+    message: message,
+    buttons: [{ text: '확인', class: 'success', callback }]
+  });
+}
+
+function showErrorModal(message, callback = null) {
+  showModal({
+    type: 'error',
+    title: '오류',
+    message: message,
+    buttons: [{ text: '확인', class: 'danger', callback }]
+  });
+}
+
+function showWarningModal(message, callback = null) {
+  showModal({
+    type: 'warning',
+    title: '경고',
+    message: message,
+    buttons: [{ text: '확인', class: 'primary', callback }]
+  });
+}
+
+function showConfirmModal(message, onConfirm, onCancel = null) {
+  showModal({
+    type: 'warning',
+    title: '확인',
+    message: message,
+    buttons: [
+      { text: '취소', class: 'secondary', callback: onCancel },
+      { text: '확인', class: 'danger', callback: onConfirm }
+    ]
+  });
+}

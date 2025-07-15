@@ -331,128 +331,118 @@
     .status-approved {
       color: #155724;
       background: #d4edda;
-      padding: 6px 12px;
-      border-radius: 16px;
+      border-radius: 48px;
       font-weight: 600;
       font-size: 0.75rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      box-shadow: 0 2px 8px rgba(21, 87, 36, 0.1);
-      border: 1px solid rgba(255,255,255,0.3);
-      backdrop-filter: blur(10px);
-      transition: all 0.3s ease;
       white-space: nowrap;
+      text-align: center;
     }
     
     .status-pending {
       color: #856404;
       background: #fff3cd;
-      padding: 6px 12px;
-      border-radius: 16px;
+      border-radius: 48px;
       font-weight: 600;
       font-size: 0.75rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      box-shadow: 0 2px 8px rgba(133, 100, 4, 0.1);
-      border: 1px solid rgba(255,255,255,0.3);
-      backdrop-filter: blur(10px);
-      transition: all 0.3s ease;
       white-space: nowrap;
+      text-align: center;
     }
     
     .status-rejected {
       color: #721c24;
       background: #f8d7da;
-      padding: 6px 12px;
-      border-radius: 16px;
+      border-radius: 48px;
       font-weight: 600;
       font-size: 0.75rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      box-shadow: 0 2px 8px rgba(114, 28, 36, 0.1);
-      border: 1px solid rgba(255,255,255,0.3);
-      backdrop-filter: blur(10px);
-      transition: all 0.3s ease;
       white-space: nowrap;
+      text-align: center;
     }
     
     .status-completed {
       color: #155724;
       background: #d1f2d1;
-      padding: 6px 12px;
-      border-radius: 16px;
+      border-radius: 48px;
       font-weight: 600;
       font-size: 0.75rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      box-shadow: 0 2px 8px rgba(21, 87, 36, 0.1);
-      border: 1px solid rgba(255,255,255,0.3);
-      backdrop-filter: blur(10px);
-      transition: all 0.3s ease;
       white-space: nowrap;
+      text-align: center;
     }
     
     .status-ongoing {
       color: #004085;
       background: #cce5ff;
-      padding: 6px 12px;
-      border-radius: 16px;
+      border-radius: 48px;
       font-weight: 600;
       font-size: 0.75rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      box-shadow: 0 2px 8px rgba(0, 64, 133, 0.1);
-      border: 1px solid rgba(255,255,255,0.3);
-      backdrop-filter: blur(10px);
-      transition: all 0.3s ease;
       white-space: nowrap;
+      text-align: center;
     }
     
     .status-scheduled {
       color: #6f42c1;
       background: #e7d6ff;
-      padding: 6px 12px;
-      border-radius: 16px;
+      border-radius: 48px;
       font-weight: 600;
       font-size: 0.75rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      box-shadow: 0 2px 8px rgba(111, 66, 193, 0.1);
-      border: 1px solid rgba(255,255,255,0.3);
-      backdrop-filter: blur(10px);
-      transition: all 0.3s ease;
       white-space: nowrap;
+      text-align: center;
+    }
+
+    /* Deleted/Cancelled request styling */
+    .deleted-row {
+      opacity: 0.6;
+      position: relative;
     }
     
-    .status-approved:hover,
-    .status-pending:hover,
-    .status-rejected:hover,
-    .status-completed:hover,
-    .status-ongoing:hover,
-    .status-scheduled:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    .deleted-row td {
+      text-decoration: line-through;
+      color: #6b7280 !important;
     }
     
-    /* DataTable specific overrides */
-    .dataTables_wrapper {
-      font-family: inherit;
+    .deleted-row .status-approved,
+    .deleted-row .status-pending,
+    .deleted-row .status-rejected,
+    .deleted-row .status-completed,
+    .deleted-row .status-ongoing,
+    .deleted-row .status-scheduled {
+      opacity: 0.7;
+      text-decoration: line-through;
     }
     
-    .dataTables_wrapper .dataTables_length,
-    .dataTables_wrapper .dataTables_filter,
-    .dataTables_wrapper .dataTables_info,
-    .dataTables_wrapper .dataTables_paginate {
-      color: #64748b;
-      font-size: 0.9rem;
+    /* Simple tooltip for deleted rows - desktop only */
+    @media (min-width: 769px) {
+      .deleted-row:hover::after {
+        content: '삭제됨';
+        position: absolute;
+        top: -40px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(55, 65, 81, 0.95);
+        color: white;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        white-space: nowrap;
+        z-index: 1000;
+        pointer-events: none;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      }
     }
     
+    .delete-btn:disabled {
+      background: #e5e7eb;
+      color: #9ca3af;
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+    
+    .delete-btn:disabled:hover {
+      background: #e5e7eb;
+      transform: none;
+      box-shadow: none;
+    }
+
     .dataTables_wrapper .dataTables_paginate .paginate_button {
       padding: 8px 12px;
       margin: 0 2px;
@@ -494,6 +484,76 @@
       margin: 0 8px;
     }
     
+    /* Edit mode styling */
+    .edit-toggle {
+      margin-left: auto;
+    }
+    
+    .edit-mode-btn {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+    }
+    
+    .edit-mode-btn:hover {
+      background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+    }
+    
+    .edit-mode-btn.active {
+      background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+      box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+    }
+    
+    .edit-mode-btn.active:hover {
+      background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+      box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+    }
+    
+    .edit-column {
+      display: none;
+      text-align: center;
+      width: 80px;
+      vertical-align: middle;
+    }
+    
+    .edit-mode .edit-column {
+      display: table-cell;
+      vertical-align: middle;
+    }
+    
+    .delete-btn {
+      background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.85rem;
+      box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+    }
+    
+    .delete-btn:hover {
+      background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+    }
+    
+    .delete-btn i {
+      pointer-events: none;
+    }
+
+    <%- include('../partials/modal-css') %>
+
     /* Mobile responsiveness improvements */
     @media (max-width: 768px) {
       body {
@@ -615,7 +675,23 @@
         gap: 3px;
         border-radius: 12px;
       }
-    }
+      
+            /* Mobile deleted row styling */
+      .deleted-row .dtr-title {
+        color: #9ca3af !important;
+        text-decoration: line-through;
+      }
+      
+      .deleted-row .dtr-data {
+        color: #9ca3af !important;
+        text-decoration: line-through;
+      }
+      
+      /* Hide edit/delete features on mobile */
+      .edit-toggle,
+      .edit-column {
+        display: none !important;
+      }
     
     @media (max-width: 480px) {
       .container {
@@ -674,7 +750,13 @@
   </div>
 
   <div class="pto-card">
-    <h2>내 연차 요청 목록 (<%= selectedYear %>년)</h2>
+    <h2>내 연차 요청 목록 (<%= selectedYear %>년)
+      <% if (isAdmin) { %>
+        <span class="edit-toggle">
+          <button id="editModeBtn" class="edit-mode-btn">편집 모드</button>
+        </span>
+      <% } %>
+    </h2>
     <% if (filteredRequests.length === 0) { %>
       <p>선택한 연도에 등록된 연차 요청이 없습니다.</p>
     <% } else { %>
@@ -687,18 +769,29 @@
             <th>소모 일수</th>
             <th>유형</th>
             <th>상태</th>
+            <% if (isAdmin) { %>
+              <th class="edit-column">삭제</th>
+            <% } %>
           </tr>
         </thead>
         <tbody>
           <% filteredRequests.forEach(function(request) { %>
             <% const [statusClass, statusText] = getRequestStatus(request); %>
-            <tr class="request-row">
+            <% const isDeleted = request.deletedAt != null; %>
+            <tr class="request-row <%= isDeleted ? 'deleted-row' : '' %>" data-request-id="<%= request.id %>" data-consumed-days="<%= request.consumedDays %>" <%= isDeleted ? 'title="이 요청은 삭제되었습니다"' : '' %>>
               <td><%= request.title %></td>
               <td><%= request.startDate.toLocaleDateString('ko-KR') %></td>
               <td><%= request.endDate.toLocaleDateString('ko-KR') %></td>
               <td><%= request.consumedDays %></td>
               <td><%= request.template.title %></td>
               <td class="<%= statusClass %>"><%= statusText %></td>
+              <% if (isAdmin) { %>
+                <td class="edit-column">
+                  <button class="delete-btn" data-request-id="<%= request.id %>" data-consumed-days="<%= request.consumedDays %>" <%= isDeleted ? 'disabled' : '' %>>
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </td>
+              <% } %>
             </tr>
           <% }); %>
         </tbody>
@@ -706,7 +799,11 @@
     <% } %>
   </div>
 
+  <%- include('../partials/modal') %>
+
   <script>
+    <%- include('../partials/modal-js') %>
+
     $(document).ready(function() {
       // Initialize DataTables with mobile-optimized settings
       $('#ptoTable').DataTable({
@@ -740,7 +837,12 @@
         columnDefs: [
           { responsivePriority: 1, targets: [0, 5] }, // Title and status always visible
           { responsivePriority: 2, targets: [1, 3] }, // Start date and days consumed second priority
-          { responsivePriority: 3, targets: [2, 4] }  // End date and type third priority
+          { responsivePriority: 3, targets: [2, 4] }, // End date and type third priority
+          { targets: [5] }, // Center align status column
+          <% if (isAdmin) { %>
+          { orderable: false, targets: [6] }, // Delete column not sortable
+          { responsivePriority: 4, targets: [6] } // Delete column lowest priority
+          <% } %>
         ]
       });
 
@@ -751,6 +853,63 @@
         currentUrl.searchParams.set('year', selectedYear);
         window.location.href = currentUrl.toString();
       });
+
+      <% if (isAdmin) { %>
+      // Edit mode toggle
+      $('#editModeBtn').click(function() {
+        const $btn = $(this);
+        const $table = $('#ptoTable');
+        
+        if ($btn.hasClass('active')) {
+          // Exit edit mode
+          $btn.removeClass('active').text('편집 모드');
+          $table.removeClass('edit-mode');
+          // Reset status column alignment
+          $table.find('tbody td:nth-child(6)').css('text-align', '');
+        } else {
+          // Enter edit mode
+          $btn.addClass('active').text('편집 종료');
+          $table.addClass('edit-mode');
+          // Center align status column content in edit mode
+          $table.find('tbody td:nth-child(6)').css('text-align', 'center');
+        }
+      });
+
+      // Handle delete button clicks
+      $(document).on('click', '.delete-btn', function() {
+        // Check if button is disabled
+        if ($(this).prop('disabled')) {
+          return false;
+        }
+        
+        const requestId = $(this).data('request-id');
+        
+        showConfirmModal('이 연차 요청을 삭제하시겠습니까?\n승인된 연차 요청의 경우 사용자의 연차 일수가 차감됩니다.', function() {
+          const currentUrl = new URL(window.location.href);
+          const token = currentUrl.searchParams.get('token');
+          
+          $.ajax({
+            url: '/api/pto-request/' + requestId + '?token=' + encodeURIComponent(token),
+            method: 'DELETE',
+            success: function() {
+              showSuccessModal('연차 요청이 삭제되었습니다.', function() {
+                window.location.reload();
+              });
+            },
+            error: function(xhr, status, error) {
+              let errorMessage = '알 수 없는 오류가 발생했습니다';
+              try {
+                const result = JSON.parse(xhr.responseText);
+                errorMessage = result.message || result.error || errorMessage;
+              } catch (e) {
+                errorMessage = xhr.responseText || error || errorMessage;
+              }
+              showErrorModal(`삭제 중 오류가 발생했습니다: ${errorMessage}`);
+            }
+          });
+        });
+      });
+      <% } %>
     });
   </script>
   </div>

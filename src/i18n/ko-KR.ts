@@ -182,4 +182,9 @@ export default {
   template_sick_leave_desc: '질병으로 인한 휴가',
   template_reward_leave_title: '포상 휴가',
   template_reward_leave_desc: '보상으로 주어진 특별 휴가',
+
+  // Deleted Request Modal
+  request_deleted_title: '삭제된 요청',
+  request_deleted_message: '이 연차 요청은 관리자에 의해 삭제되었습니다.',
+  request_deleted_info: '삭제된 요청에 대해서는 승인이나 거부 처리를 할 수 없습니다.',
 };

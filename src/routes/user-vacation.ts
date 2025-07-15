@@ -43,6 +43,10 @@ export default (app: Application) => {
     const user = await userService.getUser(userId);
     const userRequests = await ptoService.getMyPtoRequests(user);
 
+    // Check if the current user is an admin
+    const currentUser = await userService.getUser(decoded.userId);
+    const isAdmin = currentUser.isAdmin;
+
     // Prepare for year filtering
     const currentYear = new Date().getFullYear();
     const yearNum = year ? Number(year) : Number.NaN;
@@ -67,6 +71,7 @@ export default (app: Application) => {
       filteredRequests,
       commonStyles,
       getRequestStatus,
+      isAdmin,
     });
   });
 };
