@@ -27,12 +27,11 @@ export default (app: Application) => {
       }
     }
 
-    let decoded: { organizationId: string; userId: string; adminUserId?: string };
+    let decoded: { organizationId: string; userId: string };
     try {
       decoded = jwt.verify(token, process.env.JWT_SECRET || 'default-secret-key') as {
         organizationId: string;
         userId: string;
-        adminUserId?: string;
       };
     } catch (error) {
       assert401(false, `Invalid·token:·${String(error)}`);
@@ -41,9 +40,7 @@ export default (app: Application) => {
     const organization = await organizationService.getOrganization(decoded.organizationId);
     assert400(organization !== null, '조직을 찾을 수 없습니다.');
 
-    // adminUserId가 있으면 해당 사용자로 권한 체크, 없으면 기존 로직 사용
-    const adminUserId = decoded.adminUserId || decoded.userId;
-    const requestUser = await userService.getUser(adminUserId);
+    const requestUser = await userService.getUser(decoded.userId);
     assert400(requestUser.isAdmin, '관리자 권한이 없습니다.');
 
     const results = [];
