@@ -1,6 +1,7 @@
 import { type Application, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import * as XLSX from 'xlsx';
+import { logBusinessEvent } from '../logger';
 import { organizationService } from '../service';
 
 export default (app: Application) => {
@@ -28,6 +29,10 @@ export default (app: Application) => {
       res.status(404).send('No users found for this organization');
       return;
     }
+
+    logBusinessEvent('Excel template downloaded', {
+      organizationId,
+    });
 
     const data = users.map((user) => ({
       slack_id: user.userId,

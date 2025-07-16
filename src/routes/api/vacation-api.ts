@@ -1,6 +1,7 @@
 import { Application, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { User } from '../../entity/user.model';
+import { logBusinessEvent } from '../../logger';
 import { organizationService, ptoService, userService } from '../../service';
 import { assert400, assert401 } from '../../utils';
 
@@ -69,6 +70,13 @@ export default (app: Application) => {
       });
     }
 
+    logBusinessEvent('Vacation data updated via API', {
+      organizationId: decoded.organizationId,
+      adminUserId: decoded.userId,
+      updateCount: updates.length,
+      updatedUserIds: updates.map((u) => u.userId),
+    });
+
     res.json({
       success: true,
       results,
@@ -100,6 +108,12 @@ export default (app: Application) => {
 
     // Delete PTO request and update user's PTO days atomically
     const result = await ptoService.deletePtoRequestWithUserUpdate(Number(requestId));
+
+    logBusinessEvent('PTO request deleted via API', {
+      organizationId: decoded.organizationId,
+      adminUserId: adminOrRequestUserId,
+      requestId: Number(requestId),
+    });
 
     res.json({
       success: true,

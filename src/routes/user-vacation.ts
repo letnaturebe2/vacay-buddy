@@ -1,5 +1,6 @@
 import { Application, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
+import { logBusinessEvent } from '../logger';
 import { ptoService, userService } from '../service';
 import { getRequestStatus } from '../utils';
 import { commonStyles } from './css';
@@ -65,6 +66,12 @@ export default (app: Application) => {
     const filteredRequests = userRequests.filter((request) => {
       const requestYear = request.startDate.getFullYear();
       return selectedYear === requestYear;
+    });
+
+    logBusinessEvent('User vacation page accessed', {
+      organizationId,
+      userId,
+      isAdmin,
     });
 
     res.render('pages/user-vacation', {

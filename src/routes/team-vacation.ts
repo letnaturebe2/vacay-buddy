@@ -1,5 +1,6 @@
 import { Application, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
+import { logBusinessEvent } from '../logger';
 import { organizationService, ptoService } from '../service';
 import { commonStyles } from './css';
 
@@ -44,6 +45,11 @@ export default (app: Application) => {
     const pendingRequests = monthlyRequests.filter((monthlyRequest) => monthlyRequest.status === 'pending');
     const onVacationUsers: Set<string> = new Set(onGoingRequests.map((request) => request.user.userId));
     const pendingUsers: Set<string> = new Set(pendingRequests.map((request) => request.user.userId));
+
+    logBusinessEvent('Team vacation page accessed', {
+      organizationId,
+      isFromInstallation: from === 'installation',
+    });
 
     // Generate tokens for each user
     const usersWithTokens = users.map((user) => ({
