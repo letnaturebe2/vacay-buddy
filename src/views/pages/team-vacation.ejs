@@ -902,7 +902,7 @@
       $('.editable-cell').each(function() {
         const userId = $(this).closest('tr').data('user-id');
         const field = $(this).data('field');
-        const value = parseInt($(this).data('original'));
+        const value = parseFloat($(this).data('original'));
         
         if (!originalData[userId]) {
           originalData[userId] = {};
@@ -981,12 +981,12 @@
       if ($(cell).hasClass('editing')) return;
       
       const $cell = $(cell);
-      const currentValue = parseInt($cell.data('original'));
+      const currentValue = parseFloat($cell.data('original'));
       const $span = $cell.find('.cell-value');
       
       $cell.addClass('editing');
       
-      const $input = $('<input type="number" class="editable-input" min="0">');
+      const $input = $('<input type="number" class="editable-input" min="0" step="0.5">');
       $input.val(currentValue);
       
       $cell.append($input);
@@ -995,7 +995,11 @@
       $input.on('blur keypress', function(e) {
         if (e.type === 'keypress' && e.which !== 13) return;
         
-        const newValue = parseInt($input.val()) || 0;
+        let newValue = parseFloat($input.val()) || 0;
+        
+        // 0.5 단위로만 허용 (반올림)
+        newValue = Math.round(newValue * 2) / 2;
+        
         const userId = $cell.closest('tr').data('user-id');
         const field = $cell.data('field');
         
@@ -1006,7 +1010,7 @@
         pendingChanges[userId][field] = newValue;
         
         // Update display
-        $span.text(newValue + '일');
+        $span.text((newValue % 1 === 0 ? newValue : newValue.toFixed(1)) + '일');
         $input.remove();
         $cell.removeClass('editing');
         $cell.data('original', newValue);
@@ -1025,11 +1029,11 @@
 
     function updateRemainingDays(userId) {
       const $row = $(`tr[data-user-id="${userId}"]`);
-      const annual = parseInt($row.find('.annual-days').data('original'));
-      const used = parseInt($row.find('.used-days').data('original'));
+      const annual = parseFloat($row.find('.annual-days').data('original'));
+      const used = parseFloat($row.find('.used-days').data('original'));
       const remaining = annual - used;
       
-      $row.find('.remaining-days .cell-value').text(remaining + '일');
+      $row.find('.remaining-days .cell-value').text((remaining % 1 === 0 ? remaining : remaining.toFixed(1)) + '일');
     }
 
     function setupDragToFill() {
@@ -1058,7 +1062,7 @@
         const $targetCell = $(elementBelow).closest('.editable-cell');
         
         if ($targetCell.length && $targetCell.data('field') === dragStartCell.data('field')) {
-          const sourceValue = parseInt(dragStartCell.data('original'));
+          const sourceValue = parseFloat(dragStartCell.data('original'));
           
           // Fill selected range
           const sourceIndex = dragStartCell.closest('tr').index();
@@ -1077,7 +1081,7 @@
             pendingChanges[userId][$cell.data('field')] = sourceValue;
             
             $cell.data('original', sourceValue);
-            $cell.find('.cell-value').text(sourceValue + '일');
+            $cell.find('.cell-value').text((sourceValue % 1 === 0 ? sourceValue : sourceValue.toFixed(1)) + '일');
             $cell.addClass('changed');
             
             updateRemainingDays(userId);
@@ -1182,7 +1186,7 @@
               const $cell = $row.find(`[data-field="${field}"]`);
               
               $cell.data('original', originalValue);
-              $cell.find('.cell-value').text(originalValue + '일');
+              $cell.find('.cell-value').text((originalValue % 1 === 0 ? originalValue : originalValue.toFixed(1)) + '일');
               $cell.removeClass('changed');
             }
             

@@ -26,6 +26,15 @@ export default (app: Application) => {
       if (update.annualPtoDays < update.usedPtoDays) {
         assert400(false, '연차를 초과하여 사용할 수 없습니다.');
       }
+
+      // 0.5 단위로만 허용
+      if (update.annualPtoDays % 0.5 !== 0) {
+        assert400(false, '연간 연차 일수는 0.5 단위로만 입력 가능합니다.');
+      }
+
+      if (update.usedPtoDays % 0.5 !== 0) {
+        assert400(false, '사용한 연차 일수는 0.5 단위로만 입력 가능합니다.');
+      }
     }
 
     let decoded: { organizationId: string; userId: string };
