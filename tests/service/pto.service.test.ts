@@ -1662,5 +1662,70 @@ describe("PtoService Tests", () => {
         updateUserSpy.mockRestore();
       }
     });
+
+    test("should maintain correct usedPtoDays when repeatedly approving and deleting half-day requests", async () => {
+      // Arrange
+      const organization = await createOrganization();
+      let user = await createUser("test-user", organization);
+      const approver = await createUser("approver", organization);
+      const halfDayTemplate = await createPtoTemplate(organization, { daysConsumed: 0.5 });
+
+      // Set initial PTO days
+      user.annualPtoDays = 30;
+      user.usedPtoDays = 5.5;
+      user = await userRepository.save(user);
+
+      // Act & Assert - Repeat approve and delete cycle 50 times
+      for (let i = 0; i < 50; i++) {
+        // Create half-day PTO request
+        const requestDate = new Date(`2025-04-${String(i % 28 + 1).padStart(2, '0')}`); // Cycle through April dates
+        const ptoRequest = await ptoService.createPtoRequest(
+          user,
+          halfDayTemplate,
+          requestDate,
+          requestDate, // Same date for half-day requests
+          `Half day off ${i + 1}`,
+          `Half day request iteration ${i + 1}`,
+          [approver]
+        );
+
+        // Verify consumed days
+        expect(ptoRequest.consumedDays).toBe(0.5);
+
+        // Approve the request
+        const approval = ptoRequest.approvals[0];
+        await ptoService.approve(approver, approval.id, `Approved iteration ${i + 1}`);
+
+        // Verify user's used PTO days increased by 0.5
+        user = await userRepository.findOneOrFail({ where: { userId: user.userId } });
+        expect(user.usedPtoDays).toBe(6.0); // 5.5 + 0.5 = 6.0
+
+        // Delete the request
+        const result = await ptoService.deletePtoRequestWithUserUpdate(ptoRequest.id);
+        expect(result.decrementedDays).toBe(0.5);
+
+        // Verify user's used PTO days returned to initial value
+        user = await userRepository.findOneOrFail({ where: { userId: user.userId } });
+        expect(user.usedPtoDays).toBe(5.5); // Back to initial value
+
+        // Verify request is soft deleted
+        const deletedRequest = await ptoRequestRepository.findOne({
+          where: { id: ptoRequest.id }
+        });
+        expect(deletedRequest).toBeNull();
+
+        // Verify request exists with soft delete
+        const softDeletedRequest = await ptoRequestRepository.findOne({
+          where: { id: ptoRequest.id },
+          withDeleted: true
+        });
+        expect(softDeletedRequest).toBeDefined();
+        expect(softDeletedRequest?.deletedAt).toBeDefined();
+      }
+
+      // Final verification - user's used PTO days should be exactly the same as initial
+      user = await userRepository.findOneOrFail({ where: { userId: user.userId } });
+      expect(user.usedPtoDays).toBe(5.5);
+    });
   });
 });
