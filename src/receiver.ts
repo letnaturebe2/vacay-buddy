@@ -8,6 +8,7 @@ import ejs from 'ejs';
 import express, { ErrorRequestHandler } from 'express';
 import jwt from 'jsonwebtoken';
 import { buildInstallMessage } from './listeners/events/slack-ui/build-install-message';
+import { logError } from './logger';
 import routes from './routes';
 import { organizationService, ptoService, userService } from './service';
 import { assert, HttpError } from './utils';
@@ -111,7 +112,7 @@ const receiver = new ExpressReceiver({
           res.writeHead(302, { Location: redirectUrl });
           res.end();
         } catch (error) {
-          console.error('Error in OAuth success callback:', error);
+          logError('Error in OAuth success callback', error);
           res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });
           res.end('Internal Server Error');
         }
@@ -164,7 +165,11 @@ const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
 
   // Log only unexpected errors (500) with full stack trace
   if (!isHttpError) {
-    console.error('Unexpected error:', err.stack || err);
+    logError('Unexpected error in Express route', err, {
+      path: req.path,
+      method: req.method,
+      statusCode,
+    });
   }
 
   // API routes: return JSON

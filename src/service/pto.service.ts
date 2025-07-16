@@ -6,6 +6,7 @@ import { PtoApproval } from '../entity/pto-approval.model';
 import { PtoRequest } from '../entity/pto-request.model';
 import { PtoTemplate } from '../entity/pto-template.model';
 import { User } from '../entity/user.model';
+import { logBusinessEvent } from '../logger';
 import { UserWithRequests } from '../types';
 import { assert, assert400, getDefaultTemplates, isSameDay } from '../utils';
 import { UserService } from './user.service';
@@ -103,6 +104,13 @@ export class PtoService {
       savedRequest.approvals = await manager.save(approvals);
       savedRequest.currentApprovalId = savedRequest.approvals[0].id;
       await manager.save(savedRequest);
+
+      logBusinessEvent('PTO request created', {
+        requestId: savedRequest.id,
+        userId: user.userId,
+        userName: user.name,
+      });
+
       return savedRequest;
     });
   }
@@ -264,6 +272,14 @@ export class PtoService {
       approval.actionDate = new Date();
       await manager.save(approval);
 
+      logBusinessEvent('PTO approval decision', {
+        action: 'approved',
+        approvalId: approval.id,
+        requestId: ptoRequest.id,
+        approverId: approver.userId,
+        approverName: approver.name,
+      });
+
       return await this.getApprovalWithRelations(approvalId, manager);
     });
   }
@@ -383,6 +399,12 @@ export class PtoService {
 
       // Soft delete the PTO request
       await manager.softDelete(PtoRequest, id);
+
+      logBusinessEvent('PTO request deleted', {
+        requestId: id,
+        userId: user.userId,
+        userName: user.name,
+      });
 
       return { decrementedDays };
     });

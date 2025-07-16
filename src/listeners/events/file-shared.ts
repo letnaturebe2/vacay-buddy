@@ -4,6 +4,7 @@ import * as XLSX from 'xlsx';
 import type { AppContext } from '../../app';
 import { User } from '../../entity/user.model';
 import { t } from '../../i18n';
+import { logError, logInfo } from '../../logger';
 import { userService } from '../../service';
 import { assert } from '../../utils';
 
@@ -51,7 +52,7 @@ const fileShared = async ({
       remaining_pto_days: number;
     }[];
 
-    logger.info('Parsed Excel Data:', users);
+    logInfo('Excel file parsed successfully');
 
     // Validate all users before processing
     for (const user of users) {
@@ -91,12 +92,17 @@ const fileShared = async ({
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
 
+    logError('Excel file processing failed', error, {
+      fileId: event.file_id,
+      organizationId: context.organization.organizationId,
+      userId: event.user_id,
+      channelId: event.channel_id,
+    });
+
     await client.chat.postMessage({
       channel: event.channel_id,
       text: t(context.locale, 'file_shared_error', { message: errorMessage }),
     });
-
-    logger.error(errorMessage);
   }
 };
 

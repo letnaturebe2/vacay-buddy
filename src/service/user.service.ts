@@ -1,6 +1,7 @@
 import { DataSource, EntityManager, In, Repository } from 'typeorm';
 import { Organization } from '../entity/organization.model';
 import { User } from '../entity/user.model';
+import { logBusinessEvent } from '../logger';
 import { assert } from '../utils';
 
 export class UserService {
@@ -130,6 +131,10 @@ export class UserService {
     await this.dataSource.transaction(async (transactionalEntityManager) => {
       await transactionalEntityManager.update(User, { organization }, { isAdmin: false });
       await transactionalEntityManager.update(User, { organization, userId: In(userIds) }, { isAdmin: true });
+    });
+
+    logBusinessEvent('Admin permissions updated', {
+      organizationId: organization.organizationId,
     });
   }
 
