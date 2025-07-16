@@ -49,7 +49,6 @@ export default (app: Application) => {
     logBusinessEvent('Team vacation page accessed', {
       organizationId,
       token,
-      isFromInstallation: from === 'installation',
     });
 
     // Generate tokens for each user
