@@ -25,6 +25,7 @@ export default {
   home: '홈',
   settings: '설정',
   help: '도움말',
+  refresh: '새로고침',
 
   // Admin Management
   manage_admins: '관리자 관리',

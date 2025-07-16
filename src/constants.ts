@@ -13,6 +13,9 @@ export enum ActionId {
   OPEN_DECISION_MODAL = 'open-decision-modal',
   SUBMIT_DECISION_REQUEST = 'submit-decision-request',
 
+  // home actions
+  REFRESH_HOME = 'refresh-home',
+
   // message
   OPEN_EXCEL_INFO_MODAL = 'open-excel-info-modal',
 }

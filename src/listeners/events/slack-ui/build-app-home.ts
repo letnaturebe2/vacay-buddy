@@ -54,6 +54,16 @@ export const buildAppHome = async (context: AppContext, showAdminSection: boolea
           action_id: ActionId.UPDATE_BACK_TO_HOME,
           url: `${process.env.APP_URL || 'http://localhost:3000'}/user-vacation-html?token=${token}`,
         },
+        {
+          type: 'button',
+          text: {
+            type: 'plain_text',
+            text: `${t(context.locale, 'refresh')}`,
+            emoji: true,
+          },
+          action_id: ActionId.REFRESH_HOME,
+          // style: 'primary',
+        },
       ],
     },
     {

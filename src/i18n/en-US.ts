@@ -25,6 +25,7 @@ export default {
   home: 'Home',
   settings: 'Settings',
   help: 'Help',
+  refresh: 'Refresh',
 
   // Admin Management
   manage_admins: 'Manage Admins',

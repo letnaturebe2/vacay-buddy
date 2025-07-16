@@ -22,6 +22,7 @@ const register = (app: App) => {
   app.action(ActionId.SELECT_PTO_TEMPLATE, withActionLogging(ActionId.SELECT_PTO_TEMPLATE, selectPtoTemplate));
   app.action(ActionId.OPEN_DECISION_MODAL, withActionLogging(ActionId.OPEN_DECISION_MODAL, openRequestApproveModal));
   app.action(ActionId.OPEN_EXCEL_INFO_MODAL, withActionLogging(ActionId.OPEN_EXCEL_INFO_MODAL, openExcelInfoModal));
+  app.action(ActionId.REFRESH_HOME, withActionLogging(ActionId.REFRESH_HOME, updateBackToHome));
 };
 
 export default { register };
