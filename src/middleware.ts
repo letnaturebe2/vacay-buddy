@@ -8,7 +8,7 @@ type EventWithUser = {
   user_id?: string;
 };
 
-type ExtendedSlackMiddlewareArgs = AllMiddlewareArgs<AppContext> & {
+export type ExtendedSlackMiddlewareArgs = AllMiddlewareArgs<AppContext> & {
   event?: EventWithUser;
 };
 

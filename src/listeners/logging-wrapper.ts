@@ -4,32 +4,37 @@ import type {
   SlackEventMiddlewareArgs,
   SlackViewMiddlewareArgs,
 } from '@slack/bolt';
+import type { AppContext } from '../app';
 import { logBusinessEvent } from '../logger';
 
-type ActionArgs = AllMiddlewareArgs & SlackActionMiddlewareArgs;
-type EventArgs = AllMiddlewareArgs & SlackEventMiddlewareArgs;
-type ViewArgs = AllMiddlewareArgs & SlackViewMiddlewareArgs;
+type ActionArgs = AllMiddlewareArgs<AppContext> & SlackActionMiddlewareArgs;
+type EventArgs = AllMiddlewareArgs<AppContext> & SlackEventMiddlewareArgs;
+type ViewArgs = AllMiddlewareArgs<AppContext> & SlackViewMiddlewareArgs;
 
-const extractContext = (args: ActionArgs | EventArgs | ViewArgs) => {
-  const { context, body } = args;
-  return {
-    userId: context.userId || body.user?.id,
-    organizationId: context.teamId || context.enterpriseId,
-  };
+const formatLogMessage = (identifier: string, args: ActionArgs | EventArgs | ViewArgs) => {
+  const { context } = args;
+  const parts = [identifier];
+
+  const userName = context.user?.name || '';
+  const organizationName = context.organization?.name || '';
+
+  if (userName && organizationName) {
+    parts.push(`${userName} (${organizationName})`);
+  } else if (userName) {
+    parts.push(`${userName} (No Organization)`);
+  } else if (organizationName) {
+    parts.push(`(No User) ${organizationName}`);
+  }
+
+  return parts.join(', ');
 };
 
 // Action 로깅 래퍼
 // biome-ignore lint/suspicious/noExplicitAny: Handler function type is dynamic and varies by action
 export const withActionLogging = (actionId: string, handler: any) => {
   return async (args: ActionArgs) => {
-    const context = extractContext(args);
-
-    logBusinessEvent('Slack action executed', {
-      type: 'action',
-      actionId,
-      ...context,
-    });
-
+    const message = formatLogMessage(actionId, args);
+    logBusinessEvent(message);
     return await handler(args);
   };
 };
@@ -38,14 +43,8 @@ export const withActionLogging = (actionId: string, handler: any) => {
 // biome-ignore lint/suspicious/noExplicitAny: Handler function type is dynamic and varies by event
 export const withEventLogging = (eventType: string, handler: any) => {
   return async (args: EventArgs) => {
-    const context = extractContext(args);
-
-    logBusinessEvent('Slack event received', {
-      type: 'event',
-      eventType,
-      ...context,
-    });
-
+    const message = formatLogMessage(eventType, args);
+    logBusinessEvent(message);
     return await handler(args);
   };
 };
@@ -54,14 +53,8 @@ export const withEventLogging = (eventType: string, handler: any) => {
 // biome-ignore lint/suspicious/noExplicitAny: Handler function type is dynamic and varies by view
 export const withViewLogging = (viewId: string, handler: any) => {
   return async (args: ViewArgs) => {
-    const context = extractContext(args);
-
-    logBusinessEvent('Slack view submitted', {
-      type: 'view',
-      viewId,
-      ...context,
-    });
-
+    const message = formatLogMessage(viewId, args);
+    logBusinessEvent(message);
     return await handler(args);
   };
 };
@@ -71,14 +64,8 @@ export const withViewLogging = (viewId: string, handler: any) => {
 export const withCommandLogging = (command: string, handler: any) => {
   // biome-ignore lint/suspicious/noExplicitAny: Command args type varies significantly
   return async (args: any) => {
-    const context = extractContext(args);
-
-    logBusinessEvent('Slack command executed', {
-      type: 'command',
-      command,
-      ...context,
-    });
-
+    const message = formatLogMessage(command, args);
+    logBusinessEvent(message);
     return await handler(args);
   };
 };
