@@ -8,6 +8,7 @@ import { PtoApproval } from "../../src/entity/pto-approval.model";
 import { OrganizationService } from "../../src/service/organization.service";
 import { UserService } from "../../src/service/user.service";
 import { TEST_INSTALLATION } from "./constants";
+import {PtoService} from "../../src/service/pto.service";
 
 /**
  * 데이터베이스 안전 초기화 함수
@@ -40,10 +41,12 @@ export const getRepositories = () => ({
 export const getServices = () => {
   const userService = new UserService(testDataSource);
   const organizationService = new OrganizationService(testDataSource, userService);
-  
+  const ptoService = new PtoService(testDataSource, userService);
+
   return {
     userService,
     organizationService,
+    ptoService
   };
 };
 

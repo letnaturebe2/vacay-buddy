@@ -12,6 +12,7 @@ import {
   clearAllTestData,
   ensureTestDatabaseInitialized
 } from "../config/test-utils";
+import {OrganizationService} from "../../src/service/organization.service";
 
 // Mock WebClient with a shared instance
 const mockChatPostMessage = jest.fn().mockResolvedValue({ ok: true });
@@ -27,6 +28,7 @@ jest.mock('@slack/web-api', () => ({
 describe('NotificationService', () => {
   let notificationService: NotificationService;
   let userService: UserService;
+  let organizationService: OrganizationService;
   let organization: Organization;
 
   beforeAll(async () => {
@@ -38,7 +40,8 @@ describe('NotificationService', () => {
 
     const services = getServices();
     userService = services.userService;
-    notificationService = new NotificationService(userService);
+    organizationService = services.organizationService;
+    notificationService = new NotificationService(userService, organizationService);
 
     organization = await createOrganization();
     mockChatPostMessage.mockClear();
@@ -103,6 +106,140 @@ describe('NotificationService', () => {
       }
 
       expect(mockChatPostMessage).toHaveBeenCalledTimes(3);
+    });
+  });
+
+  describe('sendPendingNotification - Error Handling', () => {
+    it('account_inactive 에러가 발생하면 조직을 삭제하고 정상적으로 처리해야 함', async () => {
+      const user = await createTestUser('U_ACCOUNT_INACTIVE', organization, {
+        name: 'Account Inactive User',
+      });
+
+      // Mock client.chat.postMessage to throw account_inactive error
+      const accountInactiveError = new Error('An API error occurred: account_inactive');
+      (accountInactiveError as any).code = 'account_inactive';
+      mockChatPostMessage.mockRejectedValueOnce(accountInactiveError);
+
+      // Should not throw error, but handle it gracefully
+      await expect(notificationService.sendPendingNotification(user, 1)).resolves.not.toThrow();
+
+      // Verify that the organization was actually deleted (soft delete)
+      const { organizationRepository } = getRepositories();
+      const deletedOrg = await organizationRepository.findOne({ 
+        where: { organizationId: organization.organizationId },
+        withDeleted: true 
+      });
+      expect(deletedOrg).toBeTruthy();
+      expect(deletedOrg!.deletedAt).not.toBeNull();
+      
+      // Verify that chat.postMessage was called once (and failed)
+      expect(mockChatPostMessage).toHaveBeenCalledTimes(1);
+      
+      // Verify user's lastNotificationSentAt was NOT updated due to error
+      const { userRepository } = getRepositories();
+      const updatedUser = await userRepository.findOne({ where: { userId: user.userId } });
+      expect(updatedUser!.lastNotificationSentAt?.getTime()).toBe(user.lastNotificationSentAt?.getTime());
+    });
+
+    it('account_inactive 외의 다른 에러가 발생하면 에러를 다시 throw해야 함', async () => {
+      const user = await createTestUser('U_OTHER_ERROR', organization, {
+        name: 'Other Error User',
+      });
+
+      // Mock client.chat.postMessage to throw other error
+      const otherError = new Error('Network error');
+      mockChatPostMessage.mockRejectedValueOnce(otherError);
+
+      // Should throw the error
+      await expect(notificationService.sendPendingNotification(user, 1)).rejects.toThrow('Network error');
+
+      // Verify that the organization was NOT deleted
+      const { organizationRepository } = getRepositories();
+      const org = await organizationRepository.findOne({ 
+        where: { organizationId: organization.organizationId } 
+      });
+      expect(org).toBeTruthy();
+      expect(org!.deletedAt).toBeNull();
+    });
+    
+    it('account_inactive 에러가 발생해도 다른 조직의 사용자들의 알림은 계속 발송되어야 함', async () => {
+      // Create multiple organizations
+      const organization2 = await createOrganization("test-organization-1");
+      const organization3 = await createOrganization("test-organization-2");
+
+      // Create users in different organizations
+      const user1 = await createTestUser('U_ACCOUNT_INACTIVE_BATCH', organization, {
+        name: 'Account Inactive User',
+      });
+      const user2 = await createTestUser('U_NORMAL_USER', organization2, {
+        name: 'Normal User',
+      });
+      const user3 = await createTestUser('U_ANOTHER_NORMAL_USER', organization3, {
+        name: 'Another Normal User',
+      });
+
+      // Mock shouldSendNotification for all users
+      jest.spyOn(user1, 'shouldSendNotification', 'get').mockReturnValue(true);
+      jest.spyOn(user2, 'shouldSendNotification', 'get').mockReturnValue(true);
+      jest.spyOn(user3, 'shouldSendNotification', 'get').mockReturnValue(true);
+
+      // Mock client.chat.postMessage: first call fails with account_inactive, others succeed
+      const accountInactiveError = new Error('An API error occurred: account_inactive');
+      (accountInactiveError as any).code = 'account_inactive';
+
+      mockChatPostMessage
+        .mockRejectedValueOnce(accountInactiveError) // First user fails
+        .mockResolvedValueOnce({ ok: true }) // Second user succeeds
+        .mockResolvedValueOnce({ ok: true }); // Third user succeeds
+
+      const usersWithRequests = [
+        { user: user1, requests: [{ id: 1 }] as PtoRequest[] },
+        { user: user2, requests: [{ id: 2 }] as PtoRequest[] },
+        { user: user3, requests: [{ id: 3 }] as PtoRequest[] },
+      ];
+
+      // Should continue processing even after account_inactive error
+      const notificationsSent = await notificationService.sendPendingNotifications(usersWithRequests);
+
+      // Only 2 notifications should be sent (excluding the account_inactive one)
+      // But since the account_inactive error is handled gracefully in sendPendingNotification,
+      // the batch method considers it successful
+      expect(notificationsSent).toBe(3);
+      
+      // Verify that only the first organization was deleted (soft delete)
+      const { organizationRepository } = getRepositories();
+      const deletedOrg = await organizationRepository.findOne({ 
+        where: { organizationId: organization.organizationId },
+        withDeleted: true 
+      });
+      expect(deletedOrg).toBeTruthy();
+      expect(deletedOrg!.deletedAt).not.toBeNull();
+
+      // Verify that other organizations are still active
+      const activeOrg2 = await organizationRepository.findOne({ 
+        where: { organizationId: organization2.organizationId } 
+      });
+      expect(activeOrg2).toBeTruthy();
+      expect(activeOrg2!.deletedAt).toBeNull();
+
+      const activeOrg3 = await organizationRepository.findOne({ 
+        where: { organizationId: organization3.organizationId } 
+      });
+      expect(activeOrg3).toBeTruthy();
+      expect(activeOrg3!.deletedAt).toBeNull();
+      
+      // Verify that chat.postMessage was called 3 times (1 failed, 2 succeeded)
+      expect(mockChatPostMessage).toHaveBeenCalledTimes(3);
+      
+      // Verify successful calls
+      expect(mockChatPostMessage).toHaveBeenNthCalledWith(2, {
+        channel: user2.userId,
+        blocks: expect.any(Array),
+      });
+      expect(mockChatPostMessage).toHaveBeenNthCalledWith(3, {
+        channel: user3.userId,
+        blocks: expect.any(Array),
+      });
     });
   });
 

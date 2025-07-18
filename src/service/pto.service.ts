@@ -194,10 +194,14 @@ export class PtoService {
 
   async getPendingRequests(): Promise<Map<number, UserWithRequests>> {
     const requestsByPendingApprover = new Map<number, UserWithRequests>();
-    const pendingRequests = await this.ptoRequestRepository.find({
-      where: { status: PtoRequestStatus.Pending },
-      relations: ['approvals', 'approvals.approver', 'approvals.approver.organization'],
-    });
+    const pendingRequests = await this.ptoRequestRepository
+      .createQueryBuilder('request')
+      .innerJoinAndSelect('request.approvals', 'approval')
+      .innerJoinAndSelect('approval.approver', 'approver')
+      .innerJoinAndSelect('approver.organization', 'organization')
+      .where('request.status = :status', { status: PtoRequestStatus.Pending })
+      .andWhere('organization.deletedAt IS NULL')
+      .getMany();
 
     for (const request of pendingRequests) {
       const currentApproval = request.approvals.find((approval) => approval.id === request.currentApprovalId);

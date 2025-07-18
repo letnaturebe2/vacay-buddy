@@ -1355,6 +1355,84 @@ describe("PtoService Tests", () => {
       expect(approverData?.user.organization).toBeDefined();
       expect(approverData?.user.organization.organizationId).toBe("test-organization");
     });
+
+    test("should exclude requests from deleted organizations", async () => {
+      // Arrange
+      const activeOrganization = await createOrganization("active-org");
+      const deletedOrganization = await createOrganization("deleted-org");
+      
+      const userInActiveOrg = await createUser("user-active", activeOrganization);
+      const userInDeletedOrg = await createUser("user-deleted", deletedOrganization);
+      
+      const approverInActiveOrg = await createUser("approver-active", activeOrganization);
+      const approverInDeletedOrg = await createUser("approver-deleted", deletedOrganization);
+      
+      const activeTemplate = await createPtoTemplate(activeOrganization);
+      const deletedTemplate = await createPtoTemplate(deletedOrganization);
+
+      // Create requests in both organizations
+      await ptoService.createPtoRequest(
+        userInActiveOrg,
+        activeTemplate,
+        new Date("2025-04-01"),
+        new Date("2025-04-02"),
+        "Request from active org",
+        "Request reason",
+        [approverInActiveOrg]
+      );
+
+      await ptoService.createPtoRequest(
+        userInDeletedOrg,
+        deletedTemplate,
+        new Date("2025-04-03"),
+        new Date("2025-04-04"),
+        "Request from deleted org",
+        "Request reason",
+        [approverInDeletedOrg]
+      );
+
+      // Delete one organization
+      await organizationService.deleteOrganization(deletedOrganization.organizationId);
+
+      // Act
+      const pendingRequestsMap = await ptoService.getPendingRequests();
+
+      // Assert
+      // Should only include approvers from active organizations
+      expect(pendingRequestsMap.has(approverInActiveOrg.id)).toBe(true);
+      expect(pendingRequestsMap.has(approverInDeletedOrg.id)).toBe(false);
+      
+      // Check if any of the returned approvers are from deleted organizations
+      let hasDeletedOrgApprovers = false;
+      for (const [, data] of pendingRequestsMap) {
+        if (data.user.organization.deletedAt !== null) {
+          hasDeletedOrgApprovers = true;
+        }
+      }
+      expect(hasDeletedOrgApprovers).toBe(false);
+
+      // Verify the included request is from the active organization
+      const activeApproverData = pendingRequestsMap.get(approverInActiveOrg.id);
+      expect(activeApproverData).toBeDefined();
+      expect(activeApproverData?.user.organization.organizationId).toBe(activeOrganization.organizationId);
+      expect(activeApproverData?.requests).toHaveLength(1);
+      expect(activeApproverData?.requests[0].title).toBe("Request from active org");
+
+      // Verify the deleted organization is actually deleted
+      const deletedOrg = await organizationRepository.findOne({
+        where: { organizationId: deletedOrganization.organizationId },
+        withDeleted: true
+      });
+      expect(deletedOrg).toBeTruthy();
+      expect(deletedOrg!.deletedAt).not.toBeNull();
+
+      // Verify the active organization is still active
+      const activeOrg = await organizationRepository.findOne({
+        where: { organizationId: activeOrganization.organizationId }
+      });
+      expect(activeOrg).toBeTruthy();
+      expect(activeOrg!.deletedAt).toBeNull();
+    });
   });
 
   describe("deletePtoRequestWithUserUpdate", () => {
