@@ -192,16 +192,7 @@
       color: #856404;
       border-color: #ffeaa7;
     }
-    .user-link {
-      cursor: pointer;
-      transition: background-color 0.2s ease;
-      text-decoration: none;
-      color: inherit;
-    }
-    .user-link:hover {
-      background-color: #f0f7ff !important;
-    }
-    
+
     /* User name cell cursor */
     .user-name-cell {
       cursor: pointer;
@@ -226,13 +217,7 @@
       z-index: 10;
       box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
     }
-    
-    .user-page-btn:hover {
-      background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
-      transform: translateY(-50%) translateY(-1px);
-      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
-    }
-    
+
     /* Show user page button on hover for desktop */
     @media (min-width: 769px) {
       .user-name-cell:hover .user-page-btn {
@@ -302,101 +287,30 @@
       box-sizing: border-box;
       margin: 0;
     }
+
     .editable-input:focus {
       border-color: #2196f3;
       box-shadow: none;
     }
-    /* Enhanced table styling */
-    #teamTable {
-      background: white;
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-      border: 1px solid rgba(255,255,255,0.2);
-      width: 100% !important;
-    }
     
     #teamTable thead th {
-      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      background: #1d4ed8;
       color: white;
-      padding: 16px 12px !important;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      font-size: 0.85rem;
-      border: none !important;
-      vertical-align: middle !important;
-      height: 50px;
-      line-height: 1.2;
     }
-    
-    #teamTable thead th:first-child {
-      border-radius: 0;
-    }
-    
-    #teamTable thead th:last-child {
-      border-radius: 0;
-    }
-    
-    #teamTable tbody tr {
-      transition: all 0.2s ease;
-      border-bottom: 1px solid rgba(0,0,0,0.05);
-      height: auto;
-    }
-    
-    #teamTable tbody tr:hover {
-      background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(29, 78, 216, 0.05) 100%);
-    }
-    
+
     #teamTable tbody td {
-      padding: 14px 12px !important;
-      vertical-align: middle !important;
-      border: none !important;
-      height: auto !important;
-      line-height: 1.4;
+      padding: 6px !important;
     }
-    
+
     .user-name-cell {
-      font-weight: 600;
+      font-weight: 800;
       color: #2c3e50;
-      display: flex !important;
       align-items: center;
-      gap: 8px;
-      min-height: 40px;
     }
     
     .user-name-cell i {
       color: #3b82f6;
       font-size: 1rem;
-      flex-shrink: 0;
-    }
-    
-    /* DataTable specific overrides */
-    .dataTables_wrapper {
-      font-family: inherit;
-    }
-    
-    .dataTables_wrapper .dataTables_length,
-    .dataTables_wrapper .dataTables_filter,
-    .dataTables_wrapper .dataTables_info,
-    .dataTables_wrapper .dataTables_paginate {
-      color: #64748b;
-      font-size: 0.9rem;
-    }
-    
-    .dataTables_wrapper .dataTables_paginate .paginate_button {
-      padding: 8px 12px;
-      margin: 0 2px;
-      border-radius: 8px;
-      border: 1px solid rgba(0,0,0,0.1);
-      background: white;
-      color: #64748b !important;
-    }
-    
-    .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
-      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
-      color: white !important;
-      border-color: transparent;
     }
     
     .dataTables_wrapper .dataTables_paginate .paginate_button.current {
@@ -411,20 +325,7 @@
       padding: 8px 12px;
       margin-left: 8px;
     }
-    
-    .dataTables_wrapper .dataTables_filter input:focus {
-      outline: none;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-    
-    .dataTables_wrapper .dataTables_length select {
-      border: 2px solid rgba(0,0,0,0.1);
-      border-radius: 8px;
-      padding: 6px 10px;
-      margin: 0 8px;
-    }
-    
+
     .edit-controls {
       margin: 30px 0;
       display: flex;
@@ -589,8 +490,6 @@
       padding: 0 20px;
     }
     
-    /* Remove floating animation for better performance */
-    
     /* Improved mobile responsiveness */
     @media (max-width: 768px) {
       body {
@@ -626,100 +525,17 @@
         display: none !important;
       }
       
-      #teamTable thead th {
-        padding: 12px 8px !important;
-        font-size: 0.8rem;
-        height: 44px;
-      }
-      
-      #teamTable tbody td {
-        padding: 12px 8px !important;
-        min-height: 44px;
-      }
-      
       .user-name-cell {
-        min-height: 44px;
-        gap: 6px;
+        min-height: 30px;
+        gap: 2px;
       }
-      
-      .user-name-cell i {
-        font-size: 0.9rem;
-      }
-      
-      .dtr-details {
-        width: 100%;
-        background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,249,250,0.95) 100%);
-        border-radius: 12px;
-        padding: 15px;
-        margin-top: 10px;
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(59, 130, 246, 0.1);
-        box-shadow: 0 4px 16px rgba(59, 130, 246, 0.1);
-      }
-      
-      .dtr-details li {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 12px 0;
-        border-bottom: 1px solid rgba(0,0,0,0.05);
-      }
-      
-      .dtr-details li:last-child {
-        border-bottom: none;
-      }
-      
-      .dtr-title {
-        font-weight: 600;
-        flex: 1;
-        color: #64748b;
-        font-size: 0.9rem;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-      
+
       .dtr-title::before {
         content: '▸';
         color: #3b82f6;
         font-weight: bold;
       }
-      
-      .dtr-data {
-        flex: 2;
-        text-align: right;
-        font-weight: 500;
-        color: #2c3e50;
-      }
-      
-      /* Add user page link in mobile details */
-      .dtr-details .user-page-link {
-        display: inline-block;
-        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-        color: white;
-        text-decoration: none;
-        padding: 8px 16px;
-        border-radius: 8px;
-        font-size: 0.85rem;
-        font-weight: 600;
-        margin-top: 10px;
-        transition: all 0.2s ease;
-        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
-      }
-      
-      .dtr-details .user-page-link:hover {
-        background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
-        color: white;
-        text-decoration: none;
-      }
-      
-      .dtr-details .user-page-link i {
-        margin-right: 6px;
-      }
-      
-      
+
       .edit-mode-notice {
         display: none !important;
       }
@@ -729,24 +545,6 @@
         font-size: 0.7rem;
         gap: 3px;
         border-radius: 12px;
-      }
-    }
-    
-    @media (max-width: 480px) {
-      .container {
-        padding: 0 15px;
-      }
-      
-      h1 {
-        font-size: 1.8rem;
-      }
-      
-      .team-card {
-        padding: 15px;
-      }
-      
-      .stat-item .value {
-        font-size: 1.8rem;
       }
     }
   </style>
