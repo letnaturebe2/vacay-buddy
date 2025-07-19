@@ -46,7 +46,7 @@
     "express": "^5.0.1",
     "i18next": "^24.2.3",
     "jsonwebtoken": "^9.0.2",
-    "mysql2": "^3.14.0",
+    "mysql2": "^3.14.1",
     "openai": "^4.85.2",
     "reflect-metadata": "^0.2.2",
     "typeorm-naming-strategies": "^4.1.0",
