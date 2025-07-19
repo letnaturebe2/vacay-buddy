@@ -4,7 +4,7 @@ import { config } from 'dotenv';
 config();
 
 import { App, type Context, LogLevel } from '@slack/bolt';
-import { dataSource } from './db';
+import { dataSource } from './db/db';
 import type { Organization } from './entity/organization.model';
 import type { User } from './entity/user.model';
 import { i18nInitPromise } from './i18n';

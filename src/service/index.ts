@@ -1,4 +1,4 @@
-import { dataSource } from '../db';
+import { dataSource } from '../db/db';
 import { NotificationService } from './notification.service';
 import { OrganizationService } from './organization.service';
 import { PtoService } from './pto.service';
